@@ -177,28 +177,6 @@ ModelUnit read_pdb_structure(const char *filename,
             }
             fp_gz2.close();
         }
-        /*
-        redi::pstreambuf::pmode BothStreams = 
-            redi::pstreambuf::pstdout|redi::pstreambuf::pstderr;
-        redi::ipstream fp_gz2("tar -xOzvf "+filename_str,BothStreams);
-        int i;
-        while(fp_gz2.good())
-        {
-            getline(fp_gz2,line);
-            for (i=0;i<PDBvec.size();i++)
-            {
-                if (PDBvec[i]+':'==line) 
-                {
-                    PDBfile=PDBvec[i];
-                    cout<<PDBfile<<endl;
-                }
-            }
-            if (line.length()<53||line.substr(0,3)=="END") continue;
-            parse_pdb_line(line,pep,chain,residue,atom,PDBmap[PDBfile],
-                atomic_detail,allowX);
-        }
-        fp_gz2.close();
-        */
 
         chain.residues.clear();
         residue.atoms.clear();
