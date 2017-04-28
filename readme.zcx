@@ -1,0 +1,12 @@
+'''
+Chengxin's own c++ programs for PDB file parsing,
+licensed under LGPL v2+.
+All programs can be directly called by command line.
+When launched without argument, a short documentation will be displayed.
+'''
+
+#### structure parsing ####
+reindex_pdb        # renumber residue number of PDB file
+strip_sidechain    # remove side chain atoms
+pdb2fasta          # convert PDB file to fasta file
+split_chain        # split PDB by chain
