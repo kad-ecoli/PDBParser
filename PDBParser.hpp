@@ -110,6 +110,7 @@ int parse_pdb_line(const string line,ModelUnit &pep, ChainUnit &chain,
 /* atomic_detail: 0 - CA only, 1 - backbone heavy atoms (CA C N O), 2 - all atom
  * allowX: 0 - ATOM, 1 - ATOM and MSE, converting MSE to MET, 
  *         2 - all, converting MSE to MET, 3 - all, no conversion
+ * filename: full filename path, stdin if filename=="-"
  */
 ModelUnit read_pdb_structure(const char *filename,
     const int atomic_detail=2,const int allowX=1)
@@ -232,6 +233,7 @@ ModelUnit read_pdb_structure(const char *filename,
     return pep;
 }
 
+/* filename - full output filename, write to stdout if filename=="-" */
 void write_pdb_structure(const char *filename,ModelUnit &pep)
 {
     stringstream buf;

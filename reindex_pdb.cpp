@@ -20,6 +20,6 @@ int main(int argc,char **argv)
 
     ModelUnit pdb_entry=read_pdb_structure(argv[2],atomic_detail,allowX);
     reindex_pdb(startindex,pdb_entry);
-    write_pdb_structure(argv[3],pdb_entry);
+    write_pdb_structure((argc>3?argv[3]:"-"),pdb_entry);
     return 0;
 }
