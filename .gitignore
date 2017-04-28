@@ -3,3 +3,9 @@
 
 # vim temporary backup
 .*.sw*
+
+# binary executables
+pdb2fasta
+reindex_pdb
+strip_sidechain
+split_chain
