@@ -165,6 +165,7 @@ string pdb2sarst(ChainUnit& chain)
             sarst_seq+=sarst_matrix[i*dim+j];
         }
     }
+    angle_mat.clear();
     return sarst_seq;
 }
 
