@@ -1,10 +1,49 @@
-/* calculate backbone torsion angle */
+/* calculate backbone torsion angles (omega, psi, phi) */
+#include <cstring>
 #include "PDBParser.hpp"
 #include "GeometryTools.hpp"
 
 using namespace std;
 
-/* BackBoneTorsion - backbone torsion angles (Omega, Phi, Psi) */
+const char* sarst_matrix=
+    "SSSIIIIQQQQQQQQZZZZZZZRRYYYYYYYYSSSS"
+    "SSIIIIIQQQQFFFFZZZZZZZZYYYYYYYYYYSSS"
+    "SIIIIIIILFFFFFFFZZZZZZZYYYYYYYYYYSSS"
+    "SSIIIGGHHFFFFFFFZZZZZZZZYYYYYYYYYSSS"
+    "SMIGGGGHHLLFFLFLZZZZZZZYYYYYYYYYZZZS"
+    "MMGMGGHHHLLLLLLLLZZZZZZZYZYYYYYZZYSM"
+    "MMMMMMMHHLLLLLLLZZZZZZZYYYZYYYZZYZZM"
+    "MMMMMMMHHLLLLLLZZZZZZZZPYYYZZZZZZZMM"
+    "MMMMMMMMLLLLLLLZZZZZZPPPPPYYYZYZZZZM"
+    "MMMMMMMMMLLLLLZZZZZZZPPPPPZZZZZZZZZM"
+    "MMMMMMMMMMLLLZZZZPZZPPPPPPZPZZZZZZZZ"
+    "MMMMMMMMMNNNZZZZZZZZPPPPPPPPZZZZZZZM"
+    "MMMMNNNNNNNNNZZZZZZZPPPPPPPZZPZWWWZM"
+    "NNNNNNNNNNNKZZZZZZZPPPPPPPPPPPZZZZZW"
+    "NNNNNNNNNNKNZZZZZZZPPPPPPPPPPWWZZZZZ"
+    "WNNNNNNNNNKKZZZZZZZPPPPPPPPPWWWWZZZZ"
+    "ZNNNNNNNNKKKKZZZZZZZPPPPPPPWWWWWWZZZ"
+    "ZNNNNNNNNKKKKKZZZZZZZPPPPPPWWWWWWWZZ"
+    "ZNNNNNNNKKKKDDDZZZZZZZPPPPWWWWWWWWWZ"
+    "ZNNNNNNNKKKKDDDDZZZZZZZZPWWWWWWWWWWZ"
+    "WVVNNNNNKKEDDDDDDZZZZZZZZWWWWWWWWWWZ"
+    "VVVVVVNEEEBBDDDDDZZZZZZZWWWWWWWWWWWW"
+    "VVVVVVVEEEEACCCCDZZZZZZZWWWWWWWWWZWV"
+    "VVVVVVVEEEECCCTTTZZZZZZZWWWZWWWWZZWV"
+    "VVVVVVVVEEEETTTTTTZZZZZRRWWZZZZZZZZV"
+    "VVVVVVVVEEETTTTTTTZZZZZZRRZZZZZZZZZV"
+    "VVVVVVVVVTTTTTTTTTZZZZZRRRRZZZZZZZZZ"
+    "ZVVVVVVVVTTTTTTTTZZZZZRRRZRZZZZZZZZV"
+    "VZVVVVVVVTTTTTTTZZZZZRRRRRZZZRZZZZZZ"
+    "ZZZVVVVVVTTTTTTZZZZZRRRRRRRZZZZZZZZS"
+    "ZZSVVVVQQQZZZZZZZZZRRRRRRRRRZZZZZZZZ"
+    "SSZSSVQQQQQQZZZZZZZRRRRRRRRRZZZZZSSS"
+    "SSSSSQQQQQQQQZZZZZZRRRRRRRRRRZYSSSSS"
+    "SSSSSQQQQQQQQQZZZZZZRRRRRRRRYYYSSSSS"
+    "SSSSSQQQQQQQQQQZZZZZZRRRRRRYYYYYSSSS"
+    "SSSSIIQQQQQQQQQZZZZZZZRRRYYYYYYYSSSS";
+
+/* BackboneTorsion - backbone torsion angles (Omega, Phi, Psi) */
 vector<vector<float> > BackboneTorsion(ChainUnit& chain)
 {
     int L=chain.residues.size();
@@ -101,4 +140,48 @@ vector<vector<float> > BackboneTorsion(ChainUnit& chain)
     cur_C.clear();
     next_N.clear();
     return angle_mat;
+}
+
+/* convert pdb chain to SARST (Structural similarity search Aided 
+ * by Ramachandran Sequential Transformation) code */
+string pdb2sarst(ChainUnit& chain)
+{
+    vector<vector<float> > angle_mat=BackboneTorsion(chain);
+    string sarst_seq;
+    int L=chain.residues.size();
+    int dim=int(sqrt(strlen(sarst_matrix)));
+
+    int i,j; // coordinate in sarst_matrix
+    for (int r=0;r<L;r++)
+    {
+        if (angle_mat[r][1]==360 || angle_mat[r][2]==360)
+        {
+            sarst_seq+='X';
+        }
+        else
+        {
+            i=int((180-angle_mat[r][2])/(360/dim));
+            j=int((180+angle_mat[r][1])/(360/dim));
+            sarst_seq+=sarst_matrix[i*dim+j];
+        }
+    }
+    return sarst_seq;
+}
+
+/* convert pdb entry to SARST (Structural similarity search Aided 
+ * by Ramachandran Sequential Transformation) code
+ * ShowSeqLen - whether to show residue number for each chain */
+string pdb2sarst(ModelUnit& pep,const string PDBid="",const int ShowSeqLen=0)
+{
+    stringstream buf;
+    string sarst_seq="";
+    for (int c=0;c<pep.chains.size();c++)
+    {
+        sarst_seq=pdb2sarst(pep.chains[c]);
+        buf<<'>'<<PDBid<<':'<<pep.chains[c].chainID_full;
+        if (ShowSeqLen) buf<<'\t'<<sarst_seq.length();
+        buf<<'\n'<<sarst_seq<<'\n';
+    }
+    sarst_seq.clear();
+    return buf.str();
 }

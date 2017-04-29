@@ -10,3 +10,4 @@ reindex_pdb
 strip_sidechain
 split_chain
 BackboneTorsion
+pdb2sarst
