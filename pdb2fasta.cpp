@@ -21,8 +21,7 @@ int main(int argc,char **argv)
         char *infile=argv[i];
         string PDBid=basename_no_ext(infile);
         ModelUnit pdb_entry=read_pdb_structure(infile,atomic_detail,allowX);
-        string txt=pdb2fasta(pdb_entry,PDBid);
-        cout<<txt;
+        cout<<pdb2fasta(pdb_entry,PDBid);
     }
     return 0;
 }
