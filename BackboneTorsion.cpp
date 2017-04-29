@@ -33,6 +33,7 @@ int main(int argc,char **argv)
                 <<setw(7)<<angle_mat[r][1]<<' '
                 <<setw(7)<<angle_mat[r][2]<<endl;
         }
+        angle_mat.clear();
     }
     return 0;
 }
