@@ -9,3 +9,4 @@ pdb2fasta
 reindex_pdb
 strip_sidechain
 split_chain
+BackboneTorsion
