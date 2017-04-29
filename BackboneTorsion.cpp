@@ -3,7 +3,7 @@ const char* docstring="backbone_torsion backbone.pdb\n"
 
 #include <iostream>
 #include "PDBParser.hpp"
-#include "MathTools.hpp"
+#include "BackboneTorsion.hpp"
 
 int main(int argc,char **argv)
 {
@@ -21,7 +21,7 @@ int main(int argc,char **argv)
     cout<<" AA c resi      omg     phi     psi"<<endl;
     for (c=0;c<pdb_entry.chains.size();c++)
     {
-        vector<vector<float> > angle_mat=BackBoneTorsion(pdb_entry.chains[c]);
+        vector<vector<float> > angle_mat=BackboneTorsion(pdb_entry.chains[c]);
         for (r=0;r<pdb_entry.chains[c].residues.size();r++)
         {
             cout<<setw(3)<<pdb_entry.chains[c].residues[r].resn<<' '

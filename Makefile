@@ -3,7 +3,7 @@ CFLAGS=-O3
 LDFLAGS=-static
 
 PROG=pdb2fasta reindex_pdb strip_sidechain split_chain BackboneTorsion
-HEADER=PDBParser.hpp pstream.h GeometryTools.hpp
+HEADER=PDBParser.hpp pstream.h
 
 all: ${PROG}
 
@@ -19,7 +19,7 @@ reindex_pdb: reindex_pdb.cpp ${HEADER}
 strip_sidechain: strip_sidechain.cpp ${HEADER}
 	${CC} ${CFLAGS} $@.cpp -o $@ ${LDFLAGS}
 
-BackboneTorsion: BackboneTorsion.cpp ${HEADER}
+BackboneTorsion: BackboneTorsion.cpp BackboneTorsion.cpp BackboneTorsion.hpp ${HEADER}
 	${CC} ${CFLAGS} $@.cpp -o $@ ${LDFLAGS}
 
 clean:

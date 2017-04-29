@@ -1,12 +1,13 @@
 /* functions for numpy style matrix manipulation */
+#if !defined(MATHTOOLS_HPP)
+#define MATHTOOLS_HPP 1
+
 #include <iostream> 
 #include <iomanip>
 #include <vector>
 
 using namespace std;
 
-#if !defined(MATHTOOLS_HPP)
-    #define MATHTOOLS_HPP 1
 /* print the content of vector */
 void print_vector(vector<int>& vec)
 {
