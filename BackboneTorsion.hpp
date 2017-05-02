@@ -326,7 +326,7 @@ string pdb2ThreeDblast(ChainUnit& chain)
         alpha=angle_mat[r][1];
         if (kappa==360 || alpha==360)
         {
-            continue; // perhaps to Z
+            ThreeDblast_seq+='U'; // chain termini
         }
         else
         {
@@ -335,8 +335,8 @@ string pdb2ThreeDblast(ChainUnit& chain)
             SA_code=ThreeDblast_matrix[i*dim+j];
 
             if (SA_code=='A' && kappa<=114 && alpha>=46 )
-                ThreeDblast_seq+='Y';
-            else// unpublished detail
+                ThreeDblast_seq+='Y'; // unpublished detail
+            else
                 ThreeDblast_seq+=SA_code;
         }
     }
