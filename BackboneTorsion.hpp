@@ -270,7 +270,7 @@ vector<vector<float> > OmegaPhiPsi(ChainUnit& chain)
 string pdb2sarst(ChainUnit& chain)
 {
     vector<vector<float> > angle_mat=OmegaPhiPsi(chain);
-    string sarst_seq;
+    string sarst_seq="";
     int L=chain.residues.size();
     int dim=36; //int(sqrt(strlen(sarst_matrix)));
 
@@ -305,7 +305,6 @@ string pdb2sarst(ModelUnit& pep,const string PDBid="",const int ShowSeqLen=0)
         buf<<'>'<<PDBid<<':'<<pep.chains[c].chainID_full;
         if (ShowSeqLen) buf<<'\t'<<sarst_seq.length();
         buf<<'\n'<<sarst_seq<<'\n';
-        sarst_seq.clear();
     }
     return buf.str();
 }
@@ -314,7 +313,7 @@ string pdb2sarst(ModelUnit& pep,const string PDBid="",const int ShowSeqLen=0)
 string pdb2ThreeDblast(ChainUnit& chain)
 {
     vector<vector<float> > angle_mat=KappaAlpha(chain);
-    string ThreeDblast_seq;
+    string ThreeDblast_seq="";
     int L=chain.residues.size();
     int dim=36; //int(sqrt(strlen(sarst_matrix)));
 
@@ -327,7 +326,7 @@ string pdb2ThreeDblast(ChainUnit& chain)
         alpha=angle_mat[r][1];
         if (kappa==360 || alpha==360)
         {
-            continue;
+            continue; // perhaps to Z
         }
         else
         {
@@ -357,7 +356,6 @@ string pdb2ThreeDblast(ModelUnit& pep,const string PDBid="",const int ShowSeqLen
         buf<<'>'<<PDBid<<':'<<pep.chains[c].chainID_full;
         if (ShowSeqLen) buf<<'\t'<<ThreeDblast_seq.length();
         buf<<'\n'<<ThreeDblast_seq<<'\n';
-        ThreeDblast_seq.clear();
     }
     return buf.str();
 }
