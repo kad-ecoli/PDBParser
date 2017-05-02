@@ -11,3 +11,6 @@ strip_sidechain    # remove side chain atoms
 pdb2fasta          # convert PDB file to fasta file
 split_chain        # split PDB by chain
 BackboneTorsion    # calculate backbone torsion angles (omega, phi, psi)
+pdb2sarst          # convert PDB to SARST (Structural similarity search
+                   # Aided by Ramachandran Sequential Transformation) code
+pdb2ThreeDblast    # convert PDB to structural alphabet in 3D-blast

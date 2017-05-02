@@ -1,8 +1,9 @@
-const char* docstring="pdb2sarst backbone.pdb\n"
-"    convert PDB to fasta format SARST code\n";
+const char* docstring="pdb2ThreeDblast CA.pdb\n"
+"    convert PDB to fasta format structural alphabet in 3D-blast\n";
 /* reference:
- * Lo, Wei-Cheng, et al. "Protein structural similarity search by 
- * Ramachandran codes." BMC bioinformatics 8.1 (2007): 307.
+ * Tung, Chi-Hua, Jhang-Wei Huang, and Jinn-Moon Yang. "Kappa-alpha plot
+ * derived structural alphabet and BLOSUM-like substitution matrix for rapid
+ * search of protein structure database." Genome biology 8.3 (2007): R31.
  */
 
 #include <iostream>
@@ -26,7 +27,7 @@ int main(int argc,char **argv)
         char *infile=argv[i];
         string PDBid=basename_no_ext(infile);
         ModelUnit pdb_entry=read_pdb_structure(infile,atomic_detail,allowX);
-        cout<<pdb2sarst(pdb_entry,PDBid);
+        cout<<pdb2ThreeDblast(pdb_entry,PDBid);
     }
     return 0;
 }

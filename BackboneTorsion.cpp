@@ -18,10 +18,11 @@ int main(int argc,char **argv)
     ModelUnit pdb_entry=read_pdb_structure(argv[1],atomic_detail,allowX);
 
     int c,r; // chain index, residue index;
-    cout<<" AA c resi      omg     phi     psi"<<endl;
+    cout<<" AA c resi    omega     phi     psi   kappa   alpha"<<endl;
     for (c=0;c<pdb_entry.chains.size();c++)
     {
-        vector<vector<float> > angle_mat=BackboneTorsion(pdb_entry.chains[c]);
+        vector<vector<float> >OmgPhiPsi_mat=OmegaPhiPsi(pdb_entry.chains[c]);
+        vector<vector<float> >KappaAlpha_mat=KappaAlpha(pdb_entry.chains[c]);
         for (r=0;r<pdb_entry.chains[c].residues.size();r++)
         {
             cout<<setw(3)<<pdb_entry.chains[c].residues[r].resn<<' '
@@ -29,11 +30,13 @@ int main(int argc,char **argv)
                 <<setw(4)<<pdb_entry.chains[c].residues[r].resi
                 <<pdb_entry.chains[c].residues[r].icode<<' '
                 <<setiosflags(ios::fixed)<<setprecision(2)
-                <<setw(7)<<angle_mat[r][0]<<' '
-                <<setw(7)<<angle_mat[r][1]<<' '
-                <<setw(7)<<angle_mat[r][2]<<endl;
+                <<setw(7)<<OmgPhiPsi_mat[r][0]<<' '
+                <<setw(7)<<OmgPhiPsi_mat[r][1]<<' '
+                <<setw(7)<<OmgPhiPsi_mat[r][2]<<' '
+                <<setw(7)<<KappaAlpha_mat[r][0]<<' '
+                <<setw(7)<<KappaAlpha_mat[r][1]<<endl;
         }
-        angle_mat.clear();
+        OmgPhiPsi_mat.clear();
     }
     return 0;
 }

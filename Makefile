@@ -2,7 +2,7 @@ CC=g++
 CFLAGS=-O3
 LDFLAGS=-static
 
-PROG=pdb2fasta reindex_pdb strip_sidechain split_chain BackboneTorsion pdb2sarst
+PROG=pdb2fasta reindex_pdb strip_sidechain split_chain BackboneTorsion pdb2sarst pdb2ThreeDblast
 HEADER=PDBParser.hpp pstream.h
 
 all: ${PROG}
@@ -23,6 +23,9 @@ BackboneTorsion: BackboneTorsion.cpp BackboneTorsion.cpp BackboneTorsion.hpp ${H
 	${CC} ${CFLAGS} $@.cpp -o $@ ${LDFLAGS}
 
 pdb2sarst: pdb2sarst.cpp BackboneTorsion.hpp FilePathParser.hpp ${HEADER}
+	${CC} ${CFLAGS} $@.cpp -o $@ ${LDFLAGS}
+
+pdb2ThreeDblast: pdb2ThreeDblast.cpp BackboneTorsion.hpp FilePathParser.hpp ${HEADER}
 	${CC} ${CFLAGS} $@.cpp -o $@ ${LDFLAGS}
 
 clean:
