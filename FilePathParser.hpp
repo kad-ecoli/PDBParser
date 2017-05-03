@@ -1,4 +1,7 @@
 /* parse path of file */
+#if !defined(FILEPATHPARSER_HPP)
+#define FILEPATHPARSER_HPP 1
+
 #include<string>
 #include<cstring>
 
@@ -33,3 +36,5 @@ string filename_no_ext(const char *pdb_file)
     for (int i=0;i<endindex;i++) filename+=pdb_file[i];
     return filename;
 }
+
+#endif
