@@ -8,7 +8,7 @@ const char* docstring="pdb2ThreeDblast CA.pdb\n"
 
 #include <iostream>
 #include "PDBParser.hpp"
-#include "BackboneTorsion.hpp"
+#include "StructuralAlphabet.hpp"
 #include "FilePathParser.hpp"
 
 int main(int argc,char **argv)

@@ -8,7 +8,7 @@
 #include <ctype.h>
 
 #include "FilePathParser.hpp"
-#include "BackboneTorsion.hpp"
+#include "StructuralAlphabet.hpp"
 
 using namespace std;
 

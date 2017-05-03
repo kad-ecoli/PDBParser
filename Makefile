@@ -22,16 +22,16 @@ strip_sidechain: strip_sidechain.cpp ${HEADER}
 BackboneTorsion: BackboneTorsion.cpp BackboneTorsion.cpp BackboneTorsion.hpp ${HEADER}
 	${CC} ${CFLAGS} $@.cpp -o $@ ${LDFLAGS}
 
-pdb2sarst: pdb2sarst.cpp BackboneTorsion.hpp FilePathParser.hpp ${HEADER}
+pdb2sarst: pdb2sarst.cpp StructuralAlphabet.hpp BackboneTorsion.hpp FilePathParser.hpp ${HEADER}
 	${CC} ${CFLAGS} $@.cpp -o $@ ${LDFLAGS}
 
-pdb2ThreeDblast: pdb2ThreeDblast.cpp BackboneTorsion.hpp FilePathParser.hpp ${HEADER}
+pdb2ThreeDblast: pdb2ThreeDblast.cpp StructuralAlphabet.hpp BackboneTorsion.hpp FilePathParser.hpp ${HEADER}
 	${CC} ${CFLAGS} $@.cpp -o $@ ${LDFLAGS}
 
 NWalign: NWalign.cpp NWalign.hpp FilePathParser.hpp ${HEADER}
 	${CC} ${CFLAGS} $@.cpp -o $@ ${LDFLAGS}
 
-SarstAlign: SarstAlign.cpp SarstAlign.hpp NWalign.hpp BackboneTorsion.hpp FilePathParser.hpp ${HEADER}
+SarstAlign: SarstAlign.cpp SarstAlign.hpp StructuralAlphabet.hpp NWalign.hpp BackboneTorsion.hpp FilePathParser.hpp ${HEADER}
 	${CC} ${CFLAGS} $@.cpp -o $@ ${LDFLAGS}
 
 clean:

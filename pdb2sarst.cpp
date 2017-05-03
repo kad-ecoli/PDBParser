@@ -7,7 +7,7 @@ const char* docstring="pdb2sarst backbone.pdb\n"
 
 #include <iostream>
 #include "PDBParser.hpp"
-#include "BackboneTorsion.hpp"
+#include "StructuralAlphabet.hpp"
 #include "FilePathParser.hpp"
 
 int main(int argc,char **argv)
