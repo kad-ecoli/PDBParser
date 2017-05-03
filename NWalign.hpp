@@ -14,8 +14,8 @@
 
 using namespace std;
 
-const int gapopen=-11;
-const int gapext=-1;
+const int gapopen_blosum62=-11;
+const int gapext_blosum62=-1;
 
 const int BLOSUM62[24][24]={
 //A  R  N  D  C  Q  E  G  H  I  L  K  M  F  P  S  T  W  Y  V  B  Z  X  *
@@ -188,7 +188,8 @@ int read_fasta(const char *filename, vector<string>& name_list,
 int calculate_score_gotoh(
     const vector<int>& seq2int1, const vector<int>& seq2int2,
     vector<vector<int> >& JumpH, vector<vector<int> >& JumpV,
-    vector<vector<int> >& P,const int ScoringMatrix[24][24])
+    vector<vector<int> >& P,const int ScoringMatrix[24][24],
+    const int gapopen,const int gapext)
 {
     int len1=seq2int1.size();
     int len2=seq2int2.size();
@@ -314,7 +315,8 @@ void trace_back_gotoh(string seq1, string seq2,
 /* entry function for NWalign */
 int NWalign(const string& seq1, const string& seq2, 
     const vector<int>& seq2int1, const vector<int>& seq2int2, // aa2int
-    string & aln1,string & aln2,const int ScoringMatrix[24][24])
+    string & aln1,string & aln2,const int ScoringMatrix[24][24],
+    const int gapopen,const int gapext)
 {
     int len1=seq2int1.size();
     int len2=seq2int2.size();
@@ -324,7 +326,7 @@ int NWalign(const string& seq1, const string& seq2,
     vector<vector<int> > P(len1+1,temp_int);
 
     int aln_score=calculate_score_gotoh(seq2int1,seq2int2,JumpH,JumpV,P,
-        ScoringMatrix);
+        ScoringMatrix,gapopen,gapext);
 
     trace_back_gotoh(seq1,seq2,JumpH,JumpV,P,aln1,aln2);
 

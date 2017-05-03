@@ -101,7 +101,7 @@ int main(int argc, char **argv)
 
                 string aln1,aln2;
                 int aln_score=NWalign(seq1,seq2,seq2int1,seq2int2,aln1,aln2,
-                    BLOSUM62);
+                    BLOSUM62,gapopen_blosum62,gapext_blosum62);
 
                 string aln_str; // colon for identical sequence
                 string pos_str; // last digit for position index
@@ -157,7 +157,7 @@ int main(int argc, char **argv)
 
             string aln1,aln2;
             int aln_score=NWalign(seq1,seq2, seq2int1,seq2int2, aln1,aln2,
-                BLOSUM62);
+                BLOSUM62,gapopen_blosum62,gapext_blosum62);
 
             string aln_str; // colon for identical sequence
             string pos_str; // last digit for position index
