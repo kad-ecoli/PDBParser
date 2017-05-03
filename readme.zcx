@@ -14,3 +14,4 @@ BackboneTorsion    # calculate backbone torsion angles (omega, phi, psi)
 pdb2sarst          # convert PDB to SARST (Structural similarity search
                    # Aided by Ramachandran Sequential Transformation) code
 pdb2ThreeDblast    # convert PDB to structural alphabet in 3D-blast
+NWalign            # Needleman-Wunsch global sequence alignment
