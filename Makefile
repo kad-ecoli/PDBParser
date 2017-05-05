@@ -39,3 +39,4 @@ ThreeDblastAlign: ThreeDblastAlign.cpp ThreeDblastAlign.hpp StructuralAlphabet.h
 
 clean:
 	rm ${PROG}
+	rm pdb2sarst pdb2ThreeDblast SarstAlign ThreeDblastAlign
