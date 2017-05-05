@@ -1,3 +1,4 @@
+/* header for structure alignment by SARST code */
 #include <iostream>
 #include <vector>
 #include <fstream>

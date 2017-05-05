@@ -3,6 +3,12 @@ Chengxin's own c++ programs for PDB file parsing,
 licensed under LGPL v2+.
 All programs can be directly called by command line.
 When launched without argument, a short documentation will be displayed.
+
+Compiling by Makefile:
+make         # compile programs, excluding "old" programs
+make all     # compile all programs, including "old" programs
+make clean   # remove compiled binaries
+make NWalign # compile "NWalign" only
 '''
 
 #### structure parsing ####
@@ -10,9 +16,14 @@ reindex_pdb        # renumber residue number of PDB file
 strip_sidechain    # remove side chain atoms
 pdb2fasta          # convert PDB file to fasta file
 split_chain        # split PDB by chain
+
+#### backbone torsion ####
 BackboneTorsion    # calculate backbone torsion angles (omega, phi, psi)
-pdb2sarst          # convert PDB to SARST (Structural similarity search
+pdb2sarst          # (old) convert PDB to SARST (Structural similarity search
                    # Aided by Ramachandran Sequential Transformation) code
-pdb2ThreeDblast    # convert PDB to structural alphabet in 3D-blast
+pdb2ThreeDblast    # (old) convert PDB to structural alphabet in 3D-blast
+
+#### sequence/structural alphabet alignment ####
 NWalign            # Needleman-Wunsch global sequence alignment
-SarstAlign         # align two structure by their SARST code
+SarstAlign         # (old) align two structure by their SARST code
+ThreeDblastAlign   # (old) align two structure by 3d-blast structural alphabet

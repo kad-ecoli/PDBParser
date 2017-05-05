@@ -1,4 +1,4 @@
-/* calculate backbone torsion angles (omega, psi, phi) */
+/* convert backbone torsion angles to structural alphabet */
 #include <cstring>
 #include "BackboneTorsion.hpp"
 

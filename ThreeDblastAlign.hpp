@@ -1,3 +1,4 @@
+/* header for structure alignment by 3d-blast structural alphabet */
 #include <iostream>
 #include <vector>
 #include <fstream>

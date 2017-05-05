@@ -6,7 +6,9 @@ PROG=pdb2fasta reindex_pdb strip_sidechain split_chain BackboneTorsion NWalign
 OLD_PROG=pdb2sarst pdb2ThreeDblast SarstAlign ThreeDblastAlign
 HEADER=PDBParser.hpp pstream.h
 
-all: ${PROG}
+current: ${PROG}
+
+all: ${PROG} ${OLD_PROG}
 
 pdb2fasta: pdb2fasta.cpp FilePathParser.hpp ${HEADER}
 	${CC} ${CFLAGS} $@.cpp -o $@ ${LDFLAGS}

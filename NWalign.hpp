@@ -1,3 +1,4 @@
+/* header for Needleman-Wunsch global sequence alignment */
 #include <iostream>
 #include <vector>
 #include <fstream>
@@ -10,7 +11,9 @@
 #include "PDBParser.hpp"
 #include "FilePathParser.hpp"
 
+#ifndef MAX
 #define MAX(A,B) ((A)>(B)?(A):(B))
+#endif
 
 using namespace std;
 
