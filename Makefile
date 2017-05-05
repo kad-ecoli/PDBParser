@@ -2,7 +2,8 @@ CC=g++
 CFLAGS=-O3
 LDFLAGS=-static
 
-PROG=pdb2fasta reindex_pdb strip_sidechain split_chain BackboneTorsion NWalign #pdb2sarst pdb2ThreeDblast SarstAlign ThreeDblastAlign
+PROG=pdb2fasta reindex_pdb strip_sidechain split_chain BackboneTorsion NWalign 
+OLD_PROG=pdb2sarst pdb2ThreeDblast SarstAlign ThreeDblastAlign
 HEADER=PDBParser.hpp pstream.h
 
 all: ${PROG}
@@ -19,7 +20,7 @@ reindex_pdb: reindex_pdb.cpp ${HEADER}
 strip_sidechain: strip_sidechain.cpp ${HEADER}
 	${CC} ${CFLAGS} $@.cpp -o $@ ${LDFLAGS}
 
-BackboneTorsion: BackboneTorsion.cpp BackboneTorsion.cpp BackboneTorsion.hpp ${HEADER}
+BackboneTorsion: BackboneTorsion.cpp BackboneTorsion.hpp ${HEADER}
 	${CC} ${CFLAGS} $@.cpp -o $@ ${LDFLAGS}
 
 pdb2sarst: pdb2sarst.cpp StructuralAlphabet.hpp BackboneTorsion.hpp FilePathParser.hpp ${HEADER}
@@ -39,4 +40,4 @@ ThreeDblastAlign: ThreeDblastAlign.cpp ThreeDblastAlign.hpp StructuralAlphabet.h
 
 clean:
 	rm ${PROG}
-	rm pdb2sarst pdb2ThreeDblast SarstAlign ThreeDblastAlign
+	rm ${OLD_PROG}
