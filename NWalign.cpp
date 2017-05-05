@@ -10,6 +10,7 @@ const char* docstring=""
 "    NWalign F1.pdb ignore 7   (align all sequences within pdb file)\n"
 "\n"
 "    NWalign input1 input2 option+10 (only print sequence identity)\n"
+"    NWalign input1 input2 option+20 (only print fasta sequence)\n"
 ;
 
 #include <iostream>
@@ -33,7 +34,12 @@ int main(int argc, char **argv)
     if (argc>3)
     {
         input_mode=atoi(argv[3]);
-        if (input_mode>=10)
+        if (input_mode>=20)
+        {
+            seqID_only=2;
+            input_mode-=20;
+        }
+        else if (input_mode>=10)
         {
             seqID_only=1;
             input_mode-=10;
@@ -108,7 +114,13 @@ int main(int argc, char **argv)
                 int iden_len,aln_len;  // num of identical/aligned positions
                 get_seqID(aln1,aln2,aln_str,pos_str,iden_len,aln_len);
 
-                if (seqID_only)
+                if (seqID_only==2)
+                {
+                    cout<<'>'<<name1<<endl<<aln1<<endl;
+                    cout<<'>'<<name2<<endl<<aln2<<endl;
+                    continue;
+                }
+                else if (seqID_only==1)
                 {
                     cout<<name1<<'\t'<<name2<<'\t';
                     cout<<setprecision(4)<<float(iden_len)/len1<<'\t';
@@ -164,7 +176,13 @@ int main(int argc, char **argv)
             int iden_len,aln_len;  // num of identical/aligned positions
             get_seqID(aln1,aln2,aln_str,pos_str,iden_len,aln_len);
 
-            if (seqID_only)
+            if (seqID_only==2)
+            {
+                cout<<'>'<<name1<<endl<<aln1<<endl;
+                cout<<'>'<<name2<<endl<<aln2<<endl;
+                continue;
+            }
+            else if (seqID_only==1)
             {
                 cout<<name1<<'\t'<<name2<<'\t';
                 cout<<setprecision(4)<<float(iden_len)/len1<<'\t';
