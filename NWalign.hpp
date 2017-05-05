@@ -237,10 +237,12 @@ int calculate_score_gotoh(
             V[i][j]=MAX(S[i-1][j]+gapopen,V[i-1][j]+gapext);
             JumpV[i][j]=(V[i][j]==V[i-1][j]+gapext)?(JumpV[i-1][j]+1):1;
 
-            diag_score=S[i-1][j-1]+((seq2int1[i-1]<24&&seq2int2[j-1]<24)?
-                ScoringMatrix[seq2int1[i-1]][seq2int2[j-1]]:0); // match '\'
-            left_score=H[i][j];            // deletion       '-'
-            up_score  =V[i][j];            // insertion      '|'
+            //diag_score=S[i-1][j-1]+((seq2int1[i-1]<24&&seq2int2[j-1]<24)?
+                //ScoringMatrix[seq2int1[i-1]][seq2int2[j-1]]:0); // match '\'
+            diag_score=S[i-1][j-1]+ScoringMatrix[
+                seq2int1[i-1]][seq2int2[j-1]]; // match-mismatch '\'
+            left_score=H[i][j];                // deletion       '-'
+            up_score  =V[i][j];                // insertion      '|'
 
             if (diag_score>=left_score && diag_score>=up_score)
             {
