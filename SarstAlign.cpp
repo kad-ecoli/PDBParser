@@ -1,5 +1,7 @@
-const char* docstring="SarstAlign F1.pdb F2.pdb\n"
-"    align two structures by their SARST code\n"
+const char* docstring=
+"pairwise structure alignment by their SARST code\n"
+"    SarstAlign F1.pdb F2.pdb    (align two structure)\n"
+"    SarstAlign F1.pdb F2.pdb 20 (only print fasta sequence)\n"
 ;
 
 #include <iostream>
@@ -13,10 +15,21 @@ using namespace std;
 
 int main(int argc, char **argv)
 {
+    int input_mode=0; // align two fasta files
+    int seqID_only=0; // do not just print seqID
     if(argc<3)
     {
         cerr<<docstring;
         return 0;
+    }
+    if (argc>3)
+    {
+        input_mode=atoi(argv[3]);
+        if (input_mode>=20)
+        {
+            seqID_only=2;
+            input_mode-=20;
+        }
     }
 
     /* parse input */
@@ -49,6 +62,13 @@ int main(int argc, char **argv)
             string pos_str; // last digit for position index
             int iden_len,aln_len;  // num of identical/aligned positions
             get_seqID(aln1,aln2,aln_str,pos_str,iden_len,aln_len);
+
+            if (seqID_only==2)
+            {
+                cout<<'>'<<name1<<endl<<aln1<<endl;
+                cout<<'>'<<name2<<endl<<aln2<<endl;
+                continue;
+            }
 
             cout<<"Length of sequence 1:"<<setw(5)<<len1;
             cout<<" ->"<<name1<<endl;
