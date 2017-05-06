@@ -391,11 +391,24 @@ inline char aa3to1(const string resn,const int convertX=2)
     return 'X';
 }
 
+/* only residues in 'ATOM' record with CA atoms are converted */
 string pdb2fasta(ChainUnit& chain)
 {
     chain.sequence="";
-    for (int r=0;r<chain.residues.size();r++)
-        chain.sequence+=aa3to1(chain.residues[r].resn);
+    int r,a;
+    for (r=0;r<chain.residues.size();r++)
+    {
+        if (chain.residues[r].het==false)
+        {
+            for (a=0;a<chain.residues[r].atoms.size();a++)
+            {
+                if (chain.residues[r].atoms[a].name==" CA ")
+                {
+                    chain.sequence+=aa3to1(chain.residues[r].resn);
+                }
+            }
+        }
+    }
     return chain.sequence;
 }
 
