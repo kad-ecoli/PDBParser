@@ -10,10 +10,7 @@
 
 #include "PDBParser.hpp"
 #include "FilePathParser.hpp"
-
-#ifndef MAX
-#define MAX(A,B) ((A)>(B)?(A):(B))
-#endif
+#include "MathTools.hpp"
 
 using namespace std;
 
