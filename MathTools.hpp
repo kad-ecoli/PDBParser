@@ -6,6 +6,9 @@
 #include <iomanip>
 #include <vector>
 
+#define MIN(A,B) ((A)<(B)?(A):(B))
+#define MAX(A,B) ((A)>(B)?(A):(B))
+
 using namespace std;
 
 /* print the content of vector */
