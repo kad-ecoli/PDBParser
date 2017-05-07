@@ -27,3 +27,7 @@ pdb2ThreeDblast    # (old) convert PDB to structural alphabet in 3D-blast
 NWalign            # Needleman-Wunsch global sequence alignment
 SarstAlign         # (old) align two structure by their SARST code
 ThreeDblastAlign   # (old) align two structure by 3d-blast structural alphabet
+
+#### structure alignment ####
+pdb2rmsd           # superpose two structures using Kabsch algorithm guided
+                   # by sequence alignment given by NWalign
