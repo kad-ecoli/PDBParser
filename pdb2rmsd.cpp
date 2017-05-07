@@ -49,17 +49,28 @@ int main(int argc, char **argv)
     }
 
     /* NWalign + RMSD*/
-    for (int c1=0;c1<seq_num1;c1++)
+    int c1,c2; // index of chain
+    string aln1,aln2; // alignment
+    int L1,L2; // sequence length
+    int aln_len; // aligned position number
+    vector<float> tmp_array(3,0.);
+    vector<vector<float> > xyz_list1,xyz_list2; // coordinate of aligned residue
+    vector<vector<float> > RotMatix;  // U
+    vector<float> TranVect;  // t
+    int r; // resi
+    string aln_str; // string to indicate match/mistmatch
+    string pos_str; // string to indicate position
+    int iden_len; // number of identical position
+
+    for (c1=0;c1<seq_num1;c1++)
     {
-        for (int c2=0;c2<seq_num2;c2++)
+        for (c2=0;c2<seq_num2;c2++)
         {
             /* NWalign */
-            string aln1,aln2;
-            int aln_score=NWalign(pdb_entry1.chains[c1].sequence,
+            NWalign(pdb_entry1.chains[c1].sequence,
                 pdb_entry2.chains[c2].sequence,
                 seq2int1_list[c1],seq2int2_list[c2],
                 aln1,aln2, BLOSUM62,gapopen_blosum62,gapext_blosum62);
-
             cout<<'>'<<PDBid1<<':'<<pdb_entry1.chains[c1].chainID_full
                 <<'\t'<<pdb_entry1.chains[c1].sequence.length()<<endl
                 <<aln1<<endl;
@@ -67,45 +78,46 @@ int main(int argc, char **argv)
                 <<'\t'<<pdb_entry2.chains[c2].sequence.length()<<endl
                 <<aln2<<endl;
             
+            /* seqID */
+            L1=pdb_entry1.chains[c1].sequence.length();
+            L2=pdb_entry2.chains[c2].sequence.length();
+            get_seqID(aln1,aln2,aln_str,pos_str,iden_len,aln_len);
+            aln_str.clear();
+            pos_str.clear();
+            cout<<setiosflags(ios::fixed)<<setprecision(4)
+                <<"# IDali="<<1.*iden_len/aln_len
+                <<"\tidentity1="<<1.*iden_len/L1
+                <<"\tidentity2="<<1.*iden_len/L2<<endl;
+            
             /* extract xyz coordinate */
-            vector<vector<float> > xyz_list1,xyz_list2;
             aln2coor(aln1,aln2,pdb_entry1.chains[c1],pdb_entry2.chains[c1],
                 xyz_list1,xyz_list2,atomic_detail);
-            int L1=pdb_entry1.chains[c1].sequence.length();
-            int L2=pdb_entry2.chains[c2].sequence.length();
-            int cov=xyz_list1.size();
             cout<<setiosflags(ios::fixed)<<setprecision(4)
-                <<"# Lali="<<cov<<"\tcoverage1="<<1.*cov/L1
-                <<"\tcoverage2="<<1.*cov/L2<<endl;
+                <<"# Lali="<<aln_len<<"\tcoverage1="<<1.*aln_len/L1
+                <<"\tcoverage2="<<1.*aln_len/L2<<endl;
 
             /* RMSD superposition */
-            if (cov!=0)
+            if (aln_len!=0)
             {
                 /* kabsch */
-                vector<vector<float> > RotMatix;  // U
-                vector<float> TranVect;  // t
                 RotateCoor(xyz_list1,xyz_list2, RotMatix, TranVect);
 
                 /* change coordinate */
-                vector<float> tmp_array(3,0.);
-                vector<vector<float> > super_xyz_list1(cov,tmp_array);
-                for(int r=0; r<cov; r++)
-	            ChangeCoor(xyz_list1[r], RotMatix, TranVect, 
+                vector<vector<float> > super_xyz_list1(aln_len,tmp_array);
+                for(r=0; r<aln_len; r++)
+	                ChangeCoor(xyz_list1[r], RotMatix, TranVect, 
                         super_xyz_list1[r]);
 
                 /* RMSD */
-                float rms=calRMSD(super_xyz_list1, xyz_list2);
-                //cout<<setiosflags(ios::fixed)<<setprecision(4)
-                    //<<"# RMSD="<<rms<<endl;
-                //float TMscoreAli=calTMscore(super_xyz_list1,xyz_list2,cov);
-                float TMscore1=calTMscore(super_xyz_list1, xyz_list2,L1);
-                float TMscore2=calTMscore(super_xyz_list1, xyz_list2,L2);
                 cout<<setiosflags(ios::fixed)<<setprecision(4)
-                    <<"# RMSD="<<rms
-                    <<"\tTM-score1="<<TMscore1
-                    <<"\tTM-score2="<<TMscore2<<endl;
+                    <<"# RMSD="<<calRMSD(super_xyz_list1, xyz_list2)
+                    <<"\tTM-score1="<<calTMscore(super_xyz_list1,xyz_list2,L1)
+                    <<"\tTM-score2="<<calTMscore(super_xyz_list1,xyz_list2,L2)
+                    <<endl;
                 
                 /* clean up */
+                RotMatix.clear();
+                TranVect.clear();
                 super_xyz_list1.clear();
             }
 
@@ -115,7 +127,7 @@ int main(int argc, char **argv)
             aln1.clear();
             aln2.clear();
 
-            if (c1<seq_num1-1 || c2<seq_num2-1) cout<<"$$$$\n"<<endl;
+            if (c1<seq_num1-1 || c2<seq_num2-1) cout<<"$$$$"<<endl;
         }
     }
 

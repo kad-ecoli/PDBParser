@@ -15,13 +15,14 @@ int main(int argc,char **argv)
     
     int atomic_detail=0; // only read CA
     int allowX=1;        // only allow ATOM and MSE
+    int ShowSeqLen=1;    // show sequence length
 
     for (int i=1;i<argc;i++)
     {
         char *infile=argv[i];
         string PDBid=basename_no_ext(infile);
         ModelUnit pdb_entry=read_pdb_structure(infile,atomic_detail,allowX);
-        cout<<pdb2fasta(pdb_entry,PDBid);
+        cout<<pdb2fasta(pdb_entry,PDBid,ShowSeqLen);
     }
     return 0;
 }
