@@ -14,7 +14,8 @@ const char* docstring=""
 "    NWalign input1 input2 option+30 (for each input1 entry, only print\n"
 "                                     input2 entry with max identity)\n"
 "\n"
-//"    NWalign input1 input2 option+100 (glocal-query alignment)\n"
+"    NWalign input1 input2 option+100 (glocal-query alignment)\n"
+"    NWalign input1 input2 option+200 (glocal-both alignment)\n"
 ;
 
 #include <iostream>
@@ -40,7 +41,12 @@ int main(int argc, char **argv)
     {
         input_mode=atoi(argv[3]);
         // alignment algorithm
-        if (input_mode>=100)
+        if (input_mode>=200)
+        {
+            glocal=2;
+            input_mode-=200;
+        }
+        else if (input_mode>=100)
         {
             glocal=1;
             input_mode-=100;
