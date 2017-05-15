@@ -7,6 +7,7 @@
 #include <iomanip>
 #include <stdlib.h>
 #include <ctype.h>
+#include <limits.h>
 
 #include "PDBParser.hpp"
 #include "FilePathParser.hpp"
@@ -189,12 +190,17 @@ int read_fasta(const char *filename, vector<string>& name_list,
  * global - global or local alignment
  *         0 : global alignment
  *         1 : glocal-query alignment
+ *
+ * alt_init - whether to adopt alternative matrix initialization by wei zheng
+ *         1 : use yang zhang's matrix initialization
+ *         0 : use wei zheng's matrix initialization
  */
 int calculate_score_gotoh(
     const vector<int>& seq2int1, const vector<int>& seq2int2,
     vector<vector<int> >& JumpH, vector<vector<int> >& JumpV,
     vector<vector<int> >& P,const int ScoringMatrix[24][24],
-    const int gapopen,const int gapext,const int glocal=0)
+    const int gapopen,const int gapext,const int glocal=0,
+    const int alt_init=1)
 {
     int len1=seq2int1.size();
     int len2=seq2int2.size();
@@ -210,23 +216,27 @@ int calculate_score_gotoh(
     int i,j;
     for (i=0;i<len1+1;i++)
     {
-        P[i][0]=4;
+        P[i][0]=4; // -
         JumpV[i][0]=i;
     }
     for (j=0;j<len2+1;j++)
     {
-        P[0][j]=2;
+        if (glocal<1) P[0][j]=2; // |
         JumpH[0][j]=j;
     }
-    for (i=1;i<len1+1;i++)
+    for (i=1;i<len1+1;i++) S[i][0]=gapopen+gapext*(i-1);
+    if (glocal<1) for (j=1;j<len2+1;j++) S[0][j]=gapopen+gapext*(j-1);
+    if (alt_init==0)
     {
-        S[i][0]=gapopen+gapext*(i-1);
-        H[i][0]=gapopen+gapext*(i-1);
+        for (i=1;i<len1+1;i++) H[i][0]=gapopen+gapext*(i-1);
+        for (j=1;j<len2+1;j++) V[0][j]=gapopen+gapext*(j-1);
     }
-    for (j=1;j<len2+1;j++)
+    else
     {
-        S[0][j]=gapopen+gapext*(j-1);
-        V[0][j]=gapopen+gapext*(j-1);
+        for (i=1;i<len1+1;i++) V[i][0]=gapopen+gapext*(i-1);
+        if (glocal<1) for (j=1;j<len2+1;j++) H[0][j]=gapopen+gapext*(j-1);
+        for (i=0;i<len1+1;i++) H[i][0]=INT_MIN;
+        for (j=0;j<len2+1;j++) V[0][j]=INT_MIN;
     }
 
     // fill S and P
@@ -236,8 +246,16 @@ int calculate_score_gotoh(
         for (j=1;j<len2+1;j++)
         {
             // penalty of consective deletion
-            H[i][j]=MAX(S[i][j-1]+gapopen,H[i][j-1]+gapext);
-            JumpH[i][j]=(H[i][j]==H[i][j-1]+gapext)?(JumpH[i][j-1]+1):1;
+            if (glocal<1 || i<len1)
+            {
+                H[i][j]=MAX(S[i][j-1]+gapopen,H[i][j-1]+gapext);
+                JumpH[i][j]=(H[i][j]==H[i][j-1]+gapext)?(JumpH[i][j-1]+1):1;
+            }
+            else
+            {
+                H[i][j]=MAX(S[i][j-1],H[i][j-1]);
+                JumpH[i][j]=(H[i][j]==H[i][j-1])?(JumpH[i][j-1]+1):1;
+            }
             // penalty of consective insertion
             V[i][j]=MAX(S[i-1][j]+gapopen,V[i-1][j]+gapext);
             JumpV[i][j]=(V[i][j]==V[i-1][j]+gapext)?(JumpV[i-1][j]+1):1;
@@ -268,6 +286,11 @@ int calculate_score_gotoh(
     // re-fill first row/column of path matrix P for back-tracing
     for (i=1;i<len1;i++) P[i][0]=2; // |
     for (j=1;j<len2;j++) P[0][j]=4; // -
+
+    //cout<<"S="<<endl;
+    //print_matrix(S);
+    //cout<<"P="<<"(1 \\\t\t2 |\t\t4 -)"<<endl;
+    //print_matrix(P);
 
     // release memory
     S.clear();
