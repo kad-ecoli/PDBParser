@@ -236,52 +236,61 @@ ModelUnit read_pdb_structure(const char *filename,
     return pep;
 }
 
-/* filename - full output filename, write to stdout if filename=="-" */
-void write_pdb_structure(const char *filename,ModelUnit &pep)
+/* i - first atom index */
+string write_pdb_structure(ChainUnit &chain,int &i)
 {
     stringstream buf;
+    int r,a;
 
-    AtomUnit atom;
-    ResidueUnit residue;
-    ChainUnit chain;
-    int a,r,c,i=1;
-    for (c=0;c<pep.chains.size();c++)
-    {
-        chain=pep.chains[c];
-        for (r=0;r<chain.residues.size();r++)
-        {
-            residue=chain.residues[r];
-            for (a=0;a<residue.atoms.size();a++)
-            {
-                atom=residue.atoms[a];
-                buf<<setiosflags(ios::left)<<setw(6)
-                   <<(residue.het?"HETATM":"ATOM")<<resetiosflags(ios::left)
-                   <<setw(5)<<i++<<' '<<atom.name<<' '<<residue.resn<<' '
-                   <<chain.chainID<<setw(4)<<residue.resi<<residue.icode
-                   <<"   " <<setiosflags(ios::fixed)<<setprecision(3)
-                   <<setw(8)<<atom.xyz[0]<<setw(8)<<atom.xyz[1]
-                   <<setw(8)<<atom.xyz[2]<<endl;
-            }
-        }
-        buf<<"TER"<<endl;
-    }
-    
+    for (r=0;r<chain.residues.size();r++)
+        for (a=0;a<chain.residues[r].atoms.size();a++)
+            buf<<setiosflags(ios::left)<<setw(6)
+               <<(chain.residues[r].het?"HETATM":"ATOM")
+               <<resetiosflags(ios::left)<<setw(5)<<i++<<' '
+               <<chain.residues[r].atoms[a].name<<' '
+               <<chain.residues[r].resn<<' '<<chain.chainID<<setw(4)
+               <<chain.residues[r].resi<<chain.residues[r].icode
+               <<"   " <<setiosflags(ios::fixed)<<setprecision(3)
+               <<setw(8)<<chain.residues[r].atoms[a].xyz[0]
+               <<setw(8)<<chain.residues[r].atoms[a].xyz[1]
+               <<setw(8)<<chain.residues[r].atoms[a].xyz[2]<<endl;
+    return buf.str();
+}
+
+/* filename - full output filename, write to stdout if filename=="-" */
+void write_pdb_structure(const char *filename,ChainUnit &chain)
+{
+    int i=1;
     if (strcmp(filename,"-")==0)
-        cout<<buf.str();
+        cout<<write_pdb_structure(chain,i);
     else
     {
         ofstream fp(filename);
-        fp<<buf.str();
+        fp<<write_pdb_structure(chain,i);
         fp.close();
     }
 }
 
-void write_pdb_structure(const char *filename,ChainUnit &chain)
+string write_pdb_structure(ModelUnit &pep)
 {
-    ModelUnit pep;
-    pep.chains.push_back(chain);
-    write_pdb_structure(filename,pep);
-    pep.chains.clear();
+    string txt="";
+    int i=1; // atom index
+    for (int c=0;c<pep.chains.size();c++)
+        txt+=write_pdb_structure(pep.chains[c],i)+"TER\n";
+    return txt;
+}
+
+/* filename - full output filename, write to stdout if filename=="-" */
+void write_pdb_structure(const char *filename,ModelUnit &pep)
+{
+    if (strcmp(filename,"-")==0)
+        cout<<write_pdb_structure(pep);
+    else
+    {
+        ofstream fp(filename);
+        fp<<write_pdb_structure(pep);
+        fp.close();
+    }
 }
 
 /* renumber residue index from "startindex" */
