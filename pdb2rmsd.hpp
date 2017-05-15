@@ -88,9 +88,7 @@ float calTMscore(const vector<vector<float> >& xyz_list1,
 {
     if (L<1) return 0.;
 
-    float d0_min=0.5;
-    float d0=(L>21)?(1.24*pow((L-15.),(1./3))-1.8):d0_min;
-    if (d0<d0_min) d0=d0_min;
+    float d0=(L>21)?(1.24*pow((L-15.),(1./3))-1.8):0.5;
 
     float d02=d0*d0;
     float TMscore=0; // sum of residue TMscore
