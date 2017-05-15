@@ -14,7 +14,7 @@ const char* docstring=""
 "    NWalign input1 input2 option+30 (for each input1 entry, only print\n"
 "                                     input2 entry with max identity)\n"
 "\n"
-//"    NWalign input1 input2 option+100 (glocal-both alignment)\n"
+//"    NWalign input1 input2 option+100 (glocal-query alignment)\n"
 ;
 
 #include <iostream>

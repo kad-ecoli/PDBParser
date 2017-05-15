@@ -177,19 +177,24 @@ int read_fasta(const char *filename, vector<string>& name_list,
 
 /* calculate dynamic programming matrix using gotoh algorithm
  * S     - cumulative scorefor each cell
- * P     - string representation for path 
+ * P     - string representation for path
+ *         0 :   uninitialized, for gaps at N- & C- termini when glocal>0
  *         1 : \ match-mismatch
  *         2 : | vertical gap (insertion)
  *         4 : - horizontal gap (deletion)
  * JumpH - horizontal long gap number.
  * JumpV - vertical long gap number.
  * all matrices are in the size of [len(seq1)+1]*[len(seq2)+1]
+ *
+ * global - global or local alignment
+ *         0 : global alignment
+ *         1 : glocal-query alignment
  */
 int calculate_score_gotoh(
     const vector<int>& seq2int1, const vector<int>& seq2int2,
     vector<vector<int> >& JumpH, vector<vector<int> >& JumpV,
     vector<vector<int> >& P,const int ScoringMatrix[24][24],
-    const int gapopen,const int gapext)
+    const int gapopen,const int gapext,const int glocal=0)
 {
     int len1=seq2int1.size();
     int len2=seq2int2.size();
@@ -237,8 +242,6 @@ int calculate_score_gotoh(
             V[i][j]=MAX(S[i-1][j]+gapopen,V[i-1][j]+gapext);
             JumpV[i][j]=(V[i][j]==V[i-1][j]+gapext)?(JumpV[i-1][j]+1):1;
 
-            //diag_score=S[i-1][j-1]+((seq2int1[i-1]<24&&seq2int2[j-1]<24)?
-                //ScoringMatrix[seq2int1[i-1]][seq2int2[j-1]]:0); // match '\'
             diag_score=S[i-1][j-1]+ScoringMatrix[
                 seq2int1[i-1]][seq2int2[j-1]]; // match-mismatch '\'
             left_score=H[i][j];                // deletion       '-'
@@ -262,13 +265,14 @@ int calculate_score_gotoh(
         }
     }
     int aln_score=S[len1][len2];
-    S.clear();
-    H.clear();
-    V.clear();
-
     // re-fill first row/column of path matrix P for back-tracing
     for (i=1;i<len1;i++) P[i][0]=2; // |
     for (j=1;j<len2;j++) P[0][j]=4; // -
+
+    // release memory
+    S.clear();
+    H.clear();
+    V.clear();
     return aln_score; // final alignment score
 }
 
@@ -318,7 +322,7 @@ void trace_back_gotoh(string seq1, string seq2,
 int NWalign(const string& seq1, const string& seq2, 
     const vector<int>& seq2int1, const vector<int>& seq2int2, // aa2int
     string & aln1,string & aln2,const int ScoringMatrix[24][24],
-    const int gapopen,const int gapext)
+    const int gapopen,const int gapext,const int glocal=0)
 {
     int len1=seq2int1.size();
     int len2=seq2int2.size();
@@ -328,7 +332,7 @@ int NWalign(const string& seq1, const string& seq2,
     vector<vector<int> > P(len1+1,temp_int);
 
     int aln_score=calculate_score_gotoh(seq2int1,seq2int2,JumpH,JumpV,P,
-        ScoringMatrix,gapopen,gapext);
+        ScoringMatrix,gapopen,gapext,glocal);
 
     trace_back_gotoh(seq1,seq2,JumpH,JumpV,P,aln1,aln2);
 
