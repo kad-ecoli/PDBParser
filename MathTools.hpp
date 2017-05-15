@@ -40,6 +40,20 @@ void print_vector(vector<float>& vec)
     if (vec_len==0) cout<<"]"<<endl;
 }
 
+/* print the content of vector */
+void print_vector(vector<string>& vec)
+{
+    int vec_len=vec.size();
+    cout<<"[";
+    for(int i=0;i<vec_len;i++)
+    {
+        if (i==(vec_len-1)) cout<<vec[i]<<"]"<<endl;
+        else if (i<10 || vec_len-i <10) cout<<vec[i]<<", ";
+        else if (i==10 && vec_len>20) cout<<" ... ";
+    }
+    if (vec_len==0) cout<<"]"<<endl;
+}
+
 /* print the content of matrix */
 void print_matrix(vector<vector<float> >& mat)
 {
@@ -55,6 +69,19 @@ void print_matrix(vector<vector<float> >& mat)
 
 /* print the content of matrix */
 void print_matrix(vector<vector<int> >& mat)
+{
+    int m=mat.size();
+    cout<<"["<<endl;
+    for(int i=0;i<m;i++)
+    {
+        if (i<10 || m-i <10) print_vector(mat[i]);
+        else if (i==10 && m>20) cout<<" ... "<<endl;
+    }
+    cout<<"]"<<endl;
+}
+
+/* print the content of matrix */
+void print_matrix(vector<vector<string> >& mat)
 {
     int m=mat.size();
     cout<<"["<<endl;
