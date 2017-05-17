@@ -1,4 +1,4 @@
-const char* docstring="backbone_torsion backbone.pdb\n"
+const char* docstring="BackboneTorsion backbone.pdb\n"
 "    calculate backbone torsion angles (Omega, Phi, Psi) from backbone.pdb\n";
 
 #include <iostream>
