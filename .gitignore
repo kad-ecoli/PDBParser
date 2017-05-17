@@ -10,6 +10,7 @@ reindex_pdb
 strip_sidechain
 split_chain
 BackboneTorsion
+SidechainTorsion
 pdb2sarst
 pdb2ThreeDblast
 NWalign
