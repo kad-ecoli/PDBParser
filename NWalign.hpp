@@ -188,12 +188,15 @@ int read_fasta(const char *filename, vector<string>& name_list,
  * all matrices are in the size of [len(seq1)+1]*[len(seq2)+1]
  *
  * global - global or local alignment
- *         0 : global alignment
+ *         0 : global alignment (Needleman-Wunsch dynamic programming)
  *         1 : glocal-query alignment
+ *         2 : glocal-both alignment
+ *         3 : local alignment (Smith-Waterman dynamic programming)
  *
- * alt_init - whether to adopt alternative matrix initialization by wei zheng
- *         1 : use yang zhang's matrix initialization
- *         0 : use wei zheng's matrix initialization
+ * alt_init - whether to adopt alternative matrix initialization
+ *         1 : use wei zheng's matrix initialization
+ *         0 : use yang zhang's matrix initialization, does NOT work
+ *             for glocal alignment
  */
 int calculate_score_gotoh(
     const vector<int>& seq2int1, const vector<int>& seq2int2,
@@ -246,7 +249,7 @@ int calculate_score_gotoh(
         for (j=1;j<len2+1;j++)
         {
             // penalty of consective deletion
-            if (glocal<1 || i<len1)
+            if (glocal<1 || i<len1 || glocal>=3)
             {
                 H[i][j]=MAX(S[i][j-1]+gapopen,H[i][j-1]+gapext);
                 JumpH[i][j]=(H[i][j]==H[i][j-1]+gapext)?(JumpH[i][j-1]+1):1;
@@ -257,7 +260,7 @@ int calculate_score_gotoh(
                 JumpH[i][j]=(H[i][j]==H[i][j-1])?(JumpH[i][j-1]+1):1;
             }
             // penalty of consective insertion
-            if (glocal<2 || j<len2)
+            if (glocal<2 || j<len2 || glocal>=3)
             {
                 V[i][j]=MAX(S[i-1][j]+gapopen,V[i-1][j]+gapext);
                 JumpV[i][j]=(V[i][j]==V[i-1][j]+gapext)?(JumpV[i-1][j]+1):1;
@@ -288,17 +291,46 @@ int calculate_score_gotoh(
                 S[i][j]=left_score;
                 P[i][j]+=4;
             }
+            if (glocal>=3 && S[i][j]<0)
+            {
+                S[i][j]=0;
+                P[i][j]=0;
+                H[i][j]=0;
+                V[i][j]=0;
+                JumpH[i][j]=0;
+                JumpV[i][j]=0;
+            }
         }
     }
     int aln_score=S[len1][len2];
-    // re-fill first row/column of path matrix P for back-tracing
-    for (i=1;i<len1;i++) P[i][0]=2; // |
-    for (j=1;j<len2;j++) P[0][j]=4; // -
 
-    //cout<<"S="<<endl;
-    //print_matrix(S);
-    //cout<<"P="<<"(1 \\\t\t2 |\t\t4 -)"<<endl;
-    //print_matrix(P);
+    // re-fill first row/column of path matrix P for back-tracing
+    for (i=1;i<len1;i++) if (glocal<3 || P[i][0]>0) P[i][0]=2; // |
+    for (j=1;j<len2;j++) if (glocal<3 || P[0][j]>0) P[0][j]=4; // -
+
+    // calculate alignment score and alignment path for swalign
+    if (glocal>=3)
+    {
+        // locate the cell with highest alignment score
+        int max_aln_i=len1;
+        int max_aln_j=len2;
+        for (i=0;i<len1+1;i++)
+        {
+            for (j=0;j<len2+1;j++)
+            {
+                if (S[i][j]>=aln_score)
+                {
+                    max_aln_i=i;
+                    max_aln_j=j;
+                    aln_score=S[i][j];
+                }
+            }
+        }
+
+        // reset all path after [max_aln_i][max_aln_j]
+        for (i=max_aln_i+1;i<len1+1;i++) for (j=0;j<len2+1;j++) P[i][j]=0;
+        for (i=0;i<len1+1;i++) for (j=max_aln_j+1;j<len2+1;j++) P[i][j]=0;
+    }
 
     // release memory
     S.clear();
@@ -318,7 +350,82 @@ void trace_back_gotoh(string seq1, string seq2,
     int i=len1;
     int j=len2;
     int gaplen,p;
+
     while(i+j)
+    {
+        gaplen=0;
+        if (P[i][j]>=4)
+        {
+            gaplen=JumpH[i][j];
+            for (p=0;p<gaplen;p++) aln1='-'+aln1;
+            aln2=seq2.substr(seq2.length()-gaplen,gaplen)+aln2;
+            seq2=seq2.substr(0,seq2.length()-gaplen);
+            j-=gaplen;
+        }
+        else if (P[i][j] % 4 >= 2)
+        {
+            gaplen=JumpV[i][j];
+            aln1=seq1.substr(seq1.length()-gaplen,gaplen)+aln1;
+            for (p=0;p<gaplen;p++) aln2='-'+aln2;
+            seq1=seq1.substr(0,seq1.length()-gaplen);
+            i-=gaplen;
+        }
+        else
+        {
+            if (i==0 && j!=0) // only in glocal alignment
+            {
+                aln2=seq2+aln2;
+                for (p=0;p<seq2.length();p++) aln1='-'+aln1;
+                break;
+            }
+            if (i!=0 && j==0) // only in glocal alignment
+            {
+                aln1=seq1+aln1;
+                for (p=0;p<seq1.length();p++) aln2='-'+aln2;
+                break;
+            }
+            aln1=seq1[seq1.length()-1]+aln1;
+            aln2=seq2[seq2.length()-1]+aln2;
+            seq1=seq1.substr(0,seq1.length()-1);
+            seq2=seq2.substr(0,seq2.length()-1);
+            i--;
+            j--;
+        }
+    }   
+}
+
+
+/* trace back Smith-Waterman dynamic programming path to diciper 
+ * pairwise local alignment */
+void trace_back_sw(string seq1, string seq2,
+    const vector<vector<int> >& JumpH, const vector<vector<int> >& JumpV,
+    const vector<vector<int> >& P, string& aln1, string& aln2)
+{
+    int len1=seq1.length();
+    int len2=seq2.length();
+    
+    int i=len1;
+    int j=len2;
+    // find the first non-zero cell in P
+    bool found_start_cell=false;
+    for (i=len1;i>=0;i--)
+    {
+        for (j=len2;j>=0;j--)
+        {
+            if (P[i][j]!=0)
+            {
+                found_start_cell=true;
+                break;
+            }
+        }
+        if (found_start_cell) break;
+    }
+    if (i<0||j<0) return;
+    seq1=seq1.substr(0,i);
+    seq2=seq2.substr(0,j);
+
+    int gaplen,p;
+    while(P[i][j]!=0)
     {
         gaplen=0;
         if (P[i][j]>=4)
@@ -346,7 +453,7 @@ void trace_back_gotoh(string seq1, string seq2,
             i--;
             j--;
         }
-    }   
+    }
 }
 
 /* entry function for NWalign */
@@ -365,7 +472,14 @@ int NWalign(const string& seq1, const string& seq2,
     int aln_score=calculate_score_gotoh(seq2int1,seq2int2,JumpH,JumpV,P,
         ScoringMatrix,gapopen,gapext,glocal);
 
-    trace_back_gotoh(seq1,seq2,JumpH,JumpV,P,aln1,aln2);
+    if (glocal<3)
+    {
+        trace_back_gotoh(seq1,seq2,JumpH,JumpV,P,aln1,aln2);
+    }
+    else
+    {
+        trace_back_sw(seq1,seq2,JumpH,JumpV,P,aln1,aln2);
+    }
 
     JumpH.clear();
     JumpV.clear();
