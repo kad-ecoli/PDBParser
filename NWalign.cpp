@@ -152,11 +152,11 @@ int main(int argc, char **argv)
                 }
                 else if (seqID_only==1) // seqID only
                 {
-                    cout<<name1<<'\t'<<name2<<'\t';
-                    cout<<setiosflags(ios::fixed)<<setprecision(4);
-                    cout<<float(iden_len)/len1<<'\t';
-                    cout<<setiosflags(ios::fixed)<<setprecision(4);
-                    cout<<float(iden_len)/len2<<endl;
+                    cout<<name1<<'\t'<<name2<<'\t'
+                        <<setiosflags(ios::fixed)<<setprecision(4)
+                        <<float(iden_len)/len1<<'\t'
+                        <<float(iden_len)/len2<<'\t'
+                        <<float(iden_len)/aln_len<<endl;
                 }
                 else // full output
                 {
@@ -193,6 +193,7 @@ int main(int argc, char **argv)
         vector<int> seq2int1=seq2int_list1[q];
         int len1=seq1.length();
         int max_iden_len=0; // identical positions with max seqID seq2
+        int max_aln_len=0;  // aligned positions with max seqID seq2
         string max_seqID_name2="";
         int max_seqID_len2=0;
 
@@ -217,6 +218,7 @@ int main(int argc, char **argv)
                 if (max_iden_len<=iden_len)
                 {
                     max_iden_len=iden_len;
+                    max_aln_len=aln_len;
                     max_seqID_name2=name2;
                     max_seqID_len2=len2;
                 }
@@ -229,11 +231,11 @@ int main(int argc, char **argv)
             }
             else if (seqID_only==1) // seqID only
             {
-                cout<<name1<<'\t'<<name2<<'\t';
-                cout<<setiosflags(ios::fixed)<<setprecision(4);
-                cout<<float(iden_len)/len1<<'\t';
-                cout<<setiosflags(ios::fixed)<<setprecision(4);
-                cout<<float(iden_len)/len2<<endl;
+                cout<<name1<<'\t'<<name2<<'\t'
+                    <<setiosflags(ios::fixed)<<setprecision(4)
+                    <<float(iden_len)/len1<<'\t'
+                    <<float(iden_len)/len2<<'\t'
+                    <<float(iden_len)/aln_len<<endl;
                 if (seq_num1>1 && s==seq_num2-1) cout<<"$$$$\n";
             }
             else // full output
@@ -262,11 +264,11 @@ int main(int argc, char **argv)
         
         if (seqID_only==3)
         {
-            cout<<name1<<'\t'<<max_seqID_name2<<'\t';
-            cout<<setiosflags(ios::fixed)<<setprecision(4);
-            cout<<float(max_iden_len)/len1<<'\t';
-            cout<<setiosflags(ios::fixed)<<setprecision(4);
-            cout<<float(max_iden_len)/max_seqID_len2<<endl;
+            cout<<name1<<'\t'<<max_seqID_name2<<'\t'
+                <<setiosflags(ios::fixed)<<setprecision(4)
+                <<float(max_iden_len)/len1<<'\t'
+                <<float(max_iden_len)/max_seqID_len2<<'\t'
+                <<float(max_iden_len)/max_aln_len<<endl;
         }
     }
     return 0;
