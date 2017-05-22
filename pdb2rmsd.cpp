@@ -90,7 +90,7 @@ int main(int argc, char **argv)
                 <<"\tidentity2="<<1.*iden_len/L2<<endl;
             
             /* extract xyz coordinate */
-            aln2coor(aln1,aln2,pdb_entry1.chains[c1],pdb_entry2.chains[c1],
+            aln2coor(aln1,aln2,pdb_entry1.chains[c1],pdb_entry2.chains[c2],
                 xyz_list1,xyz_list2,atomic_detail);
             cout<<setiosflags(ios::fixed)<<setprecision(4)
                 <<"# Lali="<<aln_len<<"\tcoverage1="<<1.*aln_len/L1
@@ -127,7 +127,7 @@ int main(int argc, char **argv)
             aln1.clear();
             aln2.clear();
 
-            if (c1<seq_num1-1 || c2<seq_num2-1) cout<<"$$$$"<<endl;
+            if (c1<seq_num1-1 || c2<seq_num2-1) cout<<"$$$$\n"<<endl;
         }
     }
 
