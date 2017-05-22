@@ -236,7 +236,7 @@ int main(int argc, char **argv)
                     <<float(iden_len)/len1<<'\t'
                     <<float(iden_len)/len2<<'\t'
                     <<float(iden_len)/aln_len<<endl;
-                if (seq_num1>1 && s==seq_num2-1) cout<<"$$$$\n";
+                if (q<seq_num1-1 && s==seq_num2-1) cout<<"$$$$\n";
             }
             else // full output
             {
