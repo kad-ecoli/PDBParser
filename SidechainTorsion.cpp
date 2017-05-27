@@ -13,7 +13,7 @@ int main(int argc,char **argv)
         return 0;
     }
     
-    int atomic_detail=2; // only read full atom structure
+    int atomic_detail=2; // read full atom structure
     int allowX=1;        // only allow ATOM and MSE
     ModelUnit pdb_entry=read_pdb_structure(argv[1],atomic_detail,allowX);
 

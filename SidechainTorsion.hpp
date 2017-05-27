@@ -5,8 +5,9 @@
 
 using namespace std;
 
-/* sidechain torsion angles (chi1, chi2, chi3, chi4) */
-vector<vector<float> >SidechainTorsion(ChainUnit& chain)
+/* sidechain torsion angles (chi1, chi2, chi3, chi4) 
+ * chi1_only whether to calculate chi1 rotamer only */
+vector<vector<float> >SidechainTorsion(ChainUnit& chain,bool chi1_only=false)
 {
     int L=chain.residues.size();
     // default torsion angles: 360
@@ -174,6 +175,8 @@ vector<vector<float> >SidechainTorsion(ChainUnit& chain)
             angle_mat[r][0]=rad2deg(Points2Dihedral(N,CA,CB,CG));
             if (chain.residues[r].resn=="PRO") continue; // skip pro chi2
         }
+
+        if (chi1_only) continue;
 
         // calculate chi2
         if (chain.residues[r].resn=="LEU")
