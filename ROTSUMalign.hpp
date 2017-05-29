@@ -87,7 +87,7 @@ inline int RotSeq2int(char aa)
 {
     for (int i=0;i<RotSeq_list.length();i++)
         if (RotSeq_list[i]==aa) return i;
-    if (aa!=toupper(aa)) return RotSeq2int(toupper(aa));
+    //if (aa!=toupper(aa)) return RotSeq2int(toupper(aa));
     return RotSeq_list.length();
 }
 
@@ -127,6 +127,84 @@ int read_pdb_as_rotseq(const char *filename,vector<string>& name_list,
     return seq_num;
 }
 
+/* parse sequence typed by keyboard */
+int get_stdin_rotseq(const char *stdin_seq, vector<string>& name_list,
+    vector<string>& seq_list, vector<vector<int> >& seq2int_list)
+{
+    string line=(string) stdin_seq;
+    if (line.length()==0) return 0;
+    string name=line.substr(0,10);
+
+    vector<int> seq2int;
+    string sequence;
+    for (int i=0;i<line.length();i++)
+    {
+        sequence+=line[i];
+        seq2int.push_back(RotSeq2int(line[i]));
+    }
+
+    name_list.push_back(name);
+    seq_list.push_back(sequence);
+    seq2int_list.push_back(seq2int);
+    return 1;
+}
+
+/* read multiple-sequence fasta */
+int read_rotseq_fasta(const char *filename, vector<string>& name_list,
+    vector<string>& seq_list, vector<vector<int> >& seq2int_list)
+{
+    int seq_num=0;
+    ifstream fp(filename, ios::in);
+    int use_stdin=(strcmp(filename,"-")==0);
+    if (!fp && !use_stdin)
+    {
+        cerr<<"ERROR! Cannot read file "<<filename<<endl;
+        return 0;
+    }
+
+    string line,name,sequence;
+    vector<int> seq2int; // aa2int
+    int i;
+    while (use_stdin?cin.good():fp.good())
+    {
+        use_stdin?getline(cin,line):getline(fp,line);
+        if (line.empty()) continue;
+       
+        if (line[0]=='>')
+        {
+            seq_num++;
+            if (seq_num>1)
+            {
+                seq_list.push_back(sequence);
+                seq2int_list.push_back(seq2int);
+                sequence.clear();
+                seq2int.clear();
+            }
+            name.clear();
+            for (i=1;i<line.length();i++)
+            {
+                if (isspace(line[i])) break;
+                name+=line[i];
+            }
+            name_list.push_back(name);
+        }
+        else
+        {
+            for (i=0;i<line.length();i++)
+            {
+                sequence+=line[i];
+                seq2int.push_back(RotSeq2int(line[i]));
+            }
+        }
+    }
+    if (seq_num)
+    {
+        seq_list.push_back(sequence);
+        seq2int_list.push_back(seq2int);
+    }
+    if (!use_stdin) fp.close();
+    return seq_num;
+}
 
 /* calculate dynamic programming matrix using gotoh algorithm. 
  * overwriting NWalign in NWalign.hpp when scoring matrix is float 55x55.
