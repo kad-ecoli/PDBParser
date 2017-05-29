@@ -1,4 +1,7 @@
 /* header for Needleman-Wunsch global sequence alignment */
+#ifndef NWalign_HPP
+#define NWalign_HPP 1
+
 #include <iostream>
 #include <vector>
 #include <fstream>
@@ -103,11 +106,11 @@ int get_stdin_seq(const char *stdin_seq, vector<string>& name_list,
     string sequence;
     for (int i=0;i<line.length();i++)
     {
-         if (aa_list.find_first_of(toupper(line[i]))!=string::npos)
-         {
+         //if (aa_list.find_first_of(toupper(line[i]))!=string::npos)
+         //{
              sequence+=line[i];
              seq2int.push_back(aa2int(line[i]));
-         }
+         //}
     }
 
     name_list.push_back(name);
@@ -159,11 +162,11 @@ int read_fasta(const char *filename, vector<string>& name_list,
         {
             for (i=0;i<line.length();i++)
             {
-                if (aa_list.find_first_of(toupper(line[i]))!=string::npos)
-                {
+                //if (aa_list.find_first_of(toupper(line[i]))!=string::npos)
+                //{
                     sequence+=line[i];
                     seq2int.push_back(aa2int(line[i]));
-                }
+                //}
             }
         }
     }
@@ -509,3 +512,5 @@ int get_seqID(const string& aln1, const string& aln2,
     }
     return iden_len;
 }
+
+#endif

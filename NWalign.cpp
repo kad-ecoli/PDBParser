@@ -17,6 +17,8 @@ const char* docstring=""
 "    NWalign input1 input2 option+100 (glocal-query alignment)\n"
 "    NWalign input1 input2 option+200 (glocal-both alignment)\n"
 "    NWalign input1 input2 option+300 (local alignment)\n"
+"\n"
+"    NWalign input1 input2 option+1000 (using chi-1 rotamer sequence)\n"
 ;
 
 #include <iostream>
@@ -24,6 +26,7 @@ const char* docstring=""
 #include <string>
 
 #include "NWalign.hpp"
+#include "ROTSUMalign.hpp"
 
 using namespace std;
 
@@ -33,6 +36,7 @@ int main(int argc, char **argv)
     int input_mode=0; // align two fasta files
     int glocal=0;     // global or glocal-both alignment
     int seqID_only=0; // do not just print seqID
+    int seq_type=0;   // amino acid sequence
     if(argc<3)
     {
         cerr<<docstring;
@@ -41,6 +45,13 @@ int main(int argc, char **argv)
     if (argc>3)
     {
         input_mode=atoi(argv[3]);
+        // sequence type
+        if (input_mode>=1000)
+        {
+            seq_type=1; // chi-1 rotamer sequence
+            input_mode-=1000;
+        }
+
         // alignment algorithm
         if (input_mode>=300)
         {
@@ -81,41 +92,83 @@ int main(int argc, char **argv)
     vector<string> name_list1,seq_list1;
     vector<string> name_list2,seq_list2;
     vector<vector<int> >seq2int_list1,seq2int_list2; //aa2int
-    switch (input_mode)
+    if (seq_type==0)
     {
-        case 0:
-            seq_num1=read_fasta(argv[1],name_list1,seq_list1,seq2int_list1);
-            seq_num2=read_fasta(argv[2],name_list2,seq_list2,seq2int_list2);
-            break;
-        case 1:
-            seq_num1=read_pdb_as_fasta(argv[1],name_list1,seq_list1,seq2int_list1);
-            seq_num2=read_pdb_as_fasta(argv[2],name_list2,seq_list2,seq2int_list2);
-            break;
-        case 2:
-            seq_num1=read_fasta(argv[1],name_list1,seq_list1,seq2int_list1);
-            seq_num2=read_pdb_as_fasta(argv[2],name_list2,seq_list2,seq2int_list2);
-            break;
-        case 3:
-            seq_num1=get_stdin_seq(argv[1],name_list1,seq_list1,seq2int_list1);
-            seq_num2=get_stdin_seq(argv[2],name_list2,seq_list2,seq2int_list2);
-            break;
-        case 4:
-            seq_num1=get_stdin_seq(argv[1],name_list1,seq_list1,seq2int_list1);
-            seq_num2=read_fasta(argv[2],name_list2,seq_list2,seq2int_list2);
-            break;
-        case 5:
-            seq_num1=get_stdin_seq(argv[1],name_list1,seq_list1,seq2int_list1);
-            seq_num2=read_pdb_as_fasta(argv[2],name_list2,seq_list2,seq2int_list2);
-            break;
-        case 6:
-            seq_num1=read_fasta(argv[1],name_list1,seq_list1,seq2int_list1);
-            break;
-        case 7:
-            seq_num1=read_pdb_as_fasta(argv[1],name_list1,seq_list1,seq2int_list1);
-            break;
-        default:
-            cerr<<"ERROR! Unknown input type "<<input_mode<<endl;
-            return 0;
+        switch (input_mode)
+        {
+            case 0:
+                seq_num1=read_fasta(argv[1],name_list1,seq_list1,seq2int_list1);
+                seq_num2=read_fasta(argv[2],name_list2,seq_list2,seq2int_list2);
+                break;
+            case 1:
+                seq_num1=read_pdb_as_fasta(argv[1],name_list1,seq_list1,seq2int_list1);
+                seq_num2=read_pdb_as_fasta(argv[2],name_list2,seq_list2,seq2int_list2);
+                break;
+            case 2:
+                seq_num1=read_fasta(argv[1],name_list1,seq_list1,seq2int_list1);
+                seq_num2=read_pdb_as_fasta(argv[2],name_list2,seq_list2,seq2int_list2);
+                break;
+            case 3:
+                seq_num1=get_stdin_seq(argv[1],name_list1,seq_list1,seq2int_list1);
+                seq_num2=get_stdin_seq(argv[2],name_list2,seq_list2,seq2int_list2);
+                break;
+            case 4:
+                seq_num1=get_stdin_seq(argv[1],name_list1,seq_list1,seq2int_list1);
+                seq_num2=read_fasta(argv[2],name_list2,seq_list2,seq2int_list2);
+                break;
+            case 5:
+                seq_num1=get_stdin_seq(argv[1],name_list1,seq_list1,seq2int_list1);
+                seq_num2=read_pdb_as_fasta(argv[2],name_list2,seq_list2,seq2int_list2);
+                break;
+            case 6:
+                seq_num1=read_fasta(argv[1],name_list1,seq_list1,seq2int_list1);
+                break;
+            case 7:
+                seq_num1=read_pdb_as_fasta(argv[1],name_list1,seq_list1,seq2int_list1);
+                break;
+            default:
+                cerr<<"ERROR! Unknown input type "<<input_mode<<endl;
+                return 0;
+        }
+    }
+    else if (seq_type == 1)
+    {
+        switch (input_mode)
+        {
+            case 0:
+                seq_num1=read_rotseq_fasta(argv[1],name_list1,seq_list1,seq2int_list1);
+                seq_num2=read_rotseq_fasta(argv[2],name_list2,seq_list2,seq2int_list2);
+                break;
+            case 1:
+                seq_num1=read_pdb_as_rotseq(argv[1],name_list1,seq_list1,seq2int_list1);
+                seq_num2=read_pdb_as_rotseq(argv[2],name_list2,seq_list2,seq2int_list2);
+                break;
+            case 2:
+                seq_num1=read_rotseq_fasta(argv[1],name_list1,seq_list1,seq2int_list1);
+                seq_num2=read_pdb_as_rotseq(argv[2],name_list2,seq_list2,seq2int_list2);
+                break;
+            case 3:
+                seq_num1=get_stdin_rotseq(argv[1],name_list1,seq_list1,seq2int_list1);
+                seq_num2=get_stdin_rotseq(argv[2],name_list2,seq_list2,seq2int_list2);
+                break;
+            case 4:
+                seq_num1=get_stdin_rotseq(argv[1],name_list1,seq_list1,seq2int_list1);
+                seq_num2=read_rotseq_fasta(argv[2],name_list2,seq_list2,seq2int_list2);
+                break;
+            case 5:
+                seq_num1=get_stdin_rotseq(argv[1],name_list1,seq_list1,seq2int_list1);
+                seq_num2=read_pdb_as_rotseq(argv[2],name_list2,seq_list2,seq2int_list2);
+                break;
+            case 6:
+                seq_num1=read_rotseq_fasta(argv[1],name_list1,seq_list1,seq2int_list1);
+                break;
+            case 7:
+                seq_num1=read_pdb_as_rotseq(argv[1],name_list1,seq_list1,seq2int_list1);
+                break;
+            default:
+                cerr<<"ERROR! Unknown input type "<<input_mode<<endl;
+                return 0;
+        }
     }
 
     /* do alignment within one file*/
@@ -136,8 +189,17 @@ int main(int argc, char **argv)
                 int len2=seq2.length();
 
                 string aln1,aln2;
-                int aln_score=NWalign(seq1,seq2,seq2int1,seq2int2,aln1,aln2,
-                    BLOSUM62,gapopen_blosum62,gapext_blosum62,glocal);
+                int aln_score;
+                if (seq_type==0)
+                {
+                    aln_score=NWalign(seq1,seq2,seq2int1,seq2int2,aln1,aln2,
+                        BLOSUM62,gapopen_blosum62,gapext_blosum62,glocal);
+                }
+                else if (seq_type==1)
+                {
+                    aln_score=(int)NWalign(seq1,seq2, seq2int1,seq2int2,aln1,
+                        aln2, ROTSUM8,gapopen_rotsum8,gapext_rotsum8,glocal);
+                }
 
                 string aln_str; // colon for identical sequence
                 string pos_str; // last digit for position index
@@ -205,8 +267,17 @@ int main(int argc, char **argv)
             int len2=seq2.length();
 
             string aln1,aln2;
-            int aln_score=NWalign(seq1,seq2, seq2int1,seq2int2, aln1,aln2,
-                BLOSUM62,gapopen_blosum62,gapext_blosum62,glocal);
+            int aln_score;
+            if (seq_type==0)
+            {
+                aln_score=NWalign(seq1,seq2,seq2int1,seq2int2,aln1,aln2,
+                    BLOSUM62,gapopen_blosum62,gapext_blosum62,glocal);
+            }
+            else if (seq_type==1)
+            {
+                aln_score=(int)NWalign(seq1,seq2, seq2int1,seq2int2,aln1,
+                    aln2, ROTSUM8,gapopen_rotsum8,gapext_rotsum8,glocal);
+            }
 
             string aln_str; // colon for identical sequence
             string pos_str; // last digit for position index
