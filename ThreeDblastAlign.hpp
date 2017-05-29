@@ -51,7 +51,7 @@ inline int ThreeDblast2int(char aa)
 {
     for (int i=0;i<ThreeDblast_list.length();i++)
         if (ThreeDblast_list[i]==aa) return i;
-    if (aa!=toupper(aa)) return aa2int(toupper(aa));
+    if (aa!=toupper(aa)) return ThreeDblast2int(toupper(aa));
     return ThreeDblast_list.length();
 }
 
@@ -81,7 +81,7 @@ int read_pdb_as_3dblast(const char *filename,vector<string>& name_list,
     {
         ThreeDblast=pdb2ThreeDblast(pdb_entry.chains[c]);
         seq_list.push_back(ThreeDblast);
-        seq2int_list.push_back(aa2int(ThreeDblast));
+        seq2int_list.push_back(ThreeDblast2int(ThreeDblast));
 
         ThreeDblast.clear();
         seq2int.clear();

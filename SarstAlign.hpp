@@ -57,7 +57,7 @@ const string sarst_list="ABCDETKVNFGHILMQSYRPWZX*";
 inline int sarst2int(char aa)
 {
     for (int i=0;i<sarst_list.length();i++) if (sarst_list[i]==aa) return i;
-    if (aa!=toupper(aa)) return aa2int(toupper(aa));
+    if (aa!=toupper(aa)) return sarst2int(toupper(aa));
     return sarst_list.length();
 }
 
@@ -87,7 +87,7 @@ int read_pdb_as_sarst(const char *filename,vector<string>& name_list,
     {
         sarst=pdb2sarst(pdb_entry.chains[c]);
         seq_list.push_back(sarst);
-        seq2int_list.push_back(aa2int(sarst));
+        seq2int_list.push_back(sarst2int(sarst));
 
         sarst.clear();
         seq2int.clear();
