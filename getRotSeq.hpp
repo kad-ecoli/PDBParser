@@ -4,10 +4,6 @@
 
 using namespace std;
 
-const string RotSeq_list=
-   //ACCCDDDEEEFFFGHHHIIIKKKLLLMMMNNNPPQQQRRRSSSTTTVVVWWWYYY amino acid code
-    "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz012"; // rotamer code
-
 char getRotSeq(ResidueUnit& residue,float chi1_angle)
 {
     if (chi1_angle<0) chi1_angle+=360;

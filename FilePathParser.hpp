@@ -5,6 +5,8 @@
 #include<string>
 #include<cstring>
 
+using namespace std;
+
 /* extract the basename from a file path */
 string basename_no_ext(const char *pdb_file,bool suppress_ext=true)
 {
