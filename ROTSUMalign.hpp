@@ -192,8 +192,8 @@ float calculate_score_gotoh(
     {
         if (glocal<2) for (i=1;i<len1+1;i++) V[i][0]=gapopen+gapext*(i-1);
         if (glocal<1) for (j=1;j<len2+1;j++) H[0][j]=gapopen+gapext*(j-1);
-        for (i=0;i<len1+1;i++) H[i][0]=INT_MIN;
-        for (j=0;j<len2+1;j++) V[0][j]=INT_MIN;
+        for (i=0;i<len1+1;i++) H[i][0]=-99999; // INT_MIN cause bug on ubuntu
+        for (j=0;j<len2+1;j++) V[0][j]=-99999; // INT_MIN;
     }
 
     // fill S and P
@@ -225,10 +225,11 @@ float calculate_score_gotoh(
                 JumpV[i][j]=(V[i][j]==V[i-1][j])?(JumpV[i-1][j]+1):1;
             }
 
-            diag_score=S[i-1][j-1]+ScoringMatrix[
-                seq2int1[i-1]][seq2int2[j-1]]; // match-mismatch '\'
-            left_score=H[i][j];                // deletion       '-'
-            up_score  =V[i][j];                // insertion      '|'
+            diag_score=S[i-1][j-1]; // match-mismatch '\'
+            if (seq2int1[i-1]<55 && seq2int1[j-1]<55)
+                diag_score+=ScoringMatrix[seq2int1[i-1]][seq2int2[j-1]];
+            left_score=H[i][j];     // deletion       '-'
+            up_score  =V[i][j];     // insertion      '|'
 
             if (diag_score>=left_score && diag_score>=up_score)
             {
