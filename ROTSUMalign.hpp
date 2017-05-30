@@ -1,4 +1,7 @@
 /* header for structure alignment by chi-1 rotamer */
+#ifndef ROTSUMalign_HPP
+#define ROTSUMalign_HPP 1
+
 #include <iostream>
 #include <vector>
 #include <fstream>
@@ -13,6 +16,14 @@
 #include "NWalign.hpp"
 
 using namespace std;
+
+void trace_back_gotoh(string seq1, string seq2,
+    const vector<vector<int> >& JumpH, const vector<vector<int> >& JumpV,
+    const vector<vector<int> >& P, string& aln1, string& aln2);
+void trace_back_sw(string seq1, string seq2,
+    const vector<vector<int> >& JumpH, const vector<vector<int> >& JumpV,
+    const vector<vector<int> >& P, string& aln1, string& aln2);
+
 
 // in rotsum
 const int gapopen_rotsum8=-11;
@@ -206,6 +217,41 @@ int read_rotseq_fasta(const char *filename, vector<string>& name_list,
     return seq_num;
 }
 
+/* initialize matrix in gotoh algorith, */
+void init_gotoh_mat(vector<vector<int> >&JumpH, vector<vector<int> >&JumpV,
+    vector<vector<int> >& P,vector<vector<float> >& S, 
+    vector<vector<float> >& H, vector<vector<float> >& V,
+    const int len1, const int len2, const int gapopen,const int gapext,
+    const int glocal=0, const int alt_init=1)
+{
+    // fill first row/colum of JumpH,jumpV and path matrix P
+    int i,j;
+    for (i=0;i<len1+1;i++)
+    {
+        if (glocal<2) P[i][0]=4; // -
+        JumpV[i][0]=i;
+    }
+    for (j=0;j<len2+1;j++)
+    {
+        if (glocal<1) P[0][j]=2; // |
+        JumpH[0][j]=j;
+    }
+    if (glocal<2) for (i=1;i<len1+1;i++) S[i][0]=gapopen+gapext*(i-1);
+    if (glocal<1) for (j=1;j<len2+1;j++) S[0][j]=gapopen+gapext*(j-1);
+    if (alt_init==0)
+    {
+        for (i=1;i<len1+1;i++) H[i][0]=gapopen+gapext*(i-1);
+        for (j=1;j<len2+1;j++) V[0][j]=gapopen+gapext*(j-1);
+    }
+    else
+    {
+        if (glocal<2) for (i=1;i<len1+1;i++) V[i][0]=gapopen+gapext*(i-1);
+        if (glocal<1) for (j=1;j<len2+1;j++) H[0][j]=gapopen+gapext*(j-1);
+        for (i=0;i<len1+1;i++) H[i][0]=-99999; // INT_MIN cause bug on ubuntu
+        for (j=0;j<len2+1;j++) V[0][j]=-99999; // INT_MIN;
+    }
+}
+
 /* calculate dynamic programming matrix using gotoh algorithm. 
  * overwriting NWalign in NWalign.hpp when scoring matrix is float 55x55.
  *
@@ -249,30 +295,8 @@ float calculate_score_gotoh(
     
     // fill first row/colum of JumpH,jumpV and path matrix P
     int i,j;
-    for (i=0;i<len1+1;i++)
-    {
-        if (glocal<2) P[i][0]=4; // -
-        JumpV[i][0]=i;
-    }
-    for (j=0;j<len2+1;j++)
-    {
-        if (glocal<1) P[0][j]=2; // |
-        JumpH[0][j]=j;
-    }
-    if (glocal<2) for (i=1;i<len1+1;i++) S[i][0]=gapopen+gapext*(i-1);
-    if (glocal<1) for (j=1;j<len2+1;j++) S[0][j]=gapopen+gapext*(j-1);
-    if (alt_init==0)
-    {
-        for (i=1;i<len1+1;i++) H[i][0]=gapopen+gapext*(i-1);
-        for (j=1;j<len2+1;j++) V[0][j]=gapopen+gapext*(j-1);
-    }
-    else
-    {
-        if (glocal<2) for (i=1;i<len1+1;i++) V[i][0]=gapopen+gapext*(i-1);
-        if (glocal<1) for (j=1;j<len2+1;j++) H[0][j]=gapopen+gapext*(j-1);
-        for (i=0;i<len1+1;i++) H[i][0]=-99999; // INT_MIN cause bug on ubuntu
-        for (j=0;j<len2+1;j++) V[0][j]=-99999; // INT_MIN;
-    }
+    init_gotoh_mat(JumpH, JumpV, P, S, H, V, len1, len2,
+        gapopen, gapext, glocal, alt_init);
 
     // fill S and P
     float diag_score,left_score,up_score;
@@ -403,3 +427,5 @@ float NWalign(const string& seq1, const string& seq2,
     P.clear();
     return aln_score; // aligment score
 }
+
+#endif

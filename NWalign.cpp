@@ -92,179 +92,79 @@ int main(int argc, char **argv)
     vector<string> name_list1,seq_list1;
     vector<string> name_list2,seq_list2;
     vector<vector<int> >seq2int_list1,seq2int_list2; //aa2int
-    if (seq_type==0)
+    switch (input_mode)
     {
-        switch (input_mode)
-        {
-            case 0:
-                seq_num1=read_fasta(argv[1],name_list1,seq_list1,seq2int_list1);
-                seq_num2=read_fasta(argv[2],name_list2,seq_list2,seq2int_list2);
-                break;
-            case 1:
-                seq_num1=read_pdb_as_fasta(argv[1],name_list1,seq_list1,seq2int_list1);
-                seq_num2=read_pdb_as_fasta(argv[2],name_list2,seq_list2,seq2int_list2);
-                break;
-            case 2:
-                seq_num1=read_fasta(argv[1],name_list1,seq_list1,seq2int_list1);
-                seq_num2=read_pdb_as_fasta(argv[2],name_list2,seq_list2,seq2int_list2);
-                break;
-            case 3:
-                seq_num1=get_stdin_seq(argv[1],name_list1,seq_list1,seq2int_list1);
-                seq_num2=get_stdin_seq(argv[2],name_list2,seq_list2,seq2int_list2);
-                break;
-            case 4:
-                seq_num1=get_stdin_seq(argv[1],name_list1,seq_list1,seq2int_list1);
-                seq_num2=read_fasta(argv[2],name_list2,seq_list2,seq2int_list2);
-                break;
-            case 5:
-                seq_num1=get_stdin_seq(argv[1],name_list1,seq_list1,seq2int_list1);
-                seq_num2=read_pdb_as_fasta(argv[2],name_list2,seq_list2,seq2int_list2);
-                break;
-            case 6:
-                seq_num1=read_fasta(argv[1],name_list1,seq_list1,seq2int_list1);
-                break;
-            case 7:
-                seq_num1=read_pdb_as_fasta(argv[1],name_list1,seq_list1,seq2int_list1);
-                break;
-            default:
-                cerr<<"ERROR! Unknown input type "<<input_mode<<endl;
-                return 0;
-        }
-    }
-    else if (seq_type == 1)
-    {
-        switch (input_mode)
-        {
-            case 0:
-                seq_num1=read_rotseq_fasta(argv[1],name_list1,seq_list1,seq2int_list1);
-                seq_num2=read_rotseq_fasta(argv[2],name_list2,seq_list2,seq2int_list2);
-                break;
-            case 1:
-                seq_num1=read_pdb_as_rotseq(argv[1],name_list1,seq_list1,seq2int_list1);
-                seq_num2=read_pdb_as_rotseq(argv[2],name_list2,seq_list2,seq2int_list2);
-                break;
-            case 2:
-                seq_num1=read_rotseq_fasta(argv[1],name_list1,seq_list1,seq2int_list1);
-                seq_num2=read_pdb_as_rotseq(argv[2],name_list2,seq_list2,seq2int_list2);
-                break;
-            case 3:
-                seq_num1=get_stdin_rotseq(argv[1],name_list1,seq_list1,seq2int_list1);
-                seq_num2=get_stdin_rotseq(argv[2],name_list2,seq_list2,seq2int_list2);
-                break;
-            case 4:
-                seq_num1=get_stdin_rotseq(argv[1],name_list1,seq_list1,seq2int_list1);
-                seq_num2=read_rotseq_fasta(argv[2],name_list2,seq_list2,seq2int_list2);
-                break;
-            case 5:
-                seq_num1=get_stdin_rotseq(argv[1],name_list1,seq_list1,seq2int_list1);
-                seq_num2=read_pdb_as_rotseq(argv[2],name_list2,seq_list2,seq2int_list2);
-                break;
-            case 6:
-                seq_num1=read_rotseq_fasta(argv[1],name_list1,seq_list1,seq2int_list1);
-                break;
-            case 7:
-                seq_num1=read_pdb_as_rotseq(argv[1],name_list1,seq_list1,seq2int_list1);
-                break;
-            default:
-                cerr<<"ERROR! Unknown input type "<<input_mode<<endl;
-                return 0;
-        }
+        case 0:
+            seq_num1=read_fasta(argv[1],name_list1,seq_list1,seq2int_list1,seq_type);
+            seq_num2=read_fasta(argv[2],name_list2,seq_list2,seq2int_list2,seq_type);
+            break;
+        case 1:
+            seq_num1=read_pdb_as_fasta(argv[1],name_list1,seq_list1,seq2int_list1,seq_type);
+            seq_num2=read_pdb_as_fasta(argv[2],name_list2,seq_list2,seq2int_list2,seq_type);
+            break;
+        case 2:
+            seq_num1=read_fasta(argv[1],name_list1,seq_list1,seq2int_list1,seq_type);
+            seq_num2=read_pdb_as_fasta(argv[2],name_list2,seq_list2,seq2int_list2,seq_type);
+            break;
+        case 3:
+            seq_num1=get_stdin_seq(argv[1],name_list1,seq_list1,seq2int_list1,seq_type);
+            seq_num2=get_stdin_seq(argv[2],name_list2,seq_list2,seq2int_list2,seq_type);
+            break;
+        case 4:
+            seq_num1=get_stdin_seq(argv[1],name_list1,seq_list1,seq2int_list1,seq_type);
+            seq_num2=read_fasta(argv[2],name_list2,seq_list2,seq2int_list2,seq_type);
+            break;
+        case 5:
+            seq_num1=get_stdin_seq(argv[1],name_list1,seq_list1,seq2int_list1,seq_type);
+            seq_num2=read_pdb_as_fasta(argv[2],name_list2,seq_list2,seq2int_list2,seq_type);
+            break;
+        case 6:
+            seq_num1=read_fasta(argv[1],name_list1,seq_list1,seq2int_list1,seq_type);
+            break;
+        case 7:
+            seq_num1=read_pdb_as_fasta(argv[1],name_list1,seq_list1,seq2int_list1,seq_type);
+            break;
+        default:
+            cerr<<"ERROR! Unknown input type "<<input_mode<<endl;
+            return 0;
     }
 
-    /* do alignment within one file*/
-    if (input_mode==6 || input_mode==7)
+    /* do alignment */
+    int q,s,len1,len2,max_iden_len,max_aln_len,max_seqID_len2;
+    string name1,name2,seq1,seq2,max_seqID_name2;
+    vector<int> seq2int1,seq2int2;
+    for (q=0;q<((input_mode>=6)?(seq_num1-1):seq_num1);q++)
     {
-        for (int q=0;q<seq_num1-1;q++)
-        {
-            string name1=name_list1[q];
-            string seq1=seq_list1[q];
-            vector<int> seq2int1=seq2int_list1[q];
-            int len1=seq1.length();
+        name1=name_list1[q];
+        seq1=seq_list1[q];
+        seq2int1=seq2int_list1[q];
+        len1=seq1.length();
+        max_iden_len=0; // identical positions with max seqID seq2
+        max_aln_len=0;  // aligned   positions with max seqID seq2
+        max_seqID_name2="";
+        max_seqID_len2=0;
 
-            for (int s=q+1;s<seq_num1;s++)
+        s=0;
+        if (input_mode>=6)
+        {
+            s=q+1;
+            seq_num2=seq_num1;
+        }
+        for (;s<seq_num2;s++)
+        {
+            if (input_mode>=6)
             {
-                string name2=name_list1[s];
-                string seq2=seq_list1[s];
-                vector<int> seq2int2=seq2int_list1[s];
-                int len2=seq2.length();
-
-                string aln1,aln2;
-                int aln_score;
-                if (seq_type==0)
-                {
-                    aln_score=NWalign(seq1,seq2,seq2int1,seq2int2,aln1,aln2,
-                        BLOSUM62,gapopen_blosum62,gapext_blosum62,glocal);
-                }
-                else if (seq_type==1)
-                {
-                    aln_score=(int)NWalign(seq1,seq2, seq2int1,seq2int2,aln1,
-                        aln2, ROTSUM8,gapopen_rotsum8,gapext_rotsum8,glocal);
-                }
-
-                string aln_str; // colon for identical sequence
-                string pos_str; // last digit for position index
-                int iden_len,aln_len;  // num of identical/aligned positions
-                get_seqID(aln1,aln2,aln_str,pos_str,iden_len,aln_len);
-
-                if (seqID_only==2) // fasta alignment only
-                {
-                    cout<<'>'<<name1<<endl<<aln1<<endl;
-                    cout<<'>'<<name2<<endl<<aln2<<endl;
-                    if (q<seq_num1-1 || s<seq_num2-1) cout<<"$$$$\n"<<endl;
-                }
-                else if (seqID_only==1) // seqID only
-                {
-                    cout<<name1<<'\t'<<name2<<'\t'
-                        <<setiosflags(ios::fixed)<<setprecision(4)
-                        <<float(iden_len)/len1<<'\t'
-                        <<float(iden_len)/len2<<'\t'
-                        <<float(iden_len)/aln_len<<endl;
-                }
-                else // full output
-                {
-                    cout<<"Length of sequence 1:"<<setw(5)<<len1;
-                    cout<<" ->"<<name1<<endl;
-                    cout<<"Length of sequence 2:"<<setw(5)<<len2;
-                    cout<<" ->"<<name2<<endl;
-
-                    cout<<"Alignment score:"<<aln_score<<endl;
-                    cout<<"Aligned length:"<<setw(5)<<aln_len<<endl;
-                    cout<<"Identical length:"<<setw(5)<<iden_len<<endl;
-                    cout<<"Sequence identity:"<<setiosflags(ios::fixed);
-                    cout<<setprecision(3)<<setw(9)<<float(iden_len)/len2;
-                    cout<<" (="<<setw(4)<<iden_len<<'/'<<setw(4)<<len2;
-                    cout<<")\n\n";
-
-                    cout<<aln1<<endl;
-                    cout<<aln_str<<endl;
-                    cout<<aln2<<endl;
-                    cout<<pos_str<<endl;
-
-                    if (q<seq_num1-2 || s<seq_num1-1) cout<<"$$$$\n"<<endl;
-                }
+                name2=name_list1[s];
+                seq2=seq_list1[s];
+                seq2int2=seq2int_list1[s];
             }
-        }
-        return 0;
-    }
-
-    /* do alignment between two files*/
-    for (int q=0;q<seq_num1;q++)
-    {
-        string name1=name_list1[q];
-        string seq1=seq_list1[q];
-        vector<int> seq2int1=seq2int_list1[q];
-        int len1=seq1.length();
-        int max_iden_len=0; // identical positions with max seqID seq2
-        int max_aln_len=0;  // aligned positions with max seqID seq2
-        string max_seqID_name2="";
-        int max_seqID_len2=0;
-
-        for (int s=0;s<seq_num2;s++)
-        {
-            string name2=name_list2[s];
-            string seq2=seq_list2[s];
-            vector<int> seq2int2=seq2int_list2[s];
-            int len2=seq2.length();
+            else
+            {
+                name2=name_list2[s];
+                seq2=seq_list2[s];
+                seq2int2=seq2int_list2[s];
+            }
+            len2=seq2.length();
 
             string aln1,aln2;
             int aln_score;
@@ -298,7 +198,8 @@ int main(int argc, char **argv)
             {
                 cout<<'>'<<name1<<endl<<aln1<<endl;
                 cout<<'>'<<name2<<endl<<aln2<<endl;
-                if (q<seq_num1-1 || s<seq_num2-1) cout<<"$$$$\n"<<endl;
+                if (((input_mode>=6)?(q<seq_num1-2):(q<seq_num1-1)) || 
+                    s<seq_num2-1) cout<<"$$$$\n"<<endl;
             }
             else if (seqID_only==1) // seqID only
             {
@@ -307,7 +208,8 @@ int main(int argc, char **argv)
                     <<float(iden_len)/len1<<'\t'
                     <<float(iden_len)/len2<<'\t'
                     <<float(iden_len)/aln_len<<endl;
-                if (q<seq_num1-1 && s==seq_num2-1) cout<<"$$$$\n";
+                if (input_mode<6 && q<seq_num1-1 && s==seq_num2-1)
+                    cout<<"$$$$\n";
             }
             else // full output
             {
@@ -328,7 +230,8 @@ int main(int argc, char **argv)
                 cout<<aln_str<<endl;
                 cout<<aln2<<endl;
                 cout<<pos_str<<endl;
-                if (q<seq_num1-1 || s<seq_num2-1) cout<<"$$$$\n"<<endl;
+                if (((input_mode>=6)?(q<seq_num1-2):(q<seq_num1-1)) || 
+                    s<seq_num2-1) cout<<"$$$$\n"<<endl;
             }
 
         }

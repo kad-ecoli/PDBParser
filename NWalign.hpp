@@ -15,6 +15,7 @@
 #include "PDBParser.hpp"
 #include "FilePathParser.hpp"
 #include "MathTools.hpp"
+#include "ROTSUMalign.hpp"
 
 using namespace std;
 
@@ -67,11 +68,14 @@ vector<int> aa2int(const string sequence)
     return seq2int;
 }
 
-/* read multiple-chain PDB and extract the sequence */
+/* read multiple-chain PDB and extract the sequence 
+ * seq_type - 0: amino acid, 1: chi-1 rotamer sequence */
 int read_pdb_as_fasta(const char *filename,vector<string>& name_list,
-    vector<string>& seq_list, vector<vector<int> >& seq2int_list)
+    vector<string>& seq_list, vector<vector<int> >& seq2int_list,
+    const int seq_type=0)
 {
     int atomic_detail=0; // only read CA
+    if (seq_type==1) atomic_detail=2; // read full atom structure
     int allowX=1;        // only allow ATOM and MSE
 
     string PDBid=basename_no_ext(filename);
@@ -83,9 +87,18 @@ int read_pdb_as_fasta(const char *filename,vector<string>& name_list,
     int c,r;
     for (c=0;c<seq_num;c++)
     {
-        sequence=pdb2fasta(pdb_entry.chains[c]);
-        seq_list.push_back(sequence);
-        seq2int_list.push_back(aa2int(sequence));
+        if (seq_type==1) // rotamer sequence
+        {
+            sequence=getRotSeq(pdb_entry.chains[c]);
+            seq_list.push_back(sequence);
+            seq2int_list.push_back(RotSeq2int(sequence));
+        }
+        else // amino acid sequence
+        {
+            sequence=pdb2fasta(pdb_entry.chains[c]);
+            seq_list.push_back(sequence);
+            seq2int_list.push_back(aa2int(sequence));
+        }
         sequence.clear();
         seq2int.clear();
         name_list.push_back(PDBid+':'+pdb_entry.chains[c].chainID_full);
@@ -94,9 +107,11 @@ int read_pdb_as_fasta(const char *filename,vector<string>& name_list,
     return seq_num;
 }
 
-/* parse sequence typed by keyboard */
+/* parse sequence typed by keyboard
+ * seq_type - 0: amino acid, 1: chi-1 rotamer sequence */
 int get_stdin_seq(const char *stdin_seq, vector<string>& name_list,
-    vector<string>& seq_list, vector<vector<int> >& seq2int_list)
+    vector<string>& seq_list, vector<vector<int> >& seq2int_list,
+    const int seq_type=0)
 {
     string line=(string) stdin_seq;
     if (line.length()==0) return 0;
@@ -106,11 +121,11 @@ int get_stdin_seq(const char *stdin_seq, vector<string>& name_list,
     string sequence;
     for (int i=0;i<line.length();i++)
     {
-         //if (aa_list.find_first_of(toupper(line[i]))!=string::npos)
-         //{
-             sequence+=line[i];
-             seq2int.push_back(aa2int(line[i]));
-         //}
+        sequence+=line[i];
+        if (seq_type==1) // chi-1 rotamer sequence
+            seq2int.push_back(RotSeq2int(line[i]));
+        else // amino acid sequence
+            seq2int.push_back(aa2int(line[i]));
     }
 
     name_list.push_back(name);
@@ -119,9 +134,11 @@ int get_stdin_seq(const char *stdin_seq, vector<string>& name_list,
     return 1;
 }
 
-/* read multiple-sequence fasta */
+/* read multiple-sequence fasta
+ * seq_type - 0: amino acid, 1: chi-1 rotamer sequence */
 int read_fasta(const char *filename, vector<string>& name_list,
-    vector<string>& seq_list, vector<vector<int> >& seq2int_list)
+    vector<string>& seq_list, vector<vector<int> >& seq2int_list,
+    const int seq_type=0)
 {
     int seq_num=0;
     ifstream fp(filename, ios::in);
@@ -162,11 +179,11 @@ int read_fasta(const char *filename, vector<string>& name_list,
         {
             for (i=0;i<line.length();i++)
             {
-                //if (aa_list.find_first_of(toupper(line[i]))!=string::npos)
-                //{
-                    sequence+=line[i];
+                sequence+=line[i];
+                if (seq_type==1) // chi-1 rotamer sequence
+                    seq2int.push_back(RotSeq2int(line[i]));
+                else // amino acid sequence
                     seq2int.push_back(aa2int(line[i]));
-                //}
             }
         }
     }
@@ -177,6 +194,41 @@ int read_fasta(const char *filename, vector<string>& name_list,
     }
     if (!use_stdin) fp.close();
     return seq_num;
+}
+
+/* initialize matrix in gotoh algorith, */
+void init_gotoh_mat(vector<vector<int> >&JumpH, vector<vector<int> >&JumpV,
+    vector<vector<int> >& P,vector<vector<int> >& S, 
+    vector<vector<int> >& H, vector<vector<int> >& V,
+    const int len1, const int len2, const int gapopen,const int gapext,
+    const int glocal=0, const int alt_init=1)
+{
+    // fill first row/colum of JumpH,jumpV and path matrix P
+    int i,j;
+    for (i=0;i<len1+1;i++)
+    {
+        if (glocal<2) P[i][0]=4; // -
+        JumpV[i][0]=i;
+    }
+    for (j=0;j<len2+1;j++)
+    {
+        if (glocal<1) P[0][j]=2; // |
+        JumpH[0][j]=j;
+    }
+    if (glocal<2) for (i=1;i<len1+1;i++) S[i][0]=gapopen+gapext*(i-1);
+    if (glocal<1) for (j=1;j<len2+1;j++) S[0][j]=gapopen+gapext*(j-1);
+    if (alt_init==0)
+    {
+        for (i=1;i<len1+1;i++) H[i][0]=gapopen+gapext*(i-1);
+        for (j=1;j<len2+1;j++) V[0][j]=gapopen+gapext*(j-1);
+    }
+    else
+    {
+        if (glocal<2) for (i=1;i<len1+1;i++) V[i][0]=gapopen+gapext*(i-1);
+        if (glocal<1) for (j=1;j<len2+1;j++) H[0][j]=gapopen+gapext*(j-1);
+        for (i=0;i<len1+1;i++) H[i][0]=-99999; // INT_MIN cause bug on ubuntu
+        for (j=0;j<len2+1;j++) V[0][j]=-99999; // INT_MIN;
+    }
 }
 
 /* calculate dynamic programming matrix using gotoh algorithm
@@ -220,30 +272,8 @@ int calculate_score_gotoh(
     
     // fill first row/colum of JumpH,jumpV and path matrix P
     int i,j;
-    for (i=0;i<len1+1;i++)
-    {
-        if (glocal<2) P[i][0]=4; // -
-        JumpV[i][0]=i;
-    }
-    for (j=0;j<len2+1;j++)
-    {
-        if (glocal<1) P[0][j]=2; // |
-        JumpH[0][j]=j;
-    }
-    if (glocal<2) for (i=1;i<len1+1;i++) S[i][0]=gapopen+gapext*(i-1);
-    if (glocal<1) for (j=1;j<len2+1;j++) S[0][j]=gapopen+gapext*(j-1);
-    if (alt_init==0)
-    {
-        for (i=1;i<len1+1;i++) H[i][0]=gapopen+gapext*(i-1);
-        for (j=1;j<len2+1;j++) V[0][j]=gapopen+gapext*(j-1);
-    }
-    else
-    {
-        if (glocal<2) for (i=1;i<len1+1;i++) V[i][0]=gapopen+gapext*(i-1);
-        if (glocal<1) for (j=1;j<len2+1;j++) H[0][j]=gapopen+gapext*(j-1);
-        for (i=0;i<len1+1;i++) H[i][0]=-99999; // INT_MIN cause bug on ubuntu
-        for (j=0;j<len2+1;j++) V[0][j]=-99999; // INT_MIN;
-    }
+    init_gotoh_mat(JumpH, JumpV, P, S, H, V, len1, len2,
+        gapopen, gapext, glocal, alt_init);
 
     // fill S and P
     int diag_score,left_score,up_score;
