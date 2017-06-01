@@ -86,6 +86,7 @@ int parse_pdb_line(const string line,ModelUnit &pep, ChainUnit &chain,
         chain.chainID_full=chain.chainID;
     else
         chain.chainID_full=chainIDmap[chain.chainID];
+    if (chain.chainID_full==" ") chain.chainID_full="_";
     residue.resi=atoi(line.substr(22,4).c_str());
     residue.icode=line[26];
     atom.xyz[0]=atof(line.substr(30,8).c_str());
