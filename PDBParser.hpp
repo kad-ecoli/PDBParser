@@ -437,4 +437,12 @@ string pdb2fasta(ModelUnit& pep,const string PDBid="",const int ShowSeqLen=0)
     return buf.str();
 }
 
+/* count the number of atoms with specific name in a residue */
+int has_atom_name(ResidueUnit residue,string name=" CA ")
+{
+    int atom_name_count=0;
+    for (int a=0;a<residue.atoms.size();a++)
+        if (residue.atoms[a].name==name) atom_name_count++;
+    return atom_name_count;
+}
 #endif

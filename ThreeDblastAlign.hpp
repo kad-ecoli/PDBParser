@@ -62,31 +62,3 @@ vector<int> ThreeDblast2int(const string sequence)
         seq2int.push_back(ThreeDblast2int(sequence[r]));
     return seq2int;
 }
-
-/* read multiple-chain PDB and extract the 3d-blast structure alphabet */
-int read_pdb_as_3dblast(const char *filename,vector<string>& name_list,
-    vector<string>& seq_list, vector<vector<int> >& seq2int_list)
-{
-    int atomic_detail=0; // only read CA
-    int allowX=1;        // only allow ATOM and MSE
-
-    string PDBid=basename_no_ext(filename);
-    ModelUnit pdb_entry=read_pdb_structure(filename,atomic_detail,allowX);
-
-    int seq_num=pdb_entry.chains.size();
-    string ThreeDblast;
-    vector<int> seq2int;
-    int c,r;
-    for (c=0;c<seq_num;c++)
-    {
-        ThreeDblast=pdb2ThreeDblast(pdb_entry.chains[c]);
-        seq_list.push_back(ThreeDblast);
-        seq2int_list.push_back(ThreeDblast2int(ThreeDblast));
-
-        ThreeDblast.clear();
-        seq2int.clear();
-        name_list.push_back(PDBid+':'+pdb_entry.chains[c].chainID_full);
-    }
-    pdb_entry.chains.clear();
-    return seq_num;
-}

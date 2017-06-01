@@ -90,7 +90,8 @@ string getRotSeq(ChainUnit& chain)
     string RotSeq="";
     bool chi1_only=true;
     vector<vector<float> >angle_mat=SidechainTorsion(chain,chi1_only);
-    for (int r=0;r<chain.residues.size();r++) 
-        RotSeq+=getRotSeq(chain.residues[r],angle_mat[r][0]);
+    for (int r=0;r<chain.residues.size();r++)
+        if (has_atom_name(chain.residues[r]))
+            RotSeq+=getRotSeq(chain.residues[r],angle_mat[r][0]);
     return RotSeq;
 }

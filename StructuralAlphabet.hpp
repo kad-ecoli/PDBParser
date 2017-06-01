@@ -1,4 +1,6 @@
 /* convert backbone torsion angles to structural alphabet */
+#ifndef StructuralAphabet_HPP
+#define StructuralAphabet_HPP 1
 #include <cstring>
 #include "BackboneTorsion.hpp"
 
@@ -74,6 +76,7 @@ string pdb2sarst(ChainUnit& chain)
     int i,j; // coordinate in sarst_matrix
     for (int r=0;r<L;r++)
     {
+        if (has_atom_name(chain.residues[r])==0) continue;
         if (angle_mat[r][1]==360 || angle_mat[r][2]==360)
         {
             sarst_seq+='X';
@@ -119,6 +122,7 @@ string pdb2ThreeDblast(ChainUnit& chain)
     float kappa,alpha;
     for (int r=0;r<L;r++)
     {
+        if (has_atom_name(chain.residues[r])==0) continue;
         kappa=angle_mat[r][0];
         alpha=angle_mat[r][1];
         if (kappa==360 || alpha==360)
@@ -156,3 +160,5 @@ string pdb2ThreeDblast(ModelUnit& pep,const string PDBid="",const int ShowSeqLen
     }
     return buf.str();
 }
+
+#endif

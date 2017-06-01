@@ -11,6 +11,7 @@
 #include <stdlib.h>
 #include <ctype.h>
 
+#include "PDBParser.hpp"
 #include "FilePathParser.hpp"
 #include "getRotSeq.hpp"
 #include "NWalign.hpp"
@@ -110,113 +111,6 @@ vector<int> RotSeq2int(const string sequence)
     return seq2int;
 }
 
-/* read multiple-chain PDB and extract the chi-1 rotamer sequence */
-int read_pdb_as_rotseq(const char *filename,vector<string>& name_list,
-    vector<string>& seq_list, vector<vector<int> >& seq2int_list)
-{
-    int atomic_detail=2; // read full atom structure
-    int allowX=1;        // only allow ATOM and MSE
-
-    string PDBid=basename_no_ext(filename);
-    ModelUnit pdb_entry=read_pdb_structure(filename,atomic_detail,allowX);
-
-    int seq_num=pdb_entry.chains.size();
-    string RotSeq;
-    vector<int> seq2int;
-    int c,r;
-    for (c=0;c<seq_num;c++)
-    {
-        RotSeq=getRotSeq(pdb_entry.chains[c]);
-        seq_list.push_back(RotSeq);
-        seq2int_list.push_back(RotSeq2int(RotSeq));
-
-        RotSeq.clear();
-        seq2int.clear();
-        name_list.push_back(PDBid+':'+pdb_entry.chains[c].chainID_full);
-    }
-    pdb_entry.chains.clear();
-    return seq_num;
-}
-
-/* parse sequence typed by keyboard */
-int get_stdin_rotseq(const char *stdin_seq, vector<string>& name_list,
-    vector<string>& seq_list, vector<vector<int> >& seq2int_list)
-{
-    string line=(string) stdin_seq;
-    if (line.length()==0) return 0;
-    string name=line.substr(0,10);
-
-    vector<int> seq2int;
-    string sequence;
-    for (int i=0;i<line.length();i++)
-    {
-        sequence+=line[i];
-        seq2int.push_back(RotSeq2int(line[i]));
-    }
-
-    name_list.push_back(name);
-    seq_list.push_back(sequence);
-    seq2int_list.push_back(seq2int);
-    return 1;
-}
-
-/* read multiple-sequence fasta */
-int read_rotseq_fasta(const char *filename, vector<string>& name_list,
-    vector<string>& seq_list, vector<vector<int> >& seq2int_list)
-{
-    int seq_num=0;
-    ifstream fp(filename, ios::in);
-    int use_stdin=(strcmp(filename,"-")==0);
-    if (!fp && !use_stdin)
-    {
-        cerr<<"ERROR! Cannot read file "<<filename<<endl;
-        return 0;
-    }
-
-    string line,name,sequence;
-    vector<int> seq2int; // aa2int
-    int i;
-    while (use_stdin?cin.good():fp.good())
-    {
-        use_stdin?getline(cin,line):getline(fp,line);
-        if (line.empty()) continue;
-       
-        if (line[0]=='>')
-        {
-            seq_num++;
-            if (seq_num>1)
-            {
-                seq_list.push_back(sequence);
-                seq2int_list.push_back(seq2int);
-                sequence.clear();
-                seq2int.clear();
-            }
-            name.clear();
-            for (i=1;i<line.length();i++)
-            {
-                if (isspace(line[i])) break;
-                name+=line[i];
-            }
-            name_list.push_back(name);
-        }
-        else
-        {
-            for (i=0;i<line.length();i++)
-            {
-                sequence+=line[i];
-                seq2int.push_back(RotSeq2int(line[i]));
-            }
-        }
-    }
-    if (seq_num)
-    {
-        seq_list.push_back(sequence);
-        seq2int_list.push_back(seq2int);
-    }
-    if (!use_stdin) fp.close();
-    return seq_num;
-}
-
 /* initialize matrix in gotoh algorith, */
 void init_gotoh_mat(vector<vector<int> >&JumpH, vector<vector<int> >&JumpV,
     vector<vector<int> >& P,vector<vector<float> >& S, 
@@ -250,6 +144,35 @@ void init_gotoh_mat(vector<vector<int> >&JumpH, vector<vector<int> >&JumpV,
         for (i=0;i<len1+1;i++) H[i][0]=-99999; // INT_MIN cause bug on ubuntu
         for (j=0;j<len2+1;j++) V[0][j]=-99999; // INT_MIN;
     }
+}
+
+/* locate the cell with highest alignment score. reset path after
+ * the cell to zero. overwriting equivalent function in NWalign.hpp when 
+ * alignment score is float */
+void find_highest_align_score(
+    const vector<vector<float> >& S, vector<vector<int> >& P,
+    float &aln_score, const int len1,const int len2)
+{
+    // locate the cell with highest alignment score
+    int max_aln_i=len1;
+    int max_aln_j=len2;
+    int i,j;
+    for (i=0;i<len1+1;i++)
+    {
+        for (j=0;j<len2+1;j++)
+        {
+            if (S[i][j]>=aln_score)
+            {
+                max_aln_i=i;
+                max_aln_j=j;
+                aln_score=S[i][j];
+            }
+        }
+    }
+
+    // reset all path after [max_aln_i][max_aln_j]
+    for (i=max_aln_i+1;i<len1+1;i++) for (j=0;j<len2+1;j++) P[i][j]=0;
+    for (i=0;i<len1+1;i++) for (j=max_aln_j+1;j<len2+1;j++) P[i][j]=0;
 }
 
 /* calculate dynamic programming matrix using gotoh algorithm. 
@@ -367,27 +290,7 @@ float calculate_score_gotoh(
 
     // calculate alignment score and alignment path for swalign
     if (glocal>=3)
-    {
-        // locate the cell with highest alignment score
-        int max_aln_i=len1;
-        int max_aln_j=len2;
-        for (i=0;i<len1+1;i++)
-        {
-            for (j=0;j<len2+1;j++)
-            {
-                if (S[i][j]>=aln_score)
-                {
-                    max_aln_i=i;
-                    max_aln_j=j;
-                    aln_score=S[i][j];
-                }
-            }
-        }
-
-        // reset all path after [max_aln_i][max_aln_j]
-        for (i=max_aln_i+1;i<len1+1;i++) for (j=0;j<len2+1;j++) P[i][j]=0;
-        for (i=0;i<len1+1;i++) for (j=max_aln_j+1;j<len2+1;j++) P[i][j]=0;
-    }
+        find_highest_align_score(S,P,aln_score,len1,len2);
 
     // release memory
     S.clear();

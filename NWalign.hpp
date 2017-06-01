@@ -10,12 +10,13 @@
 #include <iomanip>
 #include <stdlib.h>
 #include <ctype.h>
-#include <limits.h>
 
 #include "PDBParser.hpp"
 #include "FilePathParser.hpp"
 #include "MathTools.hpp"
 #include "ROTSUMalign.hpp"
+#include "SarstAlign.hpp"
+#include "ThreeDblastAlign.hpp"
 
 using namespace std;
 
@@ -69,13 +70,14 @@ vector<int> aa2int(const string sequence)
 }
 
 /* read multiple-chain PDB and extract the sequence 
- * seq_type - 0: amino acid, 1: chi-1 rotamer sequence */
+ * seq_type - 0: amino acid, 1: chi-1 rotamer sequence 
+ *            2: SARST code, 3: 3d-blast sequence */
 int read_pdb_as_fasta(const char *filename,vector<string>& name_list,
     vector<string>& seq_list, vector<vector<int> >& seq2int_list,
     const int seq_type=0)
 {
     int atomic_detail=0; // only read CA
-    if (seq_type==1) atomic_detail=2; // read full atom structure
+    if (seq_type==1 || seq_type==2) atomic_detail=2; // full atom structure
     int allowX=1;        // only allow ATOM and MSE
 
     string PDBid=basename_no_ext(filename);
@@ -85,30 +87,42 @@ int read_pdb_as_fasta(const char *filename,vector<string>& name_list,
     string sequence;
     vector<int> seq2int;
     int c,r;
+    int empty_seq_num=0;
     for (c=0;c<seq_num;c++)
     {
-        if (seq_type==1) // rotamer sequence
+        switch (seq_type)
         {
-            sequence=getRotSeq(pdb_entry.chains[c]);
-            seq_list.push_back(sequence);
-            seq2int_list.push_back(RotSeq2int(sequence));
+            case 1:sequence=getRotSeq(pdb_entry.chains[c]);break;
+            case 2:sequence=pdb2sarst(pdb_entry.chains[c]);break;
+            case 3:sequence=pdb2ThreeDblast(pdb_entry.chains[c]);break;
+            default:sequence=pdb2fasta(pdb_entry.chains[c]);break;
         }
-        else // amino acid sequence
+
+        if (sequence.length()==0)
         {
-            sequence=pdb2fasta(pdb_entry.chains[c]);
-            seq_list.push_back(sequence);
-            seq2int_list.push_back(aa2int(sequence));
+            empty_seq_num++;
+            continue;
+        }
+        seq_list.push_back(sequence);
+
+        switch (seq_type)
+        {
+            case 1:seq2int_list.push_back(RotSeq2int(sequence));break;
+            case 2:seq2int_list.push_back(sarst2int(sequence));break;
+            case 3:seq2int_list.push_back(ThreeDblast2int(sequence));break;
+            default:seq2int_list.push_back(aa2int(sequence));break;
         }
         sequence.clear();
         seq2int.clear();
         name_list.push_back(PDBid+':'+pdb_entry.chains[c].chainID_full);
     }
     pdb_entry.chains.clear();
-    return seq_num;
+    return (seq_num-empty_seq_num);
 }
 
 /* parse sequence typed by keyboard
- * seq_type - 0: amino acid, 1: chi-1 rotamer sequence */
+ * seq_type - 0: amino acid, 1: chi-1 rotamer sequence
+ *            2: SARST code, 3: 3d-blast sequence */
 int get_stdin_seq(const char *stdin_seq, vector<string>& name_list,
     vector<string>& seq_list, vector<vector<int> >& seq2int_list,
     const int seq_type=0)
@@ -124,6 +138,10 @@ int get_stdin_seq(const char *stdin_seq, vector<string>& name_list,
         sequence+=line[i];
         if (seq_type==1) // chi-1 rotamer sequence
             seq2int.push_back(RotSeq2int(line[i]));
+        else if (seq_type==2) // SARST code
+            seq2int.push_back(sarst2int(line[i]));
+        else if (seq_type==3) // 3d-blast sequence
+            seq2int.push_back(ThreeDblast2int(line[i]));
         else // amino acid sequence
             seq2int.push_back(aa2int(line[i]));
     }
@@ -135,7 +153,8 @@ int get_stdin_seq(const char *stdin_seq, vector<string>& name_list,
 }
 
 /* read multiple-sequence fasta
- * seq_type - 0: amino acid, 1: chi-1 rotamer sequence */
+ * seq_type - 0: amino acid, 1: chi-1 rotamer sequence
+ *            2: SARST code, 3: 3d-blast sequence */
 int read_fasta(const char *filename, vector<string>& name_list,
     vector<string>& seq_list, vector<vector<int> >& seq2int_list,
     const int seq_type=0)
@@ -182,6 +201,10 @@ int read_fasta(const char *filename, vector<string>& name_list,
                 sequence+=line[i];
                 if (seq_type==1) // chi-1 rotamer sequence
                     seq2int.push_back(RotSeq2int(line[i]));
+                else if (seq_type==2) // SARST code
+                    seq2int.push_back(sarst2int(line[i]));
+                else if (seq_type==3) // 3d-blast sequence
+                    seq2int.push_back(ThreeDblast2int(line[i]));
                 else // amino acid sequence
                     seq2int.push_back(aa2int(line[i]));
             }
@@ -229,6 +252,34 @@ void init_gotoh_mat(vector<vector<int> >&JumpH, vector<vector<int> >&JumpV,
         for (i=0;i<len1+1;i++) H[i][0]=-99999; // INT_MIN cause bug on ubuntu
         for (j=0;j<len2+1;j++) V[0][j]=-99999; // INT_MIN;
     }
+}
+
+/* locate the cell with highest alignment score. reset path after
+ * the cell to zero */
+void find_highest_align_score(
+    const vector<vector<int> >& S, vector<vector<int> >& P,
+    int &aln_score, const int len1,const int len2)
+{
+    // locate the cell with highest alignment score
+    int max_aln_i=len1;
+    int max_aln_j=len2;
+    int i,j;
+    for (i=0;i<len1+1;i++)
+    {
+        for (j=0;j<len2+1;j++)
+        {
+            if (S[i][j]>=aln_score)
+            {
+                max_aln_i=i;
+                max_aln_j=j;
+                aln_score=S[i][j];
+            }
+        }
+    }
+
+    // reset all path after [max_aln_i][max_aln_j]
+    for (i=max_aln_i+1;i<len1+1;i++) for (j=0;j<len2+1;j++) P[i][j]=0;
+    for (i=0;i<len1+1;i++) for (j=max_aln_j+1;j<len2+1;j++) P[i][j]=0;
 }
 
 /* calculate dynamic programming matrix using gotoh algorithm
@@ -344,27 +395,7 @@ int calculate_score_gotoh(
 
     // calculate alignment score and alignment path for swalign
     if (glocal>=3)
-    {
-        // locate the cell with highest alignment score
-        int max_aln_i=len1;
-        int max_aln_j=len2;
-        for (i=0;i<len1+1;i++)
-        {
-            for (j=0;j<len2+1;j++)
-            {
-                if (S[i][j]>=aln_score)
-                {
-                    max_aln_i=i;
-                    max_aln_j=j;
-                    aln_score=S[i][j];
-                }
-            }
-        }
-
-        // reset all path after [max_aln_i][max_aln_j]
-        for (i=max_aln_i+1;i<len1+1;i++) for (j=0;j<len2+1;j++) P[i][j]=0;
-        for (i=0;i<len1+1;i++) for (j=max_aln_j+1;j<len2+1;j++) P[i][j]=0;
-    }
+        find_highest_align_score(S,P,aln_score,len1,len2);
 
     // release memory
     S.clear();

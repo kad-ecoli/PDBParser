@@ -68,31 +68,3 @@ vector<int> sarst2int(const string sequence)
         seq2int.push_back(sarst2int(sequence[r]));
     return seq2int;
 }
-
-/* read multiple-chain PDB and extract the sarst code */
-int read_pdb_as_sarst(const char *filename,vector<string>& name_list,
-    vector<string>& seq_list, vector<vector<int> >& seq2int_list)
-{
-    int atomic_detail=1; // only read backbone
-    int allowX=1;        // only allow ATOM and MSE
-
-    string PDBid=basename_no_ext(filename);
-    ModelUnit pdb_entry=read_pdb_structure(filename,atomic_detail,allowX);
-
-    int seq_num=pdb_entry.chains.size();
-    string sarst;
-    vector<int> seq2int;
-    int c,r;
-    for (c=0;c<seq_num;c++)
-    {
-        sarst=pdb2sarst(pdb_entry.chains[c]);
-        seq_list.push_back(sarst);
-        seq2int_list.push_back(sarst2int(sarst));
-
-        sarst.clear();
-        seq2int.clear();
-        name_list.push_back(PDBid+':'+pdb_entry.chains[c].chainID_full);
-    }
-    pdb_entry.chains.clear();
-    return seq_num;
-}
