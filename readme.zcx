@@ -26,9 +26,10 @@ pdb2ThreeDblast    # (old) convert PDB to structural alphabet in 3D-blast
 
 #### sequence/structural alphabet alignment ####
 NWalign            # Needleman-Wunsch global sequence alignment
-SarstAlign         # (old) align two structure by their SARST code
-ThreeDblastAlign   # (old) align two structure by 3d-blast structural alphabet
-ThreeDblastAlign   # (old) align two structure by 3d-blast structural alphabet
+SarstAlign         # (old, superseded by NWalign) align two structure by 
+                   # SARST code
+ThreeDblastAlign   # (old, superseded by NWalign) align two structure by
+                   # 3d-blast structural alphabet
 ROTSUMalign        # (old, superseded by NWalign) align two structure
                    #       by chi-1 rotamer
 
