@@ -251,7 +251,7 @@ float calculate_score_gotoh(
             }
 
             diag_score=S[i-1][j-1]; // match-mismatch '\'
-            if (seq2int1[i-1]<55 && seq2int1[j-1]<55)
+            if (seq2int1[i-1]<55 && seq2int2[j-1]<55)
                 diag_score+=ScoringMatrix[seq2int1[i-1]][seq2int2[j-1]];
             left_score=H[i][j];     // deletion       '-'
             up_score  =V[i][j];     // insertion      '|'

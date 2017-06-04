@@ -174,7 +174,7 @@ int main(int argc, char **argv)
             switch (seq_type)
             {
                 case 1: // chi-1 rotamer
-                    aln_score=(int)NWalign(seq1,seq2, seq2int1,seq2int2,aln1,
+                    aln_score=NWalign(seq1,seq2, seq2int1,seq2int2,aln1,
                         aln2, ROTSUM8,gapopen_rotsum8,gapext_rotsum8,glocal);
                     break;
                 case 2: // sarst code
