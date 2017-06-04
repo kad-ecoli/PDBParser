@@ -21,7 +21,7 @@ void print_vector(const vector<int>& vec,int max_num=20)
     for(int i=0;i<vec_len;i++)
     {
         if (i==(vec_len-1)) cout<<vec[i]<<"]"<<endl;
-        else if (i<max_num/2 || vec_len-i <max_num/2) cout<<vec[i]<<", ";
+        else if (i<max_num/2 || vec_len-i <=max_num/2) cout<<vec[i]<<", ";
         else if (i==max_num/2 && vec_len>max_num) cout<<" ... ";
     }
     if (vec_len==0) cout<<"]"<<endl;
@@ -36,7 +36,7 @@ void print_vector(const vector<float>& vec,int max_num=20)
     for(int i=0;i<vec_len;i++)
     {
         if (i==(vec_len-1)) cout<<setprecision(4)<<vec[i]<<"]"<<endl;
-        else if (i<max_num/2 || vec_len-i <max_num/2) cout<<setprecision(4)<<vec[i]<<", ";
+        else if (i<max_num/2 || vec_len-i <=max_num/2) cout<<setprecision(4)<<vec[i]<<", ";
         else if (i==max_num/2 && vec_len>max_num) cout<<" ... ";
     }
     if (vec_len==0) cout<<"]"<<endl;
@@ -51,7 +51,7 @@ void print_vector(const vector<string>& vec,int max_num=20)
     for(int i=0;i<vec_len;i++)
     {
         if (i==(vec_len-1)) cout<<vec[i]<<"]"<<endl;
-        else if (i<max_num/2 || vec_len-i <max_num/2) cout<<vec[i]<<", ";
+        else if (i<max_num/2 || vec_len-i <=max_num/2) cout<<vec[i]<<", ";
         else if (i==max_num/2 && vec_len>max_num) cout<<" ... ";
     }
     if (vec_len==0) cout<<"]"<<endl;
@@ -66,7 +66,7 @@ void print_matrix(const vector<vector<float> >& mat,int max_num=20)
     cout<<"["<<endl;
     for(int i=0;i<m;i++)
     {
-        if (i<max_num/2 || m-i <max_num/2) print_vector(mat[i],max_num);
+        if (i<max_num/2 || m-i <=max_num/2) print_vector(mat[i],max_num);
         else if (i==max_num/2 && m>max_num) cout<<" ... "<<endl;
     }
     cout<<"]"<<endl;
@@ -80,7 +80,7 @@ void print_matrix(const vector<vector<int> >& mat,int max_num=20)
     cout<<"["<<endl;
     for(int i=0;i<m;i++)
     {
-        if (i<max_num/2 || m-i <max_num/2) print_vector(mat[i],max_num);
+        if (i<max_num/2 || m-i <=max_num/2) print_vector(mat[i],max_num);
         else if (i==max_num/2 && m>max_num) cout<<" ... "<<endl;
     }
     cout<<"]"<<endl;
@@ -94,7 +94,7 @@ void print_matrix(const vector<vector<string> >& mat,int max_num=20)
     cout<<"["<<endl;
     for(int i=0;i<m;i++)
     {
-        if (i<max_num/2 || m-i <max_num/2) print_vector(mat[i],max_num);
+        if (i<max_num/2 || m-i <=max_num/2) print_vector(mat[i],max_num);
         else if (i==max_num/2 && m>max_num) cout<<" ... "<<endl;
     }
     cout<<"]"<<endl;
