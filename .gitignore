@@ -19,3 +19,4 @@ ThreeDblastAlign
 pdb2rmsd
 getRotSeq
 ROTSUMalign
+pdb2ss
