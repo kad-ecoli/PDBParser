@@ -1,4 +1,6 @@
 /* header for structure alignment by SARST code */
+#if !defined(SARSTALIGN_HPP)
+#define SARSTALIGN_HPP 1
 #include <iostream>
 #include <vector>
 #include <fstream>
@@ -68,3 +70,4 @@ vector<int> sarst2int(const string sequence)
         seq2int.push_back(sarst2int(sequence[r]));
     return seq2int;
 }
+#endif
