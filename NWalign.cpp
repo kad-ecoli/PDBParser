@@ -21,6 +21,7 @@ const char* docstring=""
 "    NWalign input1 input2 option+1000 (using chi-1 rotamer sequence)\n"
 "    NWalign input1 input2 option+2000 (using SARST sequence)\n"
 "    NWalign input1 input2 option+3000 (using 3d-blast sequence)\n"
+"    NWalign input1 input2 option+4000 (using secondary structure by TMalign)\n"
 ;
 
 #include <iostream>
@@ -185,6 +186,10 @@ int main(int argc, char **argv)
                     aln_score=NWalign(seq1,seq2,seq2int1,seq2int2,aln1,aln2,
                         BLOSUM62_3dblast,gapopen_3dblast,gapext_3dblast,
                         glocal);
+                    break;
+                case 4: // ss sequence
+                    aln_score=NWalign(seq1,seq2,seq2int1,seq2int2,aln1,aln2,
+                        BLOSUM62_ss,gapopen_ss,gapext_ss, glocal);
                     break;
                 default: // amino acid
                     aln_score=NWalign(seq1,seq2,seq2int1,seq2int2,aln1,aln2,

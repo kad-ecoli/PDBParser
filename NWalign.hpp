@@ -16,6 +16,7 @@
 #include "MathTools.hpp"
 #include "ROTSUMalign.hpp"
 #include "SarstAlign.hpp"
+#include "SSalign.hpp"
 #include "ThreeDblastAlign.hpp"
 
 using namespace std;
@@ -95,6 +96,7 @@ int read_pdb_as_fasta(const char *filename,vector<string>& name_list,
             case 1:sequence=getRotSeq(pdb_entry.chains[c]);break;
             case 2:sequence=pdb2sarst(pdb_entry.chains[c]);break;
             case 3:sequence=pdb2ThreeDblast(pdb_entry.chains[c]);break;
+            case 4:sequence=pdb2ss(pdb_entry.chains[c]);break;
             default:sequence=pdb2fasta(pdb_entry.chains[c]);break;
         }
 
@@ -110,6 +112,7 @@ int read_pdb_as_fasta(const char *filename,vector<string>& name_list,
             case 1:seq2int_list.push_back(RotSeq2int(sequence));break;
             case 2:seq2int_list.push_back(sarst2int(sequence));break;
             case 3:seq2int_list.push_back(ThreeDblast2int(sequence));break;
+            case 4:seq2int_list.push_back(ss2int(sequence));break;
             default:seq2int_list.push_back(aa2int(sequence));break;
         }
         sequence.clear();
