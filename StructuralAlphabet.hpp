@@ -64,6 +64,35 @@ const char* ThreeDblast_matrix=
     "EEEFFFKKZZZZZZZZZZZZZZZZZZZZZXXXXNHH"
     "EEFFFFZZZZZZZZZZZZZZZZZZZZZZZZZZNNHH";
 
+const char* ss_vec="XCHTE"; // undefined, coil, helix, strand, turn
+
+/* convert pdb chain to secondary structure */
+string pdb2ss(ChainUnit& chain)
+{
+    vector<vector<float> > dist_mat=KappaAlpha(chain,1);
+    string ss_seq="";
+    int L=chain.residues.size();
+    for (int r=0;r<L;r++)
+        ss_seq+=ss_vec[sec_str(dist_mat[r])];
+    return ss_seq;
+}
+
+/* convert pdb entry to secondary structure
+ * ShowSeqLen - whether to show residue number for each chain */
+string pdb2ss(ModelUnit& pep,const string PDBid="",const int ShowSeqLen=0)
+{
+    stringstream buf;
+    string ss_seq="";
+    for (int c=0;c<pep.chains.size();c++)
+    {
+        ss_seq=pdb2ss(pep.chains[c]);
+        buf<<'>'<<PDBid<<':'<<pep.chains[c].chainID_full;
+        if (ShowSeqLen) buf<<'\t'<<ss_seq.length();
+        buf<<'\n'<<ss_seq<<'\n';
+    }
+    return buf.str();
+}
+
 /* convert pdb chain to SARST (Structural similarity search Aided 
  * by Ramachandran Sequential Transformation) code */
 string pdb2sarst(ChainUnit& chain)
