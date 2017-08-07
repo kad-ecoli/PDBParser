@@ -35,10 +35,11 @@ int main(int argc, char **argv)
     vector<string> name_list1,seq_list1;
     vector<string> name_list2,seq_list2;
     vector<vector<int> >seq2int_list1,seq2int_list2; //aa2int
-    //int seq_num1=read_pdb_as_3dblast(argv[1],name_list1,seq_list1,seq2int_list1);
-    //int seq_num2=read_pdb_as_3dblast(argv[2],name_list2,seq_list2,seq2int_list2);
-    int seq_num1=read_pdb_as_fasta(argv[1],name_list1,seq_list1,seq2int_list1,3);
-    int seq_num2=read_pdb_as_fasta(argv[2],name_list2,seq_list2,seq2int_list2,3);
+    ModelUnit pdb_entry1,pdb_entry2;
+    int seq_num1=read_pdb_as_fasta(argv[1],name_list1,
+        seq_list1,seq2int_list1,pdb_entry1,3);
+    int seq_num2=read_pdb_as_fasta(argv[2],name_list2,
+        seq_list2,seq2int_list2,pdb_entry2,3);
 
     /* do alignment between two files*/
     for (int q=0;q<seq_num1;q++)

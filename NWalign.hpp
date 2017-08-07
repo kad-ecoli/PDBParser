@@ -75,14 +75,14 @@ vector<int> aa2int(const string sequence)
  *            2: SARST code, 3: 3d-blast sequence */
 int read_pdb_as_fasta(const char *filename,vector<string>& name_list,
     vector<string>& seq_list, vector<vector<int> >& seq2int_list,
-    const int seq_type=0)
+    ModelUnit &pdb_entry, const int seq_type=0)
 {
     int atomic_detail=0; // only read CA
     if (seq_type==1 || seq_type==2) atomic_detail=2; // full atom structure
     int allowX=1;        // only allow ATOM and MSE
 
     string PDBid=basename_no_ext(filename);
-    ModelUnit pdb_entry=read_pdb_structure(filename,atomic_detail,allowX);
+    pdb_entry=read_pdb_structure(filename,atomic_detail,allowX);
 
     int seq_num=pdb_entry.chains.size();
     string sequence;

@@ -22,6 +22,8 @@ const char* docstring=""
 "    NWalign input1 input2 option+2000 (using SARST sequence)\n"
 "    NWalign input1 input2 option+3000 (using 3d-blast sequence)\n"
 "    NWalign input1 input2 option+4000 (using secondary structure by TMalign)\n"
+"\n"
+"    NWalign input1 input2 option+10000 (RMSD superposition)\n"
 ;
 
 #include <iostream>
@@ -40,6 +42,7 @@ int main(int argc, char **argv)
     int glocal=0;     // global or glocal-both alignment
     int seqID_only=0; // do not just print seqID
     int seq_type=0;   // amino acid sequence
+    int super_type=0; // do not perform superposition
     if(argc<3)
     {
         cerr<<docstring;
@@ -48,26 +51,40 @@ int main(int argc, char **argv)
     if (argc>3)
     {
         input_mode=atoi(argv[3]);
+        // superposition type
+        if (input_mode>=10000)
+        {
+            super_type=int(input_mode/10000);
+            input_mode=    input_mode%10000;
+        }
+
         // sequence type
         if (input_mode>=1000)
         {
             seq_type=int(input_mode/1000);
-            input_mode=input_mode % 1000;
+            input_mode=  input_mode%1000;
         }
 
         // alignment algorithm
         if (input_mode>=100)
         {
             glocal=int(input_mode/100);
-            input_mode=input_mode % 100;
+            input_mode=input_mode%100;
         }
 
         // output format
         if (input_mode>=10)
         {
             seqID_only=int(input_mode/10);
-            input_mode=input_mode % 10;
+            input_mode=    input_mode%10;
         }
+    }
+
+    /* check if input is superposable */
+    if (super_type>0 && input_mode!=1 && input_mode!=7)
+    {
+        cerr<<"ERROR! Cannot superpose input format type "<<input_mode<<endl;
+        return 0;
     }
 
     /* parse input */
@@ -75,37 +92,52 @@ int main(int argc, char **argv)
     vector<string> name_list1,seq_list1;
     vector<string> name_list2,seq_list2;
     vector<vector<int> >seq2int_list1,seq2int_list2; //aa2int
+    ModelUnit pdb_entry1,pdb_entry2;
     switch (input_mode)
     {
         case 0:
-            seq_num1=read_fasta(argv[1],name_list1,seq_list1,seq2int_list1,seq_type);
-            seq_num2=read_fasta(argv[2],name_list2,seq_list2,seq2int_list2,seq_type);
+            seq_num1=read_fasta(argv[1],name_list1,
+                seq_list1,seq2int_list1,seq_type);
+            seq_num2=read_fasta(argv[2],name_list2,
+                seq_list2,seq2int_list2,seq_type);
             break;
         case 1:
-            seq_num1=read_pdb_as_fasta(argv[1],name_list1,seq_list1,seq2int_list1,seq_type);
-            seq_num2=read_pdb_as_fasta(argv[2],name_list2,seq_list2,seq2int_list2,seq_type);
+            seq_num1=read_pdb_as_fasta(argv[1],name_list1,
+                seq_list1,seq2int_list1,pdb_entry1,seq_type);
+            seq_num2=read_pdb_as_fasta(argv[2],name_list2,
+                seq_list2,seq2int_list2,pdb_entry2,seq_type);
             break;
         case 2:
-            seq_num1=read_fasta(argv[1],name_list1,seq_list1,seq2int_list1,seq_type);
-            seq_num2=read_pdb_as_fasta(argv[2],name_list2,seq_list2,seq2int_list2,seq_type);
+            seq_num1=read_fasta(argv[1],name_list1,
+                seq_list1,seq2int_list1,seq_type);
+            seq_num2=read_pdb_as_fasta(argv[2],name_list2,
+                seq_list2,seq2int_list2,pdb_entry2,seq_type);
             break;
         case 3:
-            seq_num1=get_stdin_seq(argv[1],name_list1,seq_list1,seq2int_list1,seq_type);
-            seq_num2=get_stdin_seq(argv[2],name_list2,seq_list2,seq2int_list2,seq_type);
+            seq_num1=get_stdin_seq(argv[1],name_list1,
+                seq_list1,seq2int_list1,seq_type);
+            seq_num2=get_stdin_seq(argv[2],name_list2,
+                seq_list2,seq2int_list2,seq_type);
             break;
         case 4:
-            seq_num1=get_stdin_seq(argv[1],name_list1,seq_list1,seq2int_list1,seq_type);
-            seq_num2=read_fasta(argv[2],name_list2,seq_list2,seq2int_list2,seq_type);
+            seq_num1=get_stdin_seq(argv[1],name_list1,
+                seq_list1,seq2int_list1,seq_type);
+            seq_num2=read_fasta(argv[2],name_list2,
+                seq_list2,seq2int_list2,seq_type);
             break;
         case 5:
-            seq_num1=get_stdin_seq(argv[1],name_list1,seq_list1,seq2int_list1,seq_type);
-            seq_num2=read_pdb_as_fasta(argv[2],name_list2,seq_list2,seq2int_list2,seq_type);
+            seq_num1=get_stdin_seq(argv[1],name_list1,
+                seq_list1,seq2int_list1,seq_type);
+            seq_num2=read_pdb_as_fasta(argv[2],name_list2,
+                seq_list2,seq2int_list2,pdb_entry2,seq_type);
             break;
         case 6:
-            seq_num1=read_fasta(argv[1],name_list1,seq_list1,seq2int_list1,seq_type);
+            seq_num1=read_fasta(argv[1],name_list1,
+                seq_list1,seq2int_list1,seq_type);
             break;
         case 7:
-            seq_num1=read_pdb_as_fasta(argv[1],name_list1,seq_list1,seq2int_list1,seq_type);
+            seq_num1=read_pdb_as_fasta(argv[1],name_list1,
+                seq_list1,seq2int_list1,pdb_entry1,seq_type);
             break;
         default:
             cerr<<"ERROR! Unknown input type "<<input_mode<<endl;
