@@ -98,7 +98,7 @@ string pdb2ss(ModelUnit& pep,const string PDBid="",const int ShowSeqLen=0)
 string pdb2sarst(ChainUnit& chain)
 {
     vector<vector<float> > angle_mat=OmegaPhiPsi(chain);
-    string sarst_seq="";
+    chain.sarst="";
     int L=chain.residues.size();
     int dim=36; //int(sqrt(strlen(sarst_matrix)));
 
@@ -108,17 +108,17 @@ string pdb2sarst(ChainUnit& chain)
         if (has_atom_name(chain.residues[r])==0) continue;
         if (angle_mat[r][1]==360 || angle_mat[r][2]==360)
         {
-            sarst_seq+='X';
+            chain.sarst+='X';
         }
         else
         {
             i=int((180-angle_mat[r][2])/(360/dim)); // psi
             j=int((180+angle_mat[r][1])/(360/dim)); // phi
-            sarst_seq+=sarst_matrix[i*dim+j];
+            chain.sarst+=sarst_matrix[i*dim+j];
         }
     }
     angle_mat.clear();
-    return sarst_seq;
+    return chain.sarst;
 }
 
 /* convert pdb entry to SARST (Structural similarity search Aided 

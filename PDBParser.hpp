@@ -37,6 +37,9 @@ struct ChainUnit  // struct for each chain
     string chainID_full;          // chain ID, might be more than 1 char
     char chainID;                 // short chain ID, must be 1 char
     string sequence;              // sequence converted from CA coordinate
+    string sarst;                 // SARST (Structural similarity search
+                                  // Aided by Ramachandran Sequential 
+                                  // Transformation) code
     vector<ResidueUnit> residues; // list of residues
 };
 

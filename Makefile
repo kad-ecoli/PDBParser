@@ -2,8 +2,8 @@ CC=g++
 CFLAGS=-O3
 LDFLAGS=-static
 
-PROG=pdb2fasta reindex_pdb strip_sidechain split_chain BackboneTorsion SidechainTorsion NWalign pdb2rmsd getRotSeq pdb2ss
-OLD_PROG=pdb2sarst pdb2ThreeDblast SarstAlign ThreeDblastAlign
+PROG=pdb2fasta reindex_pdb strip_sidechain split_chain BackboneTorsion SidechainTorsion NWalign pdb2rmsd getRotSeq pdb2ss pdb2sarst
+OLD_PROG=pdb2ThreeDblast SarstAlign ThreeDblastAlign
 HEADER=PDBParser.hpp pstream.h
 NW_HEADER=NWalign.hpp FilePathParser.hpp ROTSUMalign.hpp getRotSeq.hpp SidechainTorsion.hpp GeometryTools.hpp MathTools.hpp SarstAlign.hpp StructuralAlphabet.hpp BackboneTorsion.hpp ThreeDblastAlign.hpp SSalign.hpp
 
