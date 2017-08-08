@@ -119,7 +119,7 @@ int read_pdb_as_fasta(const char *filename,vector<string>& name_list,
         seq2int.clear();
         name_list.push_back(PDBid+':'+pdb_entry.chains[c].chainID_full);
     }
-    pdb_entry.chains.clear();
+    //pdb_entry.chains.clear();
     return (seq_num-empty_seq_num);
 }
 
