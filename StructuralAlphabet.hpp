@@ -79,7 +79,7 @@ string pdb2ss(ChainUnit& chain)
 
 /* convert pdb entry to secondary structure
  * ShowSeqLen - whether to show residue number for each chain */
-string pdb2ss(ModelUnit& pep,const string PDBid="",const int ShowSeqLen=0)
+string pdb2ss(ModelUnit& pep,const string PDBid="",const int ShowSeqLen=1)
 {
     stringstream buf;
     string ss_seq="";
@@ -124,7 +124,7 @@ string pdb2sarst(ChainUnit& chain)
 /* convert pdb entry to SARST (Structural similarity search Aided 
  * by Ramachandran Sequential Transformation) code
  * ShowSeqLen - whether to show residue number for each chain */
-string pdb2sarst(ModelUnit& pep,const string PDBid="",const int ShowSeqLen=0)
+string pdb2sarst(ModelUnit& pep,const string PDBid="",const int ShowSeqLen=1)
 {
     stringstream buf;
     string sarst_seq="";
@@ -176,7 +176,7 @@ string pdb2ThreeDblast(ChainUnit& chain)
 
 /* convert pdb entry to structure alphabet in 3D-blast 
  * ShowSeqLen - whether to show residue number for each chain */
-string pdb2ThreeDblast(ModelUnit& pep,const string PDBid="",const int ShowSeqLen=0)
+string pdb2ThreeDblast(ModelUnit& pep,const string PDBid="",const int ShowSeqLen=1)
 {
     stringstream buf;
     string ThreeDblast_seq="";
