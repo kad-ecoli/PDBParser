@@ -3,6 +3,7 @@
 #define StructuralAphabet_HPP 1
 #include <cstring>
 #include "BackboneTorsion.hpp"
+#include "MathTools.hpp"
 
 using namespace std;
 
@@ -112,8 +113,8 @@ string pdb2sarst(ChainUnit& chain)
         }
         else
         {
-            i=int((180-angle_mat[r][2])/(360/dim)); // psi
-            j=int((180+angle_mat[r][1])/(360/dim)); // phi
+            i=MIN(dim-1,int((180-angle_mat[r][2])/(360/dim))); // psi
+            j=MIN(dim-1,int((180+angle_mat[r][1])/(360/dim))); // phi
             chain.sarst+=sarst_matrix[i*dim+j];
         }
     }
@@ -160,8 +161,8 @@ string pdb2ThreeDblast(ChainUnit& chain)
         }
         else
         {
-            i=int((180-kappa)/(360/dim)); // kappa
-            j=int((180+alpha)/(360/dim)); // alpha
+            i=MIN(dim-1,int((180-kappa)/(360/dim))); // kappa
+            j=MIN(dim-1,int((180+alpha)/(360/dim))); // alpha
             SA_code=ThreeDblast_matrix[i*dim+j];
 
             if (SA_code=='A' && kappa<=114 && alpha>=46 )
