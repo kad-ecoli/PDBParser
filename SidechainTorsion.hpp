@@ -7,36 +7,36 @@ using namespace std;
 
 /* sidechain torsion angles (chi1, chi2, chi3, chi4) 
  * chi1_only whether to calculate chi1 rotamer only */
-vector<vector<float> >SidechainTorsion(ChainUnit& chain,bool chi1_only=false)
+vector<vector<double> >SidechainTorsion(ChainUnit& chain,bool chi1_only=false)
 {
     int L=chain.residues.size();
     // default torsion angles: 360
-    vector<float> tmp_array(4,360.);
-    vector<vector<float> >angle_mat(L,tmp_array);
+    vector<double> tmp_array(4,360.);
+    vector<vector<double> >angle_mat(L,tmp_array);
 
     // for chi1
-    vector<float> N(3,0.);  bool has_N=false;
-    vector<float> CA(3,0.); bool has_CA=false;
-    vector<float> CB(3,0.); bool has_CB=false;
-    vector<float> SG(3,0.); bool has_SG=false; // CYS
-    vector<float> CG1(3,0.);bool has_CG1=false;// ILE VAL
-    //vector<float> CG2(3,0.);bool has_CG2=false;// VAL, fake chi2
-    vector<float> OG(3,0.); bool has_OG=false; // SER
-    vector<float> OG1(3,0.);bool has_OG1=false;// THR
-    vector<float> CG(3,0.); bool has_CG=false; // ARG ASN ASP GLN GLU HIS LEU
+    vector<double> N(3,0.);  bool has_N=false;
+    vector<double> CA(3,0.); bool has_CA=false;
+    vector<double> CB(3,0.); bool has_CB=false;
+    vector<double> SG(3,0.); bool has_SG=false; // CYS
+    vector<double> CG1(3,0.);bool has_CG1=false;// ILE VAL
+    //vector<double> CG2(3,0.);bool has_CG2=false;// VAL, fake chi2
+    vector<double> OG(3,0.); bool has_OG=false; // SER
+    vector<double> OG1(3,0.);bool has_OG1=false;// THR
+    vector<double> CG(3,0.); bool has_CG=false; // ARG ASN ASP GLN GLU HIS LEU
                                                // LYS MET PHE PRO TRP TYR
     // for chi2
-    vector<float> CD(3,0.);bool has_CD=false;  // ILE ARG LYS GLU GLN
-    vector<float> CD1(3,0.);bool has_CD1=false;// LEU
-    vector<float> SD(3,0.);bool has_SD=false;  // MET
+    vector<double> CD(3,0.);bool has_CD=false;  // ILE ARG LYS GLU GLN
+    vector<double> CD1(3,0.);bool has_CD1=false;// LEU
+    vector<double> SD(3,0.);bool has_SD=false;  // MET
 
     // for chi3
-    vector<float> CE(3,0.);bool has_CE=false;  // MET LYS
-    vector<float> NE(3,0.);bool has_NE=false;  // ARG
+    vector<double> CE(3,0.);bool has_CE=false;  // MET LYS
+    vector<double> NE(3,0.);bool has_NE=false;  // ARG
 
     // for chi4
-    vector<float> CZ(3,0.);bool has_CZ=false;  // ARG
-    vector<float> NZ(3,0.);bool has_NZ=false;  // LYS
+    vector<double> CZ(3,0.);bool has_CZ=false;  // ARG
+    vector<double> NZ(3,0.);bool has_NZ=false;  // LYS
 
     int r,a; // residue index, atom index
     for (r=0;r<L;r++) 

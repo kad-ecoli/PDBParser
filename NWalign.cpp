@@ -159,11 +159,11 @@ int main(int argc, char **argv)
     }
 
     /* variables for RMSD */
-    vector<float> tmp_array(3,0.);
-    vector<vector<float> > xyz_list1,xyz_list2; // coordinate of aligned residue
-    vector<vector<float> > RotMatix;  // U
-    vector<float> TranVect;  // t
-    float rmsd,tmscore1,tmscore2;
+    vector<double> tmp_array(3,0.);
+    vector<vector<double> > xyz_list1,xyz_list2; // coordinate of aligned residue
+    vector<vector<double> > RotMatix;  // U
+    vector<double> TranVect;  // t
+    double rmsd,tmscore1,tmscore2;
 
     /* do alignment */
     int q,s,len1,len2,max_iden_len,max_aln_len,max_seqID_len2;
@@ -256,7 +256,7 @@ int main(int argc, char **argv)
                 RotateCoor(xyz_list1,xyz_list2, RotMatix, TranVect);
 
                 /* change coordinate */
-                vector<vector<float> > super_xyz_list1(aln_len,tmp_array);
+                vector<vector<double> > super_xyz_list1(aln_len,tmp_array);
                 for(int r=0; r<aln_len; r++)
 	                ChangeCoor(xyz_list1[r], RotMatix, TranVect, 
                         super_xyz_list1[r]);
@@ -321,9 +321,9 @@ int main(int argc, char **argv)
             {
                 cout<<name1<<'\t'<<name2<<'\t'
                     <<setiosflags(ios::fixed)<<setprecision(4)
-                    <<float(iden_len)/len1<<'\t'
-                    <<float(iden_len)/len2<<'\t'
-                    <<float(iden_len)/aln_len<<endl;
+                    <<double(iden_len)/len1<<'\t'
+                    <<double(iden_len)/len2<<'\t'
+                    <<double(iden_len)/aln_len<<endl;
                 if (input_mode<6 && q<seq_num1-1 && s==seq_num2-1)
                     cout<<"$$$$\n";
             }
@@ -338,7 +338,7 @@ int main(int argc, char **argv)
                 cout<<"Aligned length:"<<setw(5)<<aln_len<<endl;
                 cout<<"Identical length:"<<setw(5)<<iden_len<<endl;
                 cout<<"Sequence identity:"<<setiosflags(ios::fixed);
-                cout<<setprecision(3)<<setw(9)<<float(iden_len)/len2;
+                cout<<setprecision(3)<<setw(9)<<double(iden_len)/len2;
                 cout<<" (="<<setw(4)<<iden_len<<'/'<<setw(4)<<len2;                
                 cout<<")\n\n";
 
@@ -370,9 +370,9 @@ int main(int argc, char **argv)
         {
             cout<<name1<<'\t'<<max_seqID_name2<<'\t'
                 <<setiosflags(ios::fixed)<<setprecision(4)
-                <<float(max_iden_len)/len1<<'\t'
-                <<float(max_iden_len)/max_seqID_len2<<'\t'
-                <<float(max_iden_len)/max_aln_len<<endl;
+                <<double(max_iden_len)/len1<<'\t'
+                <<double(max_iden_len)/max_seqID_len2<<'\t'
+                <<double(max_iden_len)/max_aln_len<<endl;
         }
     }
     return 0;
