@@ -150,7 +150,7 @@ void normalize(double a[3])
   a[2] *= b;
 }
 
-double dot(double a[3], double b[3])
+double dot_prod(double a[3], double b[3])
 {
   return (a[0] * b[0] + a[1] * b[1] + a[2] * b[2]);
 }
@@ -340,7 +340,7 @@ void RotateCoor(const vector<vector<double> > &target_stru,const vector<vector<d
 	*/
 	for (i=0; i<3; i++) 
 	{
-		for (j=0; j<3; j++) left_eigenvec[i][j] = dot(&right_eigenvec[i][0], &Rt[j][0]);
+		for (j=0; j<3; j++) left_eigenvec[i][j] = dot_prod(&right_eigenvec[i][0], &Rt[j][0]);
 	}
 	
 	for (i=0; i<3; i++) normalize(&left_eigenvec[i][0]);
