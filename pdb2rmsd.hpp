@@ -16,7 +16,7 @@ using namespace std;
  *               >=1 : loop over all atoms of a residue to find CA
  */
 void aln2coor(const string &aln1,const string &aln2,
-    ChainUnit &chain1,ChainUnit &chain2,
+    const ChainUnit &chain1, const ChainUnit &chain2,
     vector<vector<double> > &xyz_list1,vector<vector<double> > &xyz_list2,
     int atomic_detail=0)
 {
