@@ -5,6 +5,7 @@
 .*.sw*
 
 # binary executables
+qTMclust
 pdb2fasta
 reindex_pdb
 strip_sidechain
