@@ -24,6 +24,8 @@ const char* docstring=""
 "    NWalign input1 input2 option+4000 (using secondary structure by TMalign)\n"
 "\n"
 "    NWalign input1 input2 option+10000 (RMSD superposition)\n"
+//"    NWalign input1 input2 option+20000 (TM-score superposition)\n"
+//"    NWalign input1 input2 option+30000 (fast TM-score superposition)\n"
 ;
 
 #include <iostream>
@@ -34,6 +36,7 @@ const char* docstring=""
 #include "ROTSUMalign.hpp"
 #include "pdb2rmsd.hpp"
 #include "Superpose.hpp"
+#include "TMalign.hpp"
 
 using namespace std;
 
@@ -242,8 +245,14 @@ int main(int argc, char **argv)
             int iden_len,aln_len;  // num of identical/aligned positions
             get_seqID(aln1,aln2,aln_str,pos_str,iden_len,aln_len);
 
-            /* RMSD superposition */
-            if (aln_len!=0 && super_type==1)
+            /* RMSD/TM-score superposition */
+            if (aln_len==0 && super_type>=1)
+            {
+                rmsd=0;
+                tmscore1=0;
+                tmscore2=0;
+            }
+            else if (aln_len!=0 && super_type==1) // RMSD
             {
                 if (input_mode>=6)
                     aln2coor(aln1,aln2,pdb_entry1.chains[q],pdb_entry1.chains[s],
@@ -258,7 +267,7 @@ int main(int argc, char **argv)
                 /* change coordinate */
                 vector<vector<double> > super_xyz_list1(aln_len,tmp_array);
                 for(int r=0; r<aln_len; r++)
-	                ChangeCoor(xyz_list1[r], RotMatix, TranVect, 
+                    ChangeCoor(xyz_list1[r], RotMatix, TranVect, 
                         super_xyz_list1[r]);
 
                 /* RMSD */
@@ -273,11 +282,16 @@ int main(int argc, char **argv)
                 xyz_list1.clear();
                 xyz_list2.clear();
             }
-            else if (aln_len==0 && super_type==1)
+            else if (aln_len!=0 && super_type>=2) // TM-score
             {
-                rmsd=0;
-                tmscore1=0;
-                tmscore2=0;
+                if (input_mode>=6)
+                    TMalign_I(aln1,aln2,pdb_entry1.chains[q],
+                        pdb_entry1.chains[s],rmsd,tmscore1,tmscore2,
+                        (super_type==3)*8);
+                else
+                    TMalign_I(aln1,aln2,pdb_entry1.chains[q],
+                        pdb_entry2.chains[s],rmsd,tmscore1,tmscore2,
+                        (super_type==3)*8);
             }
 
             if (seqID_only==3) // max seqID only
@@ -301,7 +315,7 @@ int main(int argc, char **argv)
             {
                 cout<<'>'<<name1<<endl<<aln1<<endl;
                 cout<<'>'<<name2<<endl<<aln2<<endl;
-                if (super_type==1)
+                if (super_type>=1)
                 {
                     cout<<setiosflags(ios::fixed)<<setprecision(4)
                         <<"# IDali="<<1.*iden_len/aln_len
@@ -342,7 +356,7 @@ int main(int argc, char **argv)
                 cout<<" (="<<setw(4)<<iden_len<<'/'<<setw(4)<<len2;                
                 cout<<")\n\n";
 
-                if (super_type==1)
+                if (super_type>=1)
                 {
                     cout<<"Aligned length= "<<aln_len
                         <<setiosflags(ios::fixed)<<setprecision(4)
