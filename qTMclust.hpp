@@ -124,7 +124,7 @@ void batch_sarst_rmsd(const vector<string> &pdb_name_list,
         {
             NWalign(pdb_chain_list[i].second.sarst, pdb_chain_list[j].
                 second.sarst, sarst2int_list[i], sarst2int_list[j],
-                aln_i, aln_j, BLOSUM62_sarst, gapopen_sarst,gapext_sarst,0);
+                aln_i, aln_j, 2, 0); // 2 - sarst; 0 - global
 
             aln2coor(aln_i, aln_j, pdb_chain_list[i].second,
                 pdb_chain_list[j].second, xyz_list_i, xyz_list_j,0);
