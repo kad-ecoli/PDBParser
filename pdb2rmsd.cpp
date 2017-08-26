@@ -69,8 +69,7 @@ int main(int argc, char **argv)
             /* NWalign */
             NWalign(pdb_entry1.chains[c1].sequence,
                 pdb_entry2.chains[c2].sequence,
-                seq2int1_list[c1],seq2int2_list[c2],
-                aln1,aln2, BLOSUM62,gapopen_blosum62,gapext_blosum62);
+                seq2int1_list[c1],seq2int2_list[c2], aln1,aln2);
             cout<<'>'<<PDBid1<<':'<<pdb_entry1.chains[c1].chainID_full
                 <<'\t'<<pdb_entry1.chains[c1].sequence.length()<<endl
                 <<aln1<<endl;

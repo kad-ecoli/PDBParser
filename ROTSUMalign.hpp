@@ -243,36 +243,4 @@ int calculate_score_gotoh(
     return aln_score; // final alignment score
 }
 
-/* entry function for NWalign, overwriting NWalign in NWalign.hpp when
- * scoring matrix is int 55x55 */
-int NWalign(const string& seq1, const string& seq2,
-    const vector<int>& seq2int1, const vector<int>& seq2int2, // aa2int
-    string & aln1,string & aln2,const int ScoringMatrix[55][55],
-    const int gapopen,const int gapext,const int glocal=0)
-{
-    int len1=seq2int1.size();
-    int len2=seq2int2.size();
-    vector<int> temp_int(len2+1,0);
-    vector<vector<int> > JumpH(len1+1,temp_int);
-    vector<vector<int> > JumpV(len1+1,temp_int);
-    vector<vector<int> > P(len1+1,temp_int);
-
-    int aln_score=calculate_score_gotoh(seq2int1,seq2int2,JumpH,JumpV,P,
-        ScoringMatrix,gapopen,gapext,glocal);
-
-    if (glocal<3)
-    {
-        trace_back_gotoh(seq1,seq2,JumpH,JumpV,P,aln1,aln2);
-    }
-    else
-    {
-        trace_back_sw(seq1,seq2,JumpH,JumpV,P,aln1,aln2);
-    }
-
-    JumpH.clear();
-    JumpV.clear();
-    P.clear();
-    return aln_score; // aligment score
-}
-
 #endif

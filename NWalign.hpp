@@ -521,11 +521,12 @@ void trace_back_sw(string seq1, string seq2,
     }
 }
 
-/* entry function for NWalign */
+/* entry function for NWalign 
+ * seq_type - 0: amino acid, 1: chi1 rotamer, 2: sarst code, 
+ *            3: 3d-blast sequence */
 int NWalign(const string& seq1, const string& seq2, 
     const vector<int>& seq2int1, const vector<int>& seq2int2, // aa2int
-    string & aln1,string & aln2,const int ScoringMatrix[24][24],
-    const int gapopen,const int gapext,const int glocal=0)
+    string & aln1,string & aln2,const int seq_type=0, const int glocal=0)
 {
     int len1=seq2int1.size();
     int len2=seq2int2.size();
@@ -533,18 +534,31 @@ int NWalign(const string& seq1, const string& seq2,
     vector<vector<int> > JumpH(len1+1,temp_int);
     vector<vector<int> > JumpV(len1+1,temp_int);
     vector<vector<int> > P(len1+1,temp_int);
-
-    int aln_score=calculate_score_gotoh(seq2int1,seq2int2,JumpH,JumpV,P,
-        ScoringMatrix,gapopen,gapext,glocal);
+    
+    int aln_score;
+    switch (seq_type)
+    {
+        case 1: // chi-1 rotamer
+            aln_score=calculate_score_gotoh(seq2int1,seq2int2,JumpH,JumpV,P,
+                ROTSUM8,gapopen_rotsum8,gapext_rotsum8,glocal);
+            break;
+        case 2: // sarst code
+            aln_score=calculate_score_gotoh(seq2int1,seq2int2,JumpH,JumpV,P,
+                BLOSUM62_sarst,gapopen_sarst,gapext_sarst,glocal);
+            break;
+        case 3: // 3d-blast sequence
+            aln_score=calculate_score_gotoh(seq2int1,seq2int2,JumpH,JumpV,P,
+                BLOSUM62_3dblast,gapopen_3dblast,gapext_3dblast,glocal);
+            break;
+        default: // amino acid
+            aln_score=calculate_score_gotoh(seq2int1,seq2int2,JumpH,JumpV,P,
+                BLOSUM62,gapopen_blosum62,gapext_blosum62,glocal);
+    }
 
     if (glocal<3)
-    {
         trace_back_gotoh(seq1,seq2,JumpH,JumpV,P,aln1,aln2);
-    }
     else
-    {
         trace_back_sw(seq1,seq2,JumpH,JumpV,P,aln1,aln2);
-    }
 
     JumpH.clear();
     JumpV.clear();

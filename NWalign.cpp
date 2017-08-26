@@ -28,7 +28,6 @@ const char* docstring=""
 #include <string>
 
 #include "NWalign.hpp"
-#include "ROTSUMalign.hpp"
 
 using namespace std;
 
@@ -170,26 +169,8 @@ int main(int argc, char **argv)
             len2=seq2.length();
 
             string aln1,aln2;
-            int aln_score;
-            switch (seq_type)
-            {
-                case 1: // chi-1 rotamer
-                    aln_score=NWalign(seq1,seq2, seq2int1,seq2int2,aln1,
-                        aln2, ROTSUM8,gapopen_rotsum8,gapext_rotsum8,glocal);
-                    break;
-                case 2: // sarst code
-                    aln_score=NWalign(seq1,seq2,seq2int1,seq2int2,aln1,aln2,
-                        BLOSUM62_sarst,gapopen_sarst,gapext_sarst,glocal);
-                    break;
-                case 3: // 3d-blast sequence
-                    aln_score=NWalign(seq1,seq2,seq2int1,seq2int2,aln1,aln2,
-                        BLOSUM62_3dblast,gapopen_3dblast,gapext_3dblast,
-                        glocal);
-                    break;
-                default: // amino acid
-                    aln_score=NWalign(seq1,seq2,seq2int1,seq2int2,aln1,aln2,
-                        BLOSUM62,gapopen_blosum62,gapext_blosum62,glocal);
-            }
+            int aln_score=NWalign(seq1,seq2, seq2int1,seq2int2, aln1,aln2,
+                seq_type,glocal);
 
             string aln_str; // colon for identical sequence
             string pos_str; // last digit for position index
