@@ -20,7 +20,7 @@ using namespace std;
 struct AtomUnit    // struct for each atom entry
 {
     string name;       // atom name
-    vector<float> xyz; // coordinate
+    vector<double> xyz; // coordinate
 };
 
 struct ResidueUnit // struct for each residue
@@ -37,6 +37,9 @@ struct ChainUnit  // struct for each chain
     string chainID_full;          // chain ID, might be more than 1 char
     char chainID;                 // short chain ID, must be 1 char
     string sequence;              // sequence converted from CA coordinate
+    string sarst;                 // SARST (Structural similarity search
+                                  // Aided by Ramachandran Sequential 
+                                  // Transformation) code
     vector<ResidueUnit> residues; // list of residues
 };
 
@@ -445,5 +448,35 @@ int has_atom_name(ResidueUnit residue,string name=" CA ")
     for (int a=0;a<residue.atoms.size();a++)
         if (residue.atoms[a].name==name) atom_name_count++;
     return atom_name_count;
+}
+
+/* remove sidechain or backbone atoms 
+ * atomic_detail - 1: only remove sidechain atoms
+ *                 0: remove all non-CA atom*/
+void remove_sidechain(ResidueUnit& residue,int atomic_detail=1)
+{
+    vector<AtomUnit> atoms; // list of atoms
+    for (int a=0;a<residue.atoms.size();a++)
+    {
+        if ((atomic_detail==0 && residue.atoms[a].name==" CA ")||
+            (atomic_detail==1 &&(residue.atoms[a].name==" CA " ||
+             residue.atoms[a].name==" N  " || residue.atoms[a].name==" C  "
+          || residue.atoms[a].name==" O  ")))
+            atoms.push_back(residue.atoms[a]);
+    }
+    residue.atoms=atoms;
+    atoms.clear();
+}
+
+void remove_sidechain(ChainUnit& chain,int atomic_detail=1)
+{
+    for (int r=0;r<chain.residues.size();r++)
+        remove_sidechain(chain.residues[r],atomic_detail);
+}
+
+void remove_sidechain(ModelUnit& pep,int atomic_detail=1)
+{
+    for (int c=0;c<pep.chains.size();c++)
+        remove_sidechain(pep.chains[c],atomic_detail);
 }
 #endif

@@ -9,24 +9,35 @@ using namespace std;
 
 /* backbone torsion angles (Kappa, Alpha).
  * following DSSP's defination, kappa is supplementary angle
- * for the angle between i-2,i,i+2 CA atoms */
-vector<vector<float> > KappaAlpha(ChainUnit& chain)
+ * for the angle between i-2,i,i+2 CA atoms 
+ *
+ * if dist_instead == 1: calculate distance between
+ * d(r-2,r), d(r-2,r+1), d(r-2,r+2), d(r-1,r+1), d(r-1,r+2), d(r,r+2) */
+vector<vector<double> > KappaAlpha(ChainUnit& chain,int dist_instead=0)
 {
     int L=chain.residues.size();
-    // default torsion angles: kappa=alpha=360
-    vector<float> tmp_array(2,360.);
-    vector<vector<float> > angle_mat(L,tmp_array);
+    vector<vector<double> > angle_mat;
+    if (dist_instead==0)
+    {
+        vector<double> tmp_array(2,360.); // default torsion angles: 360
+        angle_mat.assign(L,tmp_array);
+    }
+    else
+    {
+        vector<double> tmp_array(6,-1); // default distance: -1
+        angle_mat.assign(L,tmp_array);
+    }
 
     // coordinates of previous-previous residue
-    vector<float> prev_prev_CA(3,0.);bool has_prev_prev_CA=false;
+    vector<double> prev_prev_CA(3,0.);bool has_prev_prev_CA=false;
     // coordinates of previous-previous residue
-    vector<float> prev_CA(3,0.);bool has_prev_CA=false;
+    vector<double> prev_CA(3,0.);bool has_prev_CA=false;
     // coordinates of current residue
-    vector<float> cur_CA(3,0.); bool has_cur_CA=false;
+    vector<double> cur_CA(3,0.); bool has_cur_CA=false;
     // coordinates of next residue
-    vector <float> next_CA(3,0); bool has_next_CA=false;
+    vector <double> next_CA(3,0); bool has_next_CA=false;
     // coordinates of next-next residue
-    vector <float> next_next_CA(3,0); bool has_next_next_CA=false;
+    vector <double> next_next_CA(3,0); bool has_next_next_CA=false;
 
     int r,a; // residue index, atom index
     
@@ -93,14 +104,32 @@ vector<vector<float> > KappaAlpha(ChainUnit& chain)
                 }
             }
         }
- 
-        if (has_prev_prev_CA && has_cur_CA && has_next_next_CA)
-            angle_mat[r][0]=180.-rad2deg(Points2Angle(
-                prev_prev_CA,cur_CA,next_next_CA)); // kappa
 
-        if (has_prev_CA && has_cur_CA && has_next_CA && has_next_next_CA)
-            angle_mat[r][1]=rad2deg(Points2Dihedral(
-                prev_CA,cur_CA,next_CA,next_next_CA)); // alpha
+        if (dist_instead==0) // calculate kappa & alpha angles
+        {
+            if (has_prev_prev_CA && has_cur_CA && has_next_next_CA)
+                angle_mat[r][0]=180.-rad2deg(Points2Angle(
+                    prev_prev_CA,cur_CA,next_next_CA)); // kappa
+
+            if (has_prev_CA && has_cur_CA && has_next_CA && has_next_next_CA)
+                angle_mat[r][1]=rad2deg(Points2Dihedral(
+                    prev_CA,cur_CA,next_CA,next_next_CA)); // alpha
+        }
+        else
+        {
+            if (has_prev_prev_CA && has_cur_CA)
+                angle_mat[r][0]=Points2Distance(prev_prev_CA,cur_CA);
+            if (has_prev_prev_CA && has_next_CA)
+                angle_mat[r][1]=Points2Distance(prev_prev_CA,next_CA);
+            if (has_prev_prev_CA && has_next_next_CA)
+                angle_mat[r][2]=Points2Distance(prev_prev_CA,next_next_CA);
+            if (has_prev_CA && has_next_CA)
+                angle_mat[r][3]=Points2Distance(prev_CA,next_CA);
+            if (has_prev_CA && has_next_next_CA)
+                angle_mat[r][4]=Points2Distance(prev_CA,next_next_CA);
+            if (has_cur_CA && has_next_next_CA)
+                angle_mat[r][5]=Points2Distance(cur_CA,next_next_CA);
+        }
     }
     
     prev_prev_CA.clear();
@@ -112,22 +141,22 @@ vector<vector<float> > KappaAlpha(ChainUnit& chain)
 }
 
 /* backbone torsion angles (Omega, Phi, Psi) */
-vector<vector<float> > OmegaPhiPsi(ChainUnit& chain)
+vector<vector<double> > OmegaPhiPsi(ChainUnit& chain)
 {
     int L=chain.residues.size();
     // default torsion angles: omega=phi=psi=360
-    vector<float> tmp_array(3,360.);
-    vector<vector<float> > angle_mat(L,tmp_array);
+    vector<double> tmp_array(3,360.);
+    vector<vector<double> > angle_mat(L,tmp_array);
 
     // coordinates of previous residue
-    vector<float> prev_CA(3,0.);bool has_prev_CA=false;
-    vector<float> prev_C(3,0.); bool has_prev_C =false;
+    vector<double> prev_CA(3,0.);bool has_prev_CA=false;
+    vector<double> prev_C(3,0.); bool has_prev_C =false;
     // coordinates of current residue
-    vector<float> cur_N(3,0.);  bool has_cur_N=false;
-    vector<float> cur_CA(3,0.); bool has_cur_CA=false;
-    vector<float> cur_C(3,0.);  bool has_cur_C=false;
+    vector<double> cur_N(3,0.);  bool has_cur_N=false;
+    vector<double> cur_CA(3,0.); bool has_cur_CA=false;
+    vector<double> cur_C(3,0.);  bool has_cur_C=false;
     // coordinates of next residue
-    vector <float> next_N(3,0); bool has_next_N=false;
+    vector <double> next_N(3,0); bool has_next_N=false;
 
     int r,a; // residue index, atom index
     
@@ -207,6 +236,36 @@ vector<vector<float> > OmegaPhiPsi(ChainUnit& chain)
     cur_C.clear();
     next_N.clear();
     return angle_mat;
+}
+
+/* secondary structure assignment by CA-CA distance 
+ * 1 - coil, 2 - helix, 3 -turn, 4 - strand*/
+int sec_str(const vector<double> dis_vec)
+{
+    for (int j=0;j<6;j++) if (dis_vec[j]<0) return 1; // coil
+    double dis13=dis_vec[0];
+    double dis14=dis_vec[1];
+    double dis15=dis_vec[2];
+    double dis24=dis_vec[3];
+    double dis25=dis_vec[4];
+    double dis35=dis_vec[5];
+
+    double delta=2.1;
+    if (fabs(dis15-6.37)<delta && fabs(dis14-5.18)<delta &&
+        fabs(dis25-5.18)<delta && fabs(dis13-5.45)<delta &&
+        fabs(dis24-5.45)<delta && fabs(dis35-5.45)<delta)
+        return 2; //helix
+
+    delta=1.42;
+    if (fabs(dis15-13  )<delta && fabs(dis14-10.4)<delta &&
+        fabs(dis25-10.4)<delta && fabs(dis13- 6.1)<delta &&
+        fabs(dis24- 6.1)<delta && fabs(dis35- 6.1)<delta)
+        return 4; //strand
+
+    if(dis15 < 8)
+        return 3; //turn
+
+    return 1; // coil
 }
 
 #endif

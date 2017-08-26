@@ -36,8 +36,11 @@ int main(int argc, char **argv)
     vector<string> name_list1,seq_list1;
     vector<string> name_list2,seq_list2;
     vector<vector<int> >seq2int_list1,seq2int_list2; //aa2int
-    int seq_num1=read_pdb_as_sarst(argv[1],name_list1,seq_list1,seq2int_list1);
-    int seq_num2=read_pdb_as_sarst(argv[2],name_list2,seq_list2,seq2int_list2);
+    ModelUnit pdb_entry1,pdb_entry2;
+    int seq_num1=read_pdb_as_fasta(argv[1],name_list1,
+        seq_list1,seq2int_list1,pdb_entry1,2);
+    int seq_num2=read_pdb_as_fasta(argv[2],name_list2,
+        seq_list2,seq2int_list2,pdb_entry2,2);
 
     /* do alignment between two files*/
     for (int q=0;q<seq_num1;q++)
@@ -79,7 +82,7 @@ int main(int argc, char **argv)
             cout<<"Aligned length:"<<setw(5)<<aln_len<<endl;
             cout<<"Identical length:"<<setw(5)<<iden_len<<endl;
             cout<<"Sequence identity:"<<setiosflags(ios::fixed);
-            cout<<setprecision(3)<<setw(9)<<float(iden_len)/len2<<" (=";
+            cout<<setprecision(3)<<setw(9)<<double(iden_len)/len2<<" (=";
             cout<<setw(4)<<iden_len<<'/'<<setw(4)<<len2<<')'<<endl;
             cout<<endl;
 

@@ -4,6 +4,7 @@
 
 #include<string>
 #include<cstring>
+#include<fstream>
 
 using namespace std;
 
@@ -39,4 +40,12 @@ string filename_no_ext(const char *pdb_file)
     return filename;
 }
 
+/* check if file is accessible */
+inline bool isfile(const char *filename)
+{
+    ifstream fp(filename);
+    bool accessible=fp.good();
+    fp.close();
+    return accessible;
+}
 #endif

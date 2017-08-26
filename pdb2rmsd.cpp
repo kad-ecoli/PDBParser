@@ -53,10 +53,10 @@ int main(int argc, char **argv)
     string aln1,aln2; // alignment
     int L1,L2; // sequence length
     int aln_len; // aligned position number
-    vector<float> tmp_array(3,0.);
-    vector<vector<float> > xyz_list1,xyz_list2; // coordinate of aligned residue
-    vector<vector<float> > RotMatix;  // U
-    vector<float> TranVect;  // t
+    vector<double> tmp_array(3,0.);
+    vector<vector<double> > xyz_list1,xyz_list2; // coordinate of aligned residue
+    vector<vector<double> > RotMatix;  // U
+    vector<double> TranVect;  // t
     int r; // resi
     string aln_str; // string to indicate match/mistmatch
     string pos_str; // string to indicate position
@@ -102,7 +102,7 @@ int main(int argc, char **argv)
                 RotateCoor(xyz_list1,xyz_list2, RotMatix, TranVect);
 
                 /* change coordinate */
-                vector<vector<float> > super_xyz_list1(aln_len,tmp_array);
+                vector<vector<double> > super_xyz_list1(aln_len,tmp_array);
                 for(r=0; r<aln_len; r++)
 	                ChangeCoor(xyz_list1[r], RotMatix, TranVect, 
                         super_xyz_list1[r]);

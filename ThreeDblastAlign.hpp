@@ -1,4 +1,7 @@
 /* header for structure alignment by 3d-blast structural alphabet */
+#if !defined(THREEDBLASTALIGN_HPP)
+#define THREEDBLASTALIGN_HPP 1
+
 #include <iostream>
 #include <vector>
 #include <fstream>
@@ -62,3 +65,4 @@ vector<int> ThreeDblast2int(const string sequence)
         seq2int.push_back(ThreeDblast2int(sequence[r]));
     return seq2int;
 }
+#endif

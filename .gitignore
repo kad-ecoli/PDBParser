@@ -5,6 +5,7 @@
 .*.sw*
 
 # binary executables
+qTMclust
 pdb2fasta
 reindex_pdb
 strip_sidechain
@@ -19,3 +20,4 @@ ThreeDblastAlign
 pdb2rmsd
 getRotSeq
 ROTSUMalign
+pdb2ss

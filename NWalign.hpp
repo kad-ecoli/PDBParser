@@ -16,6 +16,7 @@
 #include "MathTools.hpp"
 #include "ROTSUMalign.hpp"
 #include "SarstAlign.hpp"
+#include "SSalign.hpp"
 #include "ThreeDblastAlign.hpp"
 
 using namespace std;
@@ -74,14 +75,14 @@ vector<int> aa2int(const string sequence)
  *            2: SARST code, 3: 3d-blast sequence */
 int read_pdb_as_fasta(const char *filename,vector<string>& name_list,
     vector<string>& seq_list, vector<vector<int> >& seq2int_list,
-    const int seq_type=0)
+    ModelUnit &pdb_entry, const int seq_type=0)
 {
     int atomic_detail=0; // only read CA
     if (seq_type==1 || seq_type==2) atomic_detail=2; // full atom structure
     int allowX=1;        // only allow ATOM and MSE
 
     string PDBid=basename_no_ext(filename);
-    ModelUnit pdb_entry=read_pdb_structure(filename,atomic_detail,allowX);
+    pdb_entry=read_pdb_structure(filename,atomic_detail,allowX);
 
     int seq_num=pdb_entry.chains.size();
     string sequence;
@@ -95,6 +96,7 @@ int read_pdb_as_fasta(const char *filename,vector<string>& name_list,
             case 1:sequence=getRotSeq(pdb_entry.chains[c]);break;
             case 2:sequence=pdb2sarst(pdb_entry.chains[c]);break;
             case 3:sequence=pdb2ThreeDblast(pdb_entry.chains[c]);break;
+            case 4:sequence=pdb2ss(pdb_entry.chains[c]);break;
             default:sequence=pdb2fasta(pdb_entry.chains[c]);break;
         }
 
@@ -110,13 +112,14 @@ int read_pdb_as_fasta(const char *filename,vector<string>& name_list,
             case 1:seq2int_list.push_back(RotSeq2int(sequence));break;
             case 2:seq2int_list.push_back(sarst2int(sequence));break;
             case 3:seq2int_list.push_back(ThreeDblast2int(sequence));break;
+            case 4:seq2int_list.push_back(ss2int(sequence));break;
             default:seq2int_list.push_back(aa2int(sequence));break;
         }
         sequence.clear();
         seq2int.clear();
         name_list.push_back(PDBid+':'+pdb_entry.chains[c].chainID_full);
     }
-    pdb_entry.chains.clear();
+    //pdb_entry.chains.clear();
     return (seq_num-empty_seq_num);
 }
 
