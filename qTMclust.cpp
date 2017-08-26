@@ -83,7 +83,6 @@ int main(int argc, char **argv)
         tmp_chain=read_pdb_structure(pdb_file_list[i].c_str(),1,1).chains[0];
         pdb2fasta(tmp_chain);
         pdb2sarst(tmp_chain);
-        //sarst2int_list.push_back(sarst2int(tmp_chain.sarst));
         remove_sidechain(tmp_chain,0); // remove non-CA atoms
 
         pdb_chain_list.push_back(make_pair(
@@ -162,12 +161,6 @@ int main(int argc, char **argv)
     string clust_txt=full_clustering(TMclust, pdb_name_list, pdb_chain_list, 
         tm_fast_mat, tm_full_mat, TMmin, TMmax, TMstep, "cluster.txt",
         "ca.xyz", 'a', norm, MinClustSize);
-
-    /* output final clusters */
-    //ofstream fp.open("cluster.txt");
-    //fp<<"TM_cut="<<setprecision(4)<<TMmin<<"\tN="<<pdb_entry_num<<"\tN_repr="
-      //<<TMclust.repr_list.size()<<endl<<clust_txt<<"$$$$"<<endl;
-    //fp.close();
     write_matrix("TM_full.txt",tm_full_mat);
     return 0;
 }

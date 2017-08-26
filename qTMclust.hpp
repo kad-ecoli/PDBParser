@@ -232,9 +232,11 @@ int fast_clustering(TMclustUnit &TMclust,const vector<string>&pdb_name_list,
 
     string aln_i,aln_j;
     double rmsd,tmscore_i,tmscore_j;
+    int L_i,L_j;
     while(TMclust.unclust_list.size())
     {
         i=TMclust.unclust_list.back(); // try to add protein i to clust_list
+        L_i=pdb_chain_list[i].first;
         cout<<"assigning "<<pdb_name_list[i];
         TMclust.unclust_list.pop_back();
         add_to_clust=-1; // cluster representative whose cluster i belongs
@@ -258,7 +260,11 @@ int fast_clustering(TMclustUnit &TMclust,const vector<string>&pdb_name_list,
         for (k=0;k<TMclust.repr_list.size();k++)
         {
             j=TMclust.repr_list[k];
+            L_j=pdb_chain_list[j].first;
             if (tm_fast_mat[i][j]!=0) continue;
+            if (norm==0 && (L_i<tmscore_cutoff*L_j || L_j<tmscore_cutoff*L_i))
+                continue;
+
         
             rmsd=tmscore_i=tmscore_j=0;
             TMalign(aln_i, aln_j,pdb_chain_list[i].second,

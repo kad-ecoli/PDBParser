@@ -5,7 +5,7 @@ All programs can be directly called by command line.
 When launched without argument, a short documentation will be displayed.
 
 Compiling by Makefile:
-make         # compile programs, excluding "old" programs
+make         # compile programs
 make all     # compile all programs, including "old" programs
 make clean   # remove compiled binaries
 make NWalign # compile "NWalign" only
@@ -16,23 +16,19 @@ reindex_pdb        # renumber residue number of PDB file
 strip_sidechain    # remove side chain atoms
 pdb2fasta          # convert PDB file to fasta file
 split_chain        # split PDB by chain
+qTMclust 
+
 
 #### residue torsion angles ####
 BackboneTorsion    # calculate backbone torsion angles (omega, phi, psi)
 SidechainTorsion   # calculate sidechain torsion angles (chi1, chi2, chi3, chi4)
-pdb2sarst          # (old) convert PDB to SARST (Structural similarity search
+pdb2sarst          # convert PDB to SARST (Structural similarity search
                    # Aided by Ramachandran Sequential Transformation) code
-pdb2ThreeDblast    # (old) convert PDB to structural alphabet in 3D-blast
+getRotSeq          # convert PDB to ROTSUM (chi-1 angle) code
+pdb2ss             # convert PDB to secondary structure (by TMalign)
 
-#### sequence/structural alphabet alignment ####
-NWalign            # Needleman-Wunsch global sequence alignment
-SarstAlign         # (old, superseded by NWalign) align two structure by 
-                   # SARST code
-ThreeDblastAlign   # (old, superseded by NWalign) align two structure by
-                   # 3d-blast structural alphabet
-ROTSUMalign        # (old, superseded by NWalign) align two structure
-                   #       by chi-1 rotamer
-
-#### structure alignment ####
+#### sequence/structure alignment ####
+NWalign            # global/glocal/local sequence alignment
 pdb2rmsd           # superpose two structures using Kabsch algorithm guided
                    # by sequence alignment given by NWalign
+qTMclust           # cluster PDB by TM-score
