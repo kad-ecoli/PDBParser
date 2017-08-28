@@ -1,10 +1,7 @@
 /*************************************************************************
-Improvements:
-Inline Functions should place in head file. 2007.5.11.
-BUG: PointsOnLine()
-c3[0]=c2[0]-(c1[0]-c2[0])*dis32/dis12;=>c3[0]=c2[0]-(c1[0]-c2[0])*dis32/dis12;
-Date 2008.7.11.
+Geometry Functions for Structural Bioinformatics
 Author: Cao Yang
+contact: cao@scu.edu.cn
 Date:2008.7.11.
 *************************************************************************/
 
@@ -319,7 +316,6 @@ inline void SetMatrix(matrix &sm, int m, int n)
 {
    vector<double> tmp(n, 0);
    sm.assign(m, tmp);
-   //tmp.~vector<double>();
 }
 
 inline void MatrixTimesMatrix(const matrix &a, const matrix &v, matrix &x, int m, int n, int l)
@@ -434,18 +430,6 @@ inline bool norm2_warnless(vector<double> &c)
    return true;
    
 }
-/*
-inline void ShowMatrix(matrix &mtx)
-{
-   cout<<"ShowMatrix"<<endl;
-   for(int i=0; i<mtx.size(); ++i)
-   {
-      for(int j=0; j<mtx[i].size(); ++j)
-         cout<<"["<<mtx[i][j]<<"]	";
-      cout<<endl;
-   }
-}
-*/
 
 /************************Rotation Matrix****************************
 * Give the Rotation Axis and the Rotation Angle
@@ -613,11 +597,9 @@ bool CoordinateRotation(const vector<double> &pointA, const vector<double> &axis
 }
 
 /******************************************************************************
-功能：用于大量空间点坐标的旋转变换
-参数：axisA-axisB两个点构成空间旋转轴，angle是旋转角度，
-     pointB是原来的空间点坐标，运算完毕后更新为新的坐标。
-作者: CaoYang
-时间：2008.6.14.
+Coordinate Rotation for a group of points
+CaoYang
+2008.6.14.
 ******************************************************************************/
 bool GroupRotation(const vector<double> &axisA, const vector<double> &axisB, double angle, vector<vector<double> > &pointB)
 {
@@ -647,26 +629,10 @@ bool GroupRotation(const vector<double> &axisA, const vector<double> &axisB, dou
       pointB[i][0]+=rotmtx[0][0]*point_A[0]+rotmtx[0][1]*point_A[1]+rotmtx[0][2]*point_A[2]+rotmtx[0][3];
       pointB[i][1]+=rotmtx[1][0]*point_A[0]+rotmtx[1][1]*point_A[1]+rotmtx[1][2]*point_A[2]+rotmtx[1][3];
       pointB[i][2]+=rotmtx[2][0]*point_A[0]+rotmtx[2][1]*point_A[1]+rotmtx[2][2]*point_A[2]+rotmtx[2][3];
-      /*
-      point_A[0]=pointB[i][0]-axisA[0];
-      point_A[1]=pointB[i][1]-axisA[1];
-      point_A[2]=pointB[i][2]-axisA[2];
-      point_A[3]=1;
-      
-      if(!MatrixTimesTransVector(rotmtx, point_A, pointB[i]))
-      { 
-         return false;
-      }
-      pointB[i].pop_back();
-   
-      pointB[i][0]+=axisA[0];
-      pointB[i][1]+=axisA[1];
-      pointB[i][2]+=axisA[2];
-      */
    }
    return true;
 }
-//对指定部分进行旋转
+//CoordinateRotation for a given group of points
 bool GroupRotation(const vector<double> &axisA, const vector<double> &axisB, double angle, vector<vector<double> > &pointB, const vector<short>& index)
 {
    if(axisA.size()!=3 || axisB.size()!=3)
@@ -703,9 +669,8 @@ bool GroupRotation(const vector<double> &axisA, const vector<double> &axisB, dou
 
 
 /******************************************************************************
-功能：用于大量空间点坐标的平移变换
-参数：trans构成空间平移量，pointB是原来的空间点坐标，运算完毕后更新为新的坐标。
-时间：2008.6.14.
+Coordinate Translation for a group of points
+2008.6.14.
 ******************************************************************************/
 bool GroupTranslation(const vector<double> &trans, vector<vector<double> > &pointB)
 {
@@ -723,40 +688,6 @@ bool GroupTranslation(const vector<double> &trans, vector<vector<double> > &poin
    return true;
 }
 
-/*****************************************************************************
-功能：使用欧拉角对三个坐标轴（x, y, z）进行旋转操作。
-参数：phi,theta, psi分别为Z轴，新X轴，  
-时间：2007.7.7.
-******************************************************************************/
-/*
-bool EulerAngleApproach(const double phi, const double theta, const double psi, vector<vector<double>> &pointB)
-{
-  double sphi=sin(phi);
-  double cphi=cos(phi);
-  double spsi=sin(psi);
-  double cpsi=cos(psi); 
-  double sthe=sin(theta); 
-  double cthe=cos(theta); 
-  vector<double> vct(3, 0);
-  matrix EulerAngleMatrix(3, vct);
-  EulerAngleMatrix[0][0]=cphi*cpsi - sphi*cthe*spsi;
-  EulerAngleMatrix[0][1]=sphi*cpsi + cpsi*cthe*spsi;
-  EulerAngleMatrix[0][2]=sthe*spsi;
-  
-  EulerAngleMatrix[1][0]=-cphi*spsi - sphi*cthe*cpsi;
-  EulerAngleMatrix[1][1]=-sphi*spsi + cphi*cthe*cpsi;
-  EulerAngleMatrix[1][2]=sthe*cpsi;
-  
-  EulerAngleMatrix[2][0]=sphi*sthe;
-  EulerAngleMatrix[2][1]=-cphis*sthe;
-  EulerAngleMatrix[2][2]=cthe;
-  
-  //MatrixTimesTransVector(EulerAngleMatrix, , vct)
-  
-  
-  return true;
-}
-*/
-
-
 #endif
+
+
