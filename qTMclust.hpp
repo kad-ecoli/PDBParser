@@ -24,10 +24,11 @@ using namespace std;
 
 struct TMclustUnit // struc for storing clustering result
 {
-    vector<int> unclust_list; // index of unclustered items
+    vector<int> unclust_list; // index of unclustered entry
     vector<int> repr_list;    // index of cluster representative
     vector<vector<int> > clust_list; // each row is one cluster
                               // each column is one member in a cluster
+    map<int,int> clust_map;   // key is entry, value is cluster index
 };
 
 int parse_pdb_list(const string pdb_list_file,const string pdb_folder,
@@ -130,12 +131,12 @@ void rough_tmscore_by_kabsch(const string& seq1, const string& seq2,
     }
 }
 
-
-/* all-against-all NWalign+Kabsch rough TM-score calculation */
-void batch_sarst_rmsd(const vector<string> &pdb_name_list,
+/* determine the order of alignment for each entry using
+ * all-against-all NWalign+Kabsch rough TM-score calculation */
+void det_aln_order(const vector<string> &pdb_name_list,
     vector<pair<int,ChainUnit> >&pdb_chain_list,
-    vector<vector<double> >&tm_fast_mat, vector<vector<double> >&tm_full_mat,
-    double tmscore_cutoff=0.5, int norm=0, double TMmax=1.0)
+    vector<vector<int> >&aln_order_mat,
+    const double tmscore_cutoff=0.5, const int norm=0)
 {
     string aln_i,aln_j;
     int aln_len;
@@ -145,9 +146,15 @@ void batch_sarst_rmsd(const vector<string> &pdb_name_list,
     vector<vector<double> > RotMatix;  // U
     vector<double> TranVect;  // t
 
-    double rmsd,tmscore_i,tmscore_j;
+    double tmscore_i,tmscore_j; // tmscore from sarst based superposition
+    double tmscore_aa_i,tmscore_aa_j; // tmscore from aa based superposition
     int L_i,L_j;
     int i,j;
+
+    vector<int>aln_order_vec;
+    vector<pair<double,int> >aln_order_pair;
+    aln_order_vec.clear();
+    aln_order_mat.push_back(aln_order_vec); // first entry is first clust
 
     /**** convert SARST to int ****/
     vector<vector<int> >sarst2int_list;
@@ -163,7 +170,7 @@ void batch_sarst_rmsd(const vector<string> &pdb_name_list,
     }
 
     /**** perform superposition ****/
-    for (i=0;i<pdb_entry_num;i++)
+    for (i=1;i<pdb_entry_num;i++)
     {
         cout<<"    aligning "<<pdb_name_list[i]<<endl;
         L_i=pdb_chain_list[i].first;
@@ -188,32 +195,21 @@ void batch_sarst_rmsd(const vector<string> &pdb_name_list,
             xyz_list_i.clear();
             xyz_list_j.clear();
 
-            /* perform TMalign on well aligned pairs */
-            if (tmscore_j>=tmscore_cutoff*0.6||(norm==1 && 
-                tmscore_i>=tmscore_cutoff*0.6))
-            {
-                if (MIN(tmscore_i,tmscore_j)<=TMmax)
-                    TMalign(aln_i, aln_j,pdb_chain_list[i].second,
-                    pdb_chain_list[j].second, rmsd, tmscore_i, tmscore_j,0);
-                tm_fast_mat[i][j]=tm_full_mat[i][j]=tmscore_i;
-                tm_fast_mat[j][i]=tm_full_mat[j][i]=tmscore_j;
-                cout<<"        "<<pdb_name_list[i]<<'\t'<<pdb_name_list[j]
-                    <<'\t'<<setiosflags(ios::fixed)<<setprecision(4)
-                    <<tmscore_i<<'\t'<<tmscore_j<<endl;
-                continue;
-            }
-
             /*** superpose by amino acid sequence ***
              * CA-only proteins are often not alignable by SARST
              * only perform aa alignment if X ratio in sarst is too high */
-            if (MAX(X_sarst_ratio[i],X_sarst_ratio[j])<0.2) continue;
+            if (MAX(X_sarst_ratio[i],X_sarst_ratio[j])<0.2)
+            {
+                aln_order_pair.push_back(make_pair(tmscore_i,j));
+                continue;
+            }
 
             rough_tmscore_by_kabsch(pdb_chain_list[i].second.sequence,
                 pdb_chain_list[j].second.sequence,
                 seq2int_list[i], seq2int_list[j], aln_i, aln_j,
                 pdb_chain_list[i].second, pdb_chain_list[j].second,
                 xyz_list_i, xyz_list_j, RotMatix, TranVect,
-                tmscore_i, tmscore_j, L_i, L_j, 0,0); //0 -aa; 0 -global
+                tmscore_aa_i, tmscore_aa_j, L_i, L_j, 0,0); //0 -aa; 0 -global
 
             /* clean up */
             RotMatix.clear();
@@ -223,21 +219,17 @@ void batch_sarst_rmsd(const vector<string> &pdb_name_list,
             xyz_list_i.clear();
             xyz_list_j.clear();
 
-            /* perform TMalign on well aligned pairs */
-            if (tmscore_j>=tmscore_cutoff*0.6||(norm==1 && 
-                tmscore_i>=tmscore_cutoff*0.6))
-            {
-                if (MIN(tmscore_i,tmscore_j)<=TMmax)
-                    TMalign(aln_i, aln_j,pdb_chain_list[i].second,
-                    pdb_chain_list[j].second, rmsd, tmscore_i, tmscore_j,0);
-                tm_fast_mat[i][j]=tm_full_mat[i][j]=tmscore_i;
-                tm_fast_mat[j][i]=tm_full_mat[j][i]=tmscore_j;
-                cout<<"        "<<pdb_name_list[i]<<'\t'<<pdb_name_list[j]
-                    <<'\t'<<setiosflags(ios::fixed)<<setprecision(4)
-                    <<tmscore_i<<'\t'<<tmscore_j<<endl;
-                continue;
-            }
+            aln_order_pair.push_back(make_pair(MAX(tmscore_i,tmscore_aa_i),j));
         }
+
+        /* clean up */
+        if (aln_order_pair.size())
+            stable_sort(aln_order_pair.begin(),aln_order_pair.end());
+        for (j=aln_order_pair.size()-1;j>=0;j--)
+            aln_order_vec.push_back(aln_order_pair[j].second);
+        aln_order_mat.push_back(aln_order_vec);
+        aln_order_vec.clear();
+        aln_order_pair.clear();
     }
 
     seq2int_list.clear();
@@ -276,21 +268,106 @@ void initialize_TMclust(TMclustUnit &TMclust, const vector<int> &member_list)
 int add_chain_to_clust(TMclustUnit &TMclust, const int new_member,
     const int clust_repr)
 {
-    int j;
-    for (j=0;j<TMclust.repr_list.size();j++)
+    int k; // cluster index
+    for (k=0;k<TMclust.repr_list.size();k++)
     {
-        if (TMclust.repr_list[j]==clust_repr)
+        if (TMclust.repr_list[k]==clust_repr)
         {
-            TMclust.clust_list[j].push_back(new_member);
+            TMclust.clust_list[k].push_back(new_member);
+            TMclust.clust_map[new_member]=k;
             break;
         }
     }
-    if (j==TMclust.repr_list.size())
+    if (k==TMclust.repr_list.size())
     {
         cout<<"FATAL ERROR! No such representative "<<clust_repr<<endl;
         exit(0);
     }
-    return j; // index of clust_repr in repr_list
+    return k; // index of clust_repr in repr_list
+}
+
+/* assign new_repr as new cluster */
+int assign_chain_as_new_clust(TMclustUnit &TMclust, const int new_repr)
+{
+    TMclust.repr_list.push_back(new_repr);
+    vector<int> tmp_array(1,new_repr);
+    TMclust.clust_list.push_back(tmp_array);
+    TMclust.clust_map[new_repr]=TMclust.repr_list.size()-1;
+    return TMclust.clust_map[new_repr];
+}
+
+int fast_ordered_clustering(TMclustUnit &TMclust,
+    const vector<string>&pdb_name_list,const vector<vector<int> >&aln_order_mat,
+    vector<vector<double> >&tm_fast_mat, vector<vector<double> >&tm_full_mat,
+    vector<pair<int,ChainUnit> >&pdb_chain_list, double tmscore_cutoff=0.5,
+    int f=8, int norm=0)
+{
+    int i,j,k,l;
+    int add_to_clust=-1;
+    int max_clust_size=0;
+
+    string aln_i,aln_j;
+    double rmsd,tmscore_i,tmscore_j;
+    int L_i,L_j;
+    while(TMclust.unclust_list.size())
+    {
+        i=TMclust.unclust_list.back(); // try to add protein i to clust_list
+        L_i=pdb_chain_list[i].first;
+        cout<<"assigning "<<pdb_name_list[i];
+        TMclust.unclust_list.pop_back();
+        add_to_clust=-1; // cluster representative to whom cluster i belongs
+
+        for (l=0;l<aln_order_mat[i].size();l++)
+        {
+            k=TMclust.clust_map[aln_order_mat[i][l]]; // cluster index
+            j=TMclust.repr_list[k]; // representative for cluster k
+
+            L_j=pdb_chain_list[j].first;
+            if (tm_fast_mat[i][j]>0 || (norm==0 && 
+               (L_i<tmscore_cutoff*L_j || L_j<tmscore_cutoff*L_i))) continue;
+            
+            rmsd=tmscore_i=tmscore_j=0;
+            TMalign(aln_i, aln_j,pdb_chain_list[i].second,
+                pdb_chain_list[j].second, rmsd, tmscore_i, tmscore_j, f);
+            tm_fast_mat[i][j]=tmscore_i;
+            tm_fast_mat[j][i]=tmscore_j;
+           
+            if (f>0     &&(MIN(tmscore_i,tmscore_j)>=tmscore_cutoff*.9 ||
+               (norm==1 && MAX(tmscore_i,tmscore_j)>=tmscore_cutoff*.9)))
+            {
+                TMalign(aln_i, aln_j,pdb_chain_list[i].second,
+                    pdb_chain_list[j].second, rmsd, tmscore_i, tmscore_j, 0);
+                tm_full_mat[i][j]=tmscore_i;
+                tm_full_mat[j][i]=tmscore_j;
+            }
+            else if (f==0)
+            {
+                tm_full_mat[i][j]=tmscore_i;
+                tm_full_mat[j][i]=tmscore_j;
+            }
+
+            if (MIN(tmscore_i,tmscore_j)>=tmscore_cutoff|| (norm==1 && 
+                MAX(tmscore_i,tmscore_j)>=tmscore_cutoff))
+            {
+                add_to_clust=j;
+                break;
+            }
+        }
+
+        if (add_to_clust>=0)
+        {
+            cout<<" to "<<pdb_name_list[j]<<endl;
+            add_chain_to_clust(TMclust,i,j);
+        }
+        else 
+        {
+            cout<<" as new cluster"<<endl;
+            assign_chain_as_new_clust(TMclust,i);
+        }
+    }
+    for (i=0;i<TMclust.clust_list.size();i++) 
+        max_clust_size=MAX(max_clust_size,TMclust.clust_list[i].size());
+    return max_clust_size;
 }
 
 int fast_clustering(TMclustUnit &TMclust,const vector<string>&pdb_name_list,
@@ -496,17 +573,16 @@ void write_TMclust_ca_xyz(const string filename,
     fp.close();
 }
 
-string full_clustering(TMclustUnit &TMclust,const vector<string>&pdb_name_list,
+void full_clustering(TMclustUnit &TMclust,const vector<string>&pdb_name_list,
     vector<pair<int,ChainUnit> >&pdb_chain_list,
     vector<vector<double> >&tm_fast_mat, vector<vector<double> >&tm_full_mat,
     double TMmin=0.5, double TMmax=0.8, double TMstep=0.1,
-    string cluster_filename="cluster.txt", string ca_xyz_filename="ca.xyz",
+    string cluster_filename="cluster.txt", 
     char openmode='a', int norm=0, int MinClustSize=2)
 {
-    string clust_txt="";
     TMmin+=TMstep;
-    if (TMmin>TMmax) return clust_txt;
-    if (TMclust.repr_list.size()<=0) return clust_txt;
+    if (TMmin>TMmax) return;
+    if (TMclust.repr_list.size()<=0) return;
 
     cout<<"heuristic clustering for TM-score "<<TMmin<<endl;
     int max_clust_size=0;
@@ -526,22 +602,16 @@ string full_clustering(TMclustUnit &TMclust,const vector<string>&pdb_name_list,
                 pdb_name_list,TMmin,openmode);
         }
 
-        //vector<int> repr_list;
-        //for (int repr=1;repr<TMsubclust.repr_list.size();repr++)
-            //repr_list.push_back(TMsubclust.repr_list[repr]);
-        //write_TMclust_ca_xyz(ca_xyz_filename, repr_list,
-        //    pdb_name_list, pdb_chain_list, openmode);
-
         /* clustering at TMmin + TMstep */
         full_clustering(TMsubclust, pdb_name_list, pdb_chain_list,
             tm_fast_mat, tm_full_mat, TMmin, TMmax, TMstep,
-            cluster_filename, ca_xyz_filename, openmode, norm);
+            cluster_filename, openmode, norm);
 
         /* clean up */
         //repr_list.clear();
         TMsubclust.repr_list.clear();
         TMsubclust.clust_list.clear();
     }
-    return clust_txt;
+    return;
 }
 #endif

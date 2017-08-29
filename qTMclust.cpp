@@ -94,11 +94,11 @@ int main(int argc, char **argv)
     }
 
     /* sort pdb list in descending order of chain length */
-    sort(pdb_chain_list.begin(),pdb_chain_list.end(),
+    stable_sort(pdb_chain_list.begin(),pdb_chain_list.end(),
         cf_pdb_chain_list);
-    sort(pdb_name_pair_list.begin(),pdb_name_pair_list.end(),
+    stable_sort(pdb_name_pair_list.begin(),pdb_name_pair_list.end(),
         cf_int_str_pair_list);
-    sort(pdb_file_pair_list.begin(),pdb_file_pair_list.end(),
+    stable_sort(pdb_file_pair_list.begin(),pdb_file_pair_list.end(),
         cf_int_str_pair_list);
     for (i=0;i<pdb_entry_num;i++)
     {
@@ -126,20 +126,26 @@ int main(int argc, char **argv)
     // (i,j) store TM-score between i and j, as normalized by i
     vector<vector<double> >tm_fast_mat(pdb_entry_num,tmp_array);//TMalign-f8
     vector<vector<double> >tm_full_mat(pdb_entry_num,tmp_array);//TMalign
+    tmp_array.clear();
+    vector<vector<int> >aln_order_mat; // row is entry, column is (in 
+                      // descending order) the entry with high sarst tmscore
 
     /* NWalign using sarst */
     cout<<"SARST alignment derived RMSD superposition"<<endl;
-    batch_sarst_rmsd(pdb_name_list,pdb_chain_list, //sarst2int_list,
-        tm_fast_mat, tm_full_mat, TMmin, norm, TMmax);
-    write_matrix("TM_fast.txt",tm_fast_mat);
-    write_matrix("TM_full.txt",tm_full_mat);
+    det_aln_order(pdb_name_list,pdb_chain_list,aln_order_mat,TMmin,norm);
+    //batch_sarst_rmsd(pdb_name_list,pdb_chain_list,
+        //tm_fast_mat, tm_full_mat, TMmin, norm, TMmax);
+    //write_matrix("TM_fast.txt",tm_fast_mat);
+    //write_matrix("TM_full.txt",tm_full_mat);
 
     /* perform initial clustering */
     TMclustUnit TMclust;
     initialize_TMclust(TMclust,pdb_entry_num);
     cout<<"heuristic clustering for TM-score "<<TMmin<<endl;
-    fast_clustering(TMclust, pdb_name_list, 
+    fast_ordered_clustering(TMclust, pdb_name_list, aln_order_mat,
         tm_fast_mat, tm_full_mat, pdb_chain_list, TMmin, 8, norm);
+    //fast_clustering(TMclust, pdb_name_list, 
+        //tm_fast_mat, tm_full_mat, pdb_chain_list, TMmin, 8, norm);
 
     /* output initial clusters */
     cout<<"write output for TM-score "<<TMmin<<endl;
@@ -152,9 +158,9 @@ int main(int argc, char **argv)
     if (TMmin+TMstep>=TMmax) return 0;
 
     /* clustering within clusters */
-    string clust_txt=full_clustering(TMclust, pdb_name_list, pdb_chain_list, 
+    full_clustering(TMclust, pdb_name_list, pdb_chain_list, 
         tm_fast_mat, tm_full_mat, TMmin, TMmax, TMstep, "cluster.txt",
-        "ca.xyz", 'a', norm, MinClustSize);
+        'a', norm, MinClustSize);
     write_matrix("TM_full.txt",tm_full_mat);
     return 0;
 }
