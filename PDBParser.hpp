@@ -158,7 +158,7 @@ ModelUnit read_pdb_structure(const char *filename,
                 continue;
             if (line[0]!=' ') // new PDBfile
             {
-                PDBfile=line.substr(0,20);
+                PDBfile=line.substr(0,line.length()-1);
                 PDBmap[PDBfile]=chainIDmap;
                 PDBvec.push_back(PDBfile);
             }
