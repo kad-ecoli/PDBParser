@@ -7,12 +7,13 @@ const char* docstring=""
 "    PDB/ - folder for input PDB coordinate files\n"
 "\n"
 "output:\n"
-"    seq.fasta   - fasta format file for amino acid sequence\n"
-"    sarst.fasta - fasta format file for SARST code\n"
-"    cluster.txt - index file for clustering result\n"
-"    ca.xyz      - xyz format file for CA atoms of representative PDB files\n"
-"    TM_fast.txt - matrix of TM-score by fast TMalign\n"
-"    TM_full.txt - matrix of TM-score by standard TMalign\n"
+"    seq.fasta    - fasta format file for amino acid sequence\n"
+"    sarst.fasta  - fasta format file for SARST code\n"
+"    cluster.txt  - index file for clustering result\n"
+"    ca.xyz       - xyz format file for CA atoms of representative PDB files\n"
+"    TM_sarst.txt - matrix of TM-score by SARST alignment\n"
+"    TM_fast.txt  - matrix of TM-score by fast TMalign\n"
+"    TM_full.txt  - matrix of TM-score by standard TMalign\n"
 "\n"
 "options:\n"
 "    -norm={0,1} protein length with which TM-score is normalized\n"
@@ -124,25 +125,16 @@ int main(int argc, char **argv)
     /* matrix for TM-score */
     vector <double> tmp_array(pdb_entry_num,0);
     // (i,j) store TM-score between i and j, as normalized by i
+    vector<vector<double> >tm_sarst_mat(pdb_entry_num,tmp_array);//TMalign-f8
     vector<vector<double> >tm_fast_mat(pdb_entry_num,tmp_array);//TMalign-f8
     vector<vector<double> >tm_full_mat(pdb_entry_num,tmp_array);//TMalign
     tmp_array.clear();
-    vector<vector<int> >aln_order_mat; // row is entry, column is (in 
-                      // descending order) the entry with high sarst tmscore
-
-    /* NWalign using sarst */
-    cout<<"SARST alignment derived RMSD superposition"<<endl;
-    det_aln_order(pdb_name_list,pdb_chain_list,aln_order_mat,TMmin,norm);
-    //batch_sarst_rmsd(pdb_name_list,pdb_chain_list,
-        //tm_fast_mat, tm_full_mat, TMmin, norm, TMmax);
-    //write_matrix("TM_fast.txt",tm_fast_mat);
-    //write_matrix("TM_full.txt",tm_full_mat);
 
     /* perform initial clustering */
     TMclustUnit TMclust;
     initialize_TMclust(TMclust,pdb_entry_num);
     cout<<"heuristic clustering for TM-score "<<TMmin<<endl;
-    fast_ordered_clustering(TMclust, pdb_name_list, aln_order_mat,
+    qTMclust(TMclust, pdb_name_list, tm_sarst_mat,
         tm_fast_mat, tm_full_mat, pdb_chain_list, TMmin, 8, norm);
     //fast_clustering(TMclust, pdb_name_list, 
         //tm_fast_mat, tm_full_mat, pdb_chain_list, TMmin, 8, norm);
@@ -150,6 +142,7 @@ int main(int argc, char **argv)
     /* output initial clusters */
     cout<<"write output for TM-score "<<TMmin<<endl;
     write_TMclust_result("cluster.txt",TMclust,pdb_name_list,TMmin);
+    write_matrix("TM_sarst.txt",tm_sarst_mat);
     write_matrix("TM_fast.txt",tm_fast_mat);
     write_matrix("TM_full.txt",tm_full_mat);
     write_TMclust_ca_xyz("ca.xyz", TMclust.repr_list, 

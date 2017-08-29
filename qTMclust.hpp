@@ -131,115 +131,6 @@ void rough_tmscore_by_kabsch(const string& seq1, const string& seq2,
     }
 }
 
-/* determine the order of alignment for each entry using
- * all-against-all NWalign+Kabsch rough TM-score calculation */
-void det_aln_order(const vector<string> &pdb_name_list,
-    vector<pair<int,ChainUnit> >&pdb_chain_list,
-    vector<vector<int> >&aln_order_mat,
-    const double tmscore_cutoff=0.5, const int norm=0)
-{
-    string aln_i,aln_j;
-    int aln_len;
-    int pdb_entry_num=pdb_chain_list.size();
-
-    vector<vector<double> > xyz_list_i,xyz_list_j;
-    vector<vector<double> > RotMatix;  // U
-    vector<double> TranVect;  // t
-
-    double tmscore_i,tmscore_j; // tmscore from sarst based superposition
-    double tmscore_aa_i,tmscore_aa_j; // tmscore from aa based superposition
-    int L_i,L_j;
-    int i,j;
-
-    vector<int>aln_order_vec;
-    vector<pair<double,int> >aln_order_pair;
-    aln_order_vec.clear();
-    aln_order_mat.push_back(aln_order_vec); // first entry is first clust
-
-    /**** convert SARST to int ****/
-    vector<vector<int> >sarst2int_list;
-    vector<vector<int> >seq2int_list;
-    vector<double> X_sarst_ratio(pdb_entry_num,0.);
-    for (i=0;i<pdb_entry_num;i++)
-    {
-        sarst2int_list.push_back(sarst2int(pdb_chain_list[i].second.sarst));
-        seq2int_list.push_back(aa2int(pdb_chain_list[i].second.sequence));
-        for (j=0;j<pdb_chain_list[i].second.sarst.length();j++)
-            X_sarst_ratio[i]+=(pdb_chain_list[i].second.sarst[j]=='X');
-        X_sarst_ratio[i]/=pdb_chain_list[i].first;
-    }
-
-    /**** perform superposition ****/
-    for (i=1;i<pdb_entry_num;i++)
-    {
-        cout<<"    aligning "<<pdb_name_list[i]<<endl;
-        L_i=pdb_chain_list[i].first;
-        for (j=0;j<i;j++)
-        {
-            L_j=pdb_chain_list[j].first;
-            if (norm==0 && (L_i<tmscore_cutoff*L_j || L_j<tmscore_cutoff*L_i))
-                continue;
-            /*** superpose by sarst ***/
-            rough_tmscore_by_kabsch(pdb_chain_list[i].second.sarst,
-                pdb_chain_list[j].second.sarst,
-                sarst2int_list[i], sarst2int_list[j], aln_i, aln_j,
-                pdb_chain_list[i].second, pdb_chain_list[j].second,
-                xyz_list_i, xyz_list_j, RotMatix, TranVect,
-                tmscore_i, tmscore_j, L_i, L_j, 2,0); //2 -sarst; 0 -global
-
-            /* clean up */
-            RotMatix.clear();
-            TranVect.clear();
-            aln_i.clear();
-            aln_j.clear();
-            xyz_list_i.clear();
-            xyz_list_j.clear();
-
-            /*** superpose by amino acid sequence ***
-             * CA-only proteins are often not alignable by SARST
-             * only perform aa alignment if X ratio in sarst is too high */
-            if (MAX(X_sarst_ratio[i],X_sarst_ratio[j])<0.2)
-            {
-                aln_order_pair.push_back(make_pair(norm==0?
-                    MIN(tmscore_i,tmscore_j):MAX(tmscore_i,tmscore_j),j));
-                continue;
-            }
-
-            rough_tmscore_by_kabsch(pdb_chain_list[i].second.sequence,
-                pdb_chain_list[j].second.sequence,
-                seq2int_list[i], seq2int_list[j], aln_i, aln_j,
-                pdb_chain_list[i].second, pdb_chain_list[j].second,
-                xyz_list_i, xyz_list_j, RotMatix, TranVect,
-                tmscore_aa_i, tmscore_aa_j, L_i, L_j, 0,0); //0 -aa; 0 -global
-            tmscore_i=MAX(tmscore_i,tmscore_aa_i);
-            tmscore_j=MAX(tmscore_j,tmscore_aa_j);
-
-            /* clean up */
-            RotMatix.clear();
-            TranVect.clear();
-            aln_i.clear();
-            aln_j.clear();
-            xyz_list_i.clear();
-            xyz_list_j.clear();
-
-            aln_order_pair.push_back(make_pair(norm==0?
-                MIN(tmscore_i,tmscore_j):MAX(tmscore_i,tmscore_j),j));
-        }
-
-        /* clean up */
-        if (aln_order_pair.size())
-            stable_sort(aln_order_pair.begin(),aln_order_pair.end());
-        for (j=aln_order_pair.size()-1;j>=0;j--)
-            aln_order_vec.push_back(aln_order_pair[j].second);
-        aln_order_mat.push_back(aln_order_vec);
-        aln_order_vec.clear();
-        aln_order_pair.clear();
-    }
-
-    seq2int_list.clear();
-    sarst2int_list.clear();
-}
-
 void initialize_TMclust(TMclustUnit &TMclust,const int pdb_entry_num)
 {
     TMclust.repr_list.clear();
@@ -300,19 +191,44 @@ int assign_chain_as_new_clust(TMclustUnit &TMclust, const int new_repr)
     return TMclust.clust_map[new_repr];
 }
 
-int fast_ordered_clustering(TMclustUnit &TMclust,
-    const vector<string>&pdb_name_list,const vector<vector<int> >&aln_order_mat,
+int qTMclust(TMclustUnit &TMclust, const vector<string>&pdb_name_list,
+    vector<vector<double> >&tm_sarst_mat,
     vector<vector<double> >&tm_fast_mat, vector<vector<double> >&tm_full_mat,
     vector<pair<int,ChainUnit> >&pdb_chain_list, double tmscore_cutoff=0.5,
     int f=8, int norm=0)
 {
+    int pdb_entry_num=pdb_chain_list.size();
+
     int i,j,k,l;
     int add_to_clust=-1;
     int max_clust_size=0;
 
     string aln_i,aln_j;
-    double rmsd,tmscore_i,tmscore_j;
+    double rmsd,tmscore_i,tmscore_j;  // tmscore from sarst based superposition
+    double tmscore_aa_i,tmscore_aa_j; // tmscore from aa based superposition
+    double tmscore; // the tmscore to consider when clustering
     int L_i,L_j;
+    int aln_len;
+
+    vector<vector<double> > xyz_list_i,xyz_list_j;
+    vector<vector<double> > RotMatix;  // U
+    vector<double> TranVect;  // t
+    vector<pair<double,int> >aln_order_pair;
+
+    /**** convert SARST to int ****/
+    vector<vector<int> >sarst2int_list;
+    vector<vector<int> >seq2int_list;
+    vector<double> X_sarst_ratio(pdb_entry_num,0.);
+    for (i=0;i<pdb_entry_num;i++)
+    {
+        sarst2int_list.push_back(sarst2int(pdb_chain_list[i].second.sarst));
+        seq2int_list.push_back(aa2int(pdb_chain_list[i].second.sequence));
+        for (j=0;j<pdb_chain_list[i].second.sarst.length();j++)
+            X_sarst_ratio[i]+=(pdb_chain_list[i].second.sarst[j]=='X');
+        X_sarst_ratio[i]/=pdb_chain_list[i].first;
+    }
+
+    /**** perform superposition ****/
     while(TMclust.unclust_list.size())
     {
         i=TMclust.unclust_list.back(); // try to add protein i to clust_list
@@ -321,9 +237,95 @@ int fast_ordered_clustering(TMclustUnit &TMclust,
         TMclust.unclust_list.pop_back();
         add_to_clust=-1; // cluster representative to whom cluster i belongs
 
-        for (l=0;l<aln_order_mat[i].size();l++)
+        aln_order_pair.clear();
+        for (k=0;k<TMclust.repr_list.size();k++)
         {
-            k=TMclust.clust_map[aln_order_mat[i][l]]; // cluster index
+            j=TMclust.repr_list[k]; // representative for cluster k
+            L_j=pdb_chain_list[j].first;
+            if (tm_fast_mat[i][j]>0 || (norm==0 &&
+               (L_i<tmscore_cutoff*L_j || L_j<tmscore_cutoff*L_i)))
+                continue; // skip unnecessary superposition
+
+            /*** superpose by sarst ***/
+            rough_tmscore_by_kabsch(pdb_chain_list[i].second.sarst,
+                pdb_chain_list[j].second.sarst,
+                sarst2int_list[i], sarst2int_list[j], aln_i, aln_j,
+                pdb_chain_list[i].second, pdb_chain_list[j].second,
+                xyz_list_i, xyz_list_j, RotMatix, TranVect,
+                tmscore_i, tmscore_j, L_i, L_j, 2,0); //2 -sarst; 0 -global
+
+            /* clean up */
+            RotMatix.clear();
+            TranVect.clear();
+            aln_i.clear();
+            aln_j.clear();
+            xyz_list_i.clear();
+            xyz_list_j.clear();
+
+            /*** superpose by amino acid sequence ***
+             * CA-only proteins are often not alignable by SARST */
+            rough_tmscore_by_kabsch(pdb_chain_list[i].second.sequence,
+                pdb_chain_list[j].second.sequence,
+                seq2int_list[i], seq2int_list[j], aln_i, aln_j,
+                pdb_chain_list[i].second, pdb_chain_list[j].second,
+                xyz_list_i, xyz_list_j, RotMatix, TranVect,
+                tmscore_aa_i, tmscore_aa_j, L_i, L_j, 0,0); //0 -aa; 0 -global
+            tmscore_i=MAX(tmscore_i,tmscore_aa_i);
+            tmscore_j=MAX(tmscore_j,tmscore_aa_j);
+            tmscore=(norm==0?
+                MIN(tmscore_i,tmscore_j):MAX(tmscore_i,tmscore_j));
+            tm_sarst_mat[i][j]=tmscore_i;
+            tm_sarst_mat[j][i]=tmscore_j;
+
+            /* clean up */
+            RotMatix.clear();
+            TranVect.clear();
+            aln_i.clear();
+            aln_j.clear();
+            xyz_list_i.clear();
+            xyz_list_j.clear();
+
+            /* the following lines pre-terminate sarst+rmsd alignment if the
+             * first significant hit is found. this is not only unhelpful
+             * for shortening computational time, but also resulting in
+             * assignment to cluster whose TM-score is not the best
+            if (tmscore>=tmscore_cutoff*.6)
+            {
+                TMalign(aln_i, aln_j,pdb_chain_list[i].second,
+                    pdb_chain_list[j].second, rmsd,tmscore_i,tmscore_j,0);
+                tm_full_mat[i][j]=tm_fast_mat[i][j]=tmscore_i;
+                tm_full_mat[j][i]=tm_fast_mat[j][i]=tmscore_j;
+                tmscore=(norm==0?
+                    MIN(tmscore_i,tmscore_j):MAX(tmscore_i,tmscore_j));
+                if (tmscore>=tmscore_cutoff)
+                {
+                    add_to_clust=j;
+                    break;
+                }
+            }
+            */
+            aln_order_pair.push_back(make_pair(tmscore,j));
+        }
+
+        /* if we do not pre-terminate sarst+rmsd, add_to_clust==-1
+        if (add_to_clust>=0)
+        {
+            cout<<" to "<<pdb_name_list[j]<<endl;
+            add_chain_to_clust(TMclust,i,j);
+            aln_order_pair.clear();
+            continue;
+        }
+        */
+
+        if (aln_order_pair.size())
+        {
+            stable_sort(aln_order_pair.begin(), aln_order_pair.end());
+            reverse(aln_order_pair.begin(), aln_order_pair.end());
+        }
+
+        for (l=0;l<aln_order_pair.size();l++)
+        {
+            k=TMclust.clust_map[aln_order_pair[l].second]; // cluster index
             j=TMclust.repr_list[k]; // representative for cluster k
 
             L_j=pdb_chain_list[j].first;
@@ -368,7 +370,15 @@ int fast_ordered_clustering(TMclustUnit &TMclust,
             cout<<" as new cluster"<<endl;
             assign_chain_as_new_clust(TMclust,i);
         }
+        aln_order_pair.clear();
     }
+
+    /* clean-up */
+    seq2int_list.clear();
+    sarst2int_list.clear();
+    X_sarst_ratio.clear();
+
+    /* return max cluster size */
     for (i=0;i<TMclust.clust_list.size();i++) 
         max_clust_size=MAX(max_clust_size,TMclust.clust_list[i].size());
     return max_clust_size;
