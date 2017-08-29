@@ -121,11 +121,6 @@ int main(int argc, char **argv)
         pdb_chain_list[i].first<<endl<<pdb_chain_list[i].second.sequence<<endl;
     fp_aa.close();
 
-    /* convert SARST to int */
-    vector<vector<int> >sarst2int_list;
-    for (i=0;i<pdb_entry_num;i++)
-        sarst2int_list.push_back(sarst2int(pdb_chain_list[i].second.sarst));
-
     /* matrix for TM-score */
     vector <double> tmp_array(pdb_entry_num,0);
     // (i,j) store TM-score between i and j, as normalized by i
@@ -134,9 +129,8 @@ int main(int argc, char **argv)
 
     /* NWalign using sarst */
     cout<<"SARST alignment derived RMSD superposition"<<endl;
-    batch_sarst_rmsd(pdb_name_list,pdb_chain_list, sarst2int_list,
-        tm_fast_mat, tm_full_mat, TMmin, norm);
-    sarst2int_list.clear();
+    batch_sarst_rmsd(pdb_name_list,pdb_chain_list, //sarst2int_list,
+        tm_fast_mat, tm_full_mat, TMmin, norm, TMmax);
     write_matrix("TM_fast.txt",tm_fast_mat);
     write_matrix("TM_full.txt",tm_full_mat);
 

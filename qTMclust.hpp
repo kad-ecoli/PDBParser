@@ -97,13 +97,46 @@ bool cf_int_str_pair_list(pair<int,string> chain1,pair<int,string> chain2)
     return chain1.first>chain2.first;
 }
 
+/* NWalign+Kabsch rough TM-score calculation */
+void rough_tmscore_by_kabsch(const string& seq1, const string& seq2, 
+    const vector<int>& seq2int1, const vector<int>& seq2int2,
+    string & aln1,string & aln2, ChainUnit& chain1, ChainUnit& chain2,
+    vector<vector<double> >&xyz_list1, vector<vector<double> >&xyz_list2, 
+    vector<vector<double> >&RotMatix, vector<double>&TranVect,
+    double& tmscore1, double& tmscore2, const int L1, const int L2,
+    const int seq_type=0, const int glocal=0)
+{
+    NWalign(seq1, seq2, seq2int1, seq2int2, aln1, aln2, seq_type, glocal);
+    aln2coor(aln1, aln2, chain1, chain2, xyz_list1, xyz_list2,0);
+    int aln_len=xyz_list1.size();
+    if (aln_len==0) tmscore1=tmscore2=0;
+    else
+    {
+        /* kabsch */
+        RotateCoor(xyz_list1,xyz_list2, RotMatix, TranVect);
+
+        /* change coordinate */
+        vector<double> tmp_array(3,0);
+        vector<vector<double> > super_xyz_list1(aln_len,tmp_array);
+        for (int r=0; r<aln_len; r++)
+            ChangeCoor(xyz_list1[r], RotMatix, TranVect, super_xyz_list1[r]);
+
+        /* TM-score */
+        tmscore1=calTMscore(super_xyz_list1,xyz_list2,L1);
+        tmscore2=calTMscore(super_xyz_list1,xyz_list2,L2);
+
+        /* clean-up */
+        super_xyz_list1.clear();
+    }
+}
+
+
+/* all-against-all NWalign+Kabsch rough TM-score calculation */
 void batch_sarst_rmsd(const vector<string> &pdb_name_list,
     vector<pair<int,ChainUnit> >&pdb_chain_list,
-    vector<vector<int> >&sarst2int_list,
     vector<vector<double> >&tm_fast_mat, vector<vector<double> >&tm_full_mat,
-    double tmscore_cutoff=0.5, int norm=0)
+    double tmscore_cutoff=0.5, int norm=0, double TMmax=1.0)
 {
-    vector<double> tmp_array(3,0);
     string aln_i,aln_j;
     int aln_len;
     int pdb_entry_num=pdb_chain_list.size();
@@ -113,46 +146,45 @@ void batch_sarst_rmsd(const vector<string> &pdb_name_list,
     vector<double> TranVect;  // t
 
     double rmsd,tmscore_i,tmscore_j;
-
+    int L_i,L_j;
     int i,j;
-    //for (i=0;i<pdb_entry_num-1;i++)
+
+    /**** convert SARST to int ****/
+    vector<vector<int> >sarst2int_list;
+    vector<vector<int> >seq2int_list;
+    vector<double> X_sarst_ratio(pdb_entry_num,0.);
+    for (i=0;i<pdb_entry_num;i++)
+    {
+        sarst2int_list.push_back(sarst2int(pdb_chain_list[i].second.sarst));
+        seq2int_list.push_back(aa2int(pdb_chain_list[i].second.sequence));
+        for (j=0;j<pdb_chain_list[i].second.sarst.length();j++)
+            X_sarst_ratio[i]+=(pdb_chain_list[i].second.sarst[j]=='X');
+        X_sarst_ratio[i]/=pdb_chain_list[i].first;
+    }
+
+    /**** perform superposition ****/
     for (i=0;i<pdb_entry_num;i++)
     {
         cout<<"    aligning "<<pdb_name_list[i]<<endl;
-        //for (j=i+1;j<pdb_entry_num;j++)
+        L_i=pdb_chain_list[i].first;
         for (j=0;j<i;j++)
         {
-            NWalign(pdb_chain_list[i].second.sarst, pdb_chain_list[j].
-                second.sarst, sarst2int_list[i], sarst2int_list[j],
-                aln_i, aln_j, 2, 0); // 2 - sarst; 0 - global
+            L_j=pdb_chain_list[j].first;
+            if (norm==0 && (L_i<tmscore_cutoff*L_j || L_j<tmscore_cutoff*L_i))
+                continue;
+            /*** superpose by sarst ***/
+            rough_tmscore_by_kabsch(pdb_chain_list[i].second.sarst,
+                pdb_chain_list[j].second.sarst,
+                sarst2int_list[i], sarst2int_list[j], aln_i, aln_j,
+                pdb_chain_list[i].second, pdb_chain_list[j].second,
+                xyz_list_i, xyz_list_j, RotMatix, TranVect,
+                tmscore_i, tmscore_j, L_i, L_j, 2,0); //2 -sarst; 0 -global
 
-            aln2coor(aln_i, aln_j, pdb_chain_list[i].second,
-                pdb_chain_list[j].second, xyz_list_i, xyz_list_j,0);
-            aln_len=xyz_list_i.size();
-
-            if (aln_len==0) continue;
-
-            /* kabsch */
-            RotateCoor(xyz_list_i,xyz_list_j, RotMatix, TranVect);
-
-            /* change coordinate */
-            vector<vector<double> > super_xyz_list_i(aln_len,tmp_array);
-            for (int r=0; r<aln_len; r++)
-	            ChangeCoor(xyz_list_i[r], RotMatix, TranVect, 
-                    super_xyz_list_i[r]);
-
-            /* TM-score */
-            tmscore_i=calTMscore(super_xyz_list_i,xyz_list_j,
-                pdb_chain_list[i].first);
-            tmscore_j=calTMscore(super_xyz_list_i,xyz_list_j,
-                pdb_chain_list[j].first);
-                
             /* clean up */
-            aln_i.clear();
-            aln_j.clear();
             RotMatix.clear();
             TranVect.clear();
-            super_xyz_list_i.clear();
+            aln_i.clear();
+            aln_j.clear();
             xyz_list_i.clear();
             xyz_list_j.clear();
 
@@ -160,16 +192,56 @@ void batch_sarst_rmsd(const vector<string> &pdb_name_list,
             if (tmscore_j>=tmscore_cutoff*0.6||(norm==1 && 
                 tmscore_i>=tmscore_cutoff*0.6))
             {
-                TMalign(aln_i, aln_j,pdb_chain_list[i].second,
+                if (MIN(tmscore_i,tmscore_j)<=TMmax)
+                    TMalign(aln_i, aln_j,pdb_chain_list[i].second,
                     pdb_chain_list[j].second, rmsd, tmscore_i, tmscore_j,0);
                 tm_fast_mat[i][j]=tm_full_mat[i][j]=tmscore_i;
                 tm_fast_mat[j][i]=tm_full_mat[j][i]=tmscore_j;
-                cout<<pdb_name_list[i]<<'\t'<<pdb_name_list[j]<<'\t'
-                    <<setiosflags(ios::fixed)<<setprecision(4)
+                cout<<"        "<<pdb_name_list[i]<<'\t'<<pdb_name_list[j]
+                    <<'\t'<<setiosflags(ios::fixed)<<setprecision(4)
                     <<tmscore_i<<'\t'<<tmscore_j<<endl;
+                continue;
+            }
+
+            /*** superpose by amino acid sequence ***
+             * CA-only proteins are often not alignable by SARST
+             * only perform aa alignment if X ratio in sarst is too high */
+            if (MAX(X_sarst_ratio[i],X_sarst_ratio[j])<0.2) continue;
+
+            rough_tmscore_by_kabsch(pdb_chain_list[i].second.sequence,
+                pdb_chain_list[j].second.sequence,
+                seq2int_list[i], seq2int_list[j], aln_i, aln_j,
+                pdb_chain_list[i].second, pdb_chain_list[j].second,
+                xyz_list_i, xyz_list_j, RotMatix, TranVect,
+                tmscore_i, tmscore_j, L_i, L_j, 0,0); //0 -aa; 0 -global
+
+            /* clean up */
+            RotMatix.clear();
+            TranVect.clear();
+            aln_i.clear();
+            aln_j.clear();
+            xyz_list_i.clear();
+            xyz_list_j.clear();
+
+            /* perform TMalign on well aligned pairs */
+            if (tmscore_j>=tmscore_cutoff*0.6||(norm==1 && 
+                tmscore_i>=tmscore_cutoff*0.6))
+            {
+                if (MIN(tmscore_i,tmscore_j)<=TMmax)
+                    TMalign(aln_i, aln_j,pdb_chain_list[i].second,
+                    pdb_chain_list[j].second, rmsd, tmscore_i, tmscore_j,0);
+                tm_fast_mat[i][j]=tm_full_mat[i][j]=tmscore_i;
+                tm_fast_mat[j][i]=tm_full_mat[j][i]=tmscore_j;
+                cout<<"        "<<pdb_name_list[i]<<'\t'<<pdb_name_list[j]
+                    <<'\t'<<setiosflags(ios::fixed)<<setprecision(4)
+                    <<tmscore_i<<'\t'<<tmscore_j<<endl;
+                continue;
             }
         }
     }
+
+    seq2int_list.clear();
+    sarst2int_list.clear();
 }
 
 void initialize_TMclust(TMclustUnit &TMclust,const int pdb_entry_num)
@@ -226,7 +298,7 @@ int fast_clustering(TMclustUnit &TMclust,const vector<string>&pdb_name_list,
     vector<pair<int,ChainUnit> >&pdb_chain_list, double tmscore_cutoff=0.5,
     int f=8, int norm=0)
 {
-    int i,j,k;
+    int i,j,k,l;
     int add_to_clust=-1;
     int max_clust_size=0;
 
@@ -239,7 +311,9 @@ int fast_clustering(TMclustUnit &TMclust,const vector<string>&pdb_name_list,
         L_i=pdb_chain_list[i].first;
         cout<<"assigning "<<pdb_name_list[i];
         TMclust.unclust_list.pop_back();
-        add_to_clust=-1; // cluster representative whose cluster i belongs
+        add_to_clust=-1; // cluster representative to whom cluster i belongs
+
+        /* add to clust k if sarst_tmscore(i,k)>=tmscore_cutoff */
         for (k=0;k<TMclust.repr_list.size();k++)
         {
             j=TMclust.repr_list[k];
@@ -251,12 +325,49 @@ int fast_clustering(TMclustUnit &TMclust,const vector<string>&pdb_name_list,
                 break;
             }
         }
-        if (add_to_clust>=0) 
+        if (add_to_clust>=0)
         {
             cout<<" to "<<pdb_name_list[j]<<endl;
             add_chain_to_clust(TMclust,i,j);
             continue;
         }
+
+        /* try to add to clust k if sarst_tmscore(i,member of k)>=
+         * tmscore_cutoff */
+        for (k=0;k<TMclust.repr_list.size();k++)
+        {
+            if (tm_full_mat[i][TMclust.repr_list[k]]!=0 ||
+                TMclust.clust_list[k].size()<=1) continue;
+            for (l=1;l<TMclust.clust_list[k].size();l++)
+            {
+                j=TMclust.clust_list[k][l];
+                if (MIN(tm_full_mat[i][j],tm_full_mat[j][i])>=tmscore_cutoff
+                    || (norm==1 &&
+                    MAX(tm_full_mat[i][j],tm_full_mat[j][i])>=tmscore_cutoff))
+                {
+                    j=TMclust.repr_list[k];
+                    rmsd=tmscore_i=tmscore_j=0;
+                    TMalign(aln_i, aln_j,pdb_chain_list[i].second,
+                    pdb_chain_list[j].second, rmsd, tmscore_i, tmscore_j, 0);
+                    tm_fast_mat[i][j]=tmscore_i;
+                    tm_fast_mat[j][i]=tmscore_j;
+            
+                    if (MIN(tmscore_i,tmscore_j)>=tmscore_cutoff||(norm==1 &&
+                        MAX(tmscore_i,tmscore_j)>=tmscore_cutoff))
+                        add_to_clust=j;
+                    break;
+                }
+            }
+            if (add_to_clust>=0) break;
+        }
+        if (add_to_clust>=0)
+        {
+            cout<<" to "<<pdb_name_list[j]<<endl;
+            add_chain_to_clust(TMclust,i,j);
+            continue;
+        }
+
+        /* add to clust k if full tmscore(i,k)>=tmscore_cutoff */
         for (k=0;k<TMclust.repr_list.size();k++)
         {
             j=TMclust.repr_list[k];
