@@ -200,7 +200,8 @@ void det_aln_order(const vector<string> &pdb_name_list,
              * only perform aa alignment if X ratio in sarst is too high */
             if (MAX(X_sarst_ratio[i],X_sarst_ratio[j])<0.2)
             {
-                aln_order_pair.push_back(make_pair(tmscore_i,j));
+                aln_order_pair.push_back(make_pair(norm==0?
+                    MIN(tmscore_i,tmscore_j):MAX(tmscore_i,tmscore_j),j));
                 continue;
             }
 
@@ -210,6 +211,8 @@ void det_aln_order(const vector<string> &pdb_name_list,
                 pdb_chain_list[i].second, pdb_chain_list[j].second,
                 xyz_list_i, xyz_list_j, RotMatix, TranVect,
                 tmscore_aa_i, tmscore_aa_j, L_i, L_j, 0,0); //0 -aa; 0 -global
+            tmscore_i=MAX(tmscore_i,tmscore_aa_i);
+            tmscore_j=MAX(tmscore_j,tmscore_aa_j);
 
             /* clean up */
             RotMatix.clear();
@@ -219,7 +222,8 @@ void det_aln_order(const vector<string> &pdb_name_list,
             xyz_list_i.clear();
             xyz_list_j.clear();
 
-            aln_order_pair.push_back(make_pair(MAX(tmscore_i,tmscore_aa_i),j));
+            aln_order_pair.push_back(make_pair(norm==0?
+                MIN(tmscore_i,tmscore_j):MAX(tmscore_i,tmscore_j),j));
         }
 
         /* clean up */
