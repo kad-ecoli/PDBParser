@@ -7,13 +7,12 @@ const char* docstring=""
 "    PDB/ - folder for input PDB coordinate files\n"
 "\n"
 "output:\n"
-"    seq.fasta    - fasta format file for amino acid sequence\n"
-"    sarst.fasta  - fasta format file for SARST code\n"
-"    cluster.txt  - index file for clustering result\n"
-"    ca.xyz       - xyz format file for CA atoms of representative PDB files\n"
-"    TM_sarst.txt - matrix of TM-score by SARST alignment\n"
-"    TM_fast.txt  - matrix of TM-score by fast TMalign\n"
-"    TM_full.txt  - matrix of TM-score by standard TMalign\n"
+"    seq.fasta   - fasta format file for amino acid sequence\n"
+"    sarst.fasta - fasta format file for SARST code\n"
+"    cluster.txt - index file for clustering result\n"
+"    ca.xyz      - xyz format file for CA atoms of representative PDB files\n"
+"    TM_fast.txt - matrix of TM-score by fast TMalign\n"
+"    TM_full.txt - matrix of TM-score by standard TMalign\n"
 "\n"
 "options:\n"
 "    -norm={0,1} protein length with which TM-score is normalized\n"
@@ -43,6 +42,7 @@ int main(int argc, char **argv)
     double TMmin=0.5;  // minimum TM-score cutoff
     double TMmax=0.8;  // maximum TM-score cutoff
     double TMstep=0.1; // step size of TM-score cutoffs
+    int MaxMemChain=1000; // maximum number of chain cache in memory
     vector<string> argv_list;
     for (int arg=1;arg<argc;arg++)
     {
@@ -72,26 +72,31 @@ int main(int argc, char **argv)
         pdb_name_list,pdb_file_list);
 
     /* parse pdb_file */
+    cout<<"convert "<<pdb_entry_num<<" chains into SARST sequence"<<endl;
     vector<pair<int,ChainUnit> > pdb_chain_list;
     vector<pair<int,string> > pdb_name_pair_list;
     vector<pair<int,string> > pdb_file_pair_list;
-    ChainUnit tmp_chain;
+    ModelUnit tmp_model;
     int i,j;
+    int L;
     for (i=0;i<pdb_entry_num;i++)
     {
-        cout<<"    parsing "<<pdb_file_list[i]<<endl;
+        cout<<"    parse "<<pdb_file_list[i]<<'\t'<<setiosflags(ios::fixed)
+            <<setprecision(2)<<100.*(i+1)/pdb_entry_num<<'%'<<endl;
         // backbone; MSE to MET
-        tmp_chain=read_pdb_structure(pdb_file_list[i].c_str(),1,1).chains[0];
-        pdb2fasta(tmp_chain);
-        pdb2sarst(tmp_chain);
-        remove_sidechain(tmp_chain,0); // remove non-CA atoms
+        tmp_model=read_pdb_structure(pdb_file_list[i].c_str(),1,1);
+        pdb2fasta(tmp_model.chains[0]);
+        pdb2sarst(tmp_model.chains[0]);
+        tmp_model.chains[0].residues.clear(); // free memory for caching 
+                                              // coordinates. coordinates
+                                              // are re-parsed in qTMclust
+        //remove_sidechain(tmp_model.chains[0],0); // remove non-CA atoms
 
-        pdb_chain_list.push_back(make_pair(
-            tmp_chain.residues.size(),tmp_chain));
-        pdb_name_pair_list.push_back(make_pair(
-            tmp_chain.residues.size(),pdb_name_list[i]));
-        pdb_file_pair_list.push_back(make_pair(
-            tmp_chain.residues.size(),pdb_file_list[i]));
+        L=tmp_model.chains[0].sarst.length();
+        pdb_chain_list.push_back(make_pair(L,tmp_model.chains[0]));
+        pdb_name_pair_list.push_back(make_pair(L,pdb_name_list[i]));
+        pdb_file_pair_list.push_back(make_pair(L,pdb_file_list[i]));
+        tmp_model.chains.clear();
     }
 
     /* sort pdb list in descending order of chain length */
@@ -123,18 +128,21 @@ int main(int argc, char **argv)
     fp_aa.close();
 
     /* matrix for TM-score */
-    vector <double> tmp_array(pdb_entry_num,0);
+    cout<<"allocate TM-score table"<<endl;
     // (i,j) store TM-score between i and j, as normalized by i
-    vector<vector<double> >tm_sarst_mat(pdb_entry_num,tmp_array);//TMalign-f8
-    vector<vector<double> >tm_fast_mat(pdb_entry_num,tmp_array);//TMalign-f8
-    vector<vector<double> >tm_full_mat(pdb_entry_num,tmp_array);//TMalign
+    // tm_fast_mat is calculated by TMalign -f 8
+    // tm_full_mat is calculated by standard TMalign
+    // use unsigned char instead of float or double save 4x ~ 8x space
+    vector <unsigned char> tmp_array(pdb_entry_num,0);
+    vector<vector<unsigned char> >tm_fast_mat(pdb_entry_num,tmp_array);
+    vector<vector<unsigned char> >tm_full_mat(pdb_entry_num,tmp_array);
     tmp_array.clear();
-
-    /* perform initial clustering */
     TMclustUnit TMclust;
     initialize_TMclust(TMclust,pdb_entry_num);
+
+    /* perform initial clustering */
     cout<<"heuristic clustering for TM-score "<<TMmin<<endl;
-    qTMclust(TMclust, pdb_name_list, tm_sarst_mat,
+    qTMclust(TMclust, pdb_name_list, pdb_file_list, 
         tm_fast_mat, tm_full_mat, pdb_chain_list, TMmin, 8, norm);
     //fast_clustering(TMclust, pdb_name_list, 
         //tm_fast_mat, tm_full_mat, pdb_chain_list, TMmin, 8, norm);
@@ -142,18 +150,24 @@ int main(int argc, char **argv)
     /* output initial clusters */
     cout<<"write output for TM-score "<<TMmin<<endl;
     write_TMclust_result("cluster.txt",TMclust,pdb_name_list,TMmin);
-    write_matrix("TM_sarst.txt",tm_sarst_mat);
-    write_matrix("TM_fast.txt",tm_fast_mat);
-    write_matrix("TM_full.txt",tm_full_mat);
+    write_unsigned_char_matrix("TM_fast.txt",tm_fast_mat);
+    write_unsigned_char_matrix("TM_full.txt",tm_full_mat);
     write_TMclust_ca_xyz("ca.xyz", TMclust.repr_list, 
         pdb_name_list, pdb_chain_list);
 
     if (TMmin+TMstep>=TMmax) return 0;
 
     /* clustering within clusters */
-    full_clustering(TMclust, pdb_name_list, pdb_chain_list, 
+    full_clustering(TMclust, pdb_name_list, pdb_file_list, pdb_chain_list, 
         tm_fast_mat, tm_full_mat, TMmin, TMmax, TMstep, "cluster.txt",
-        'a', norm, MinClustSize);
-    write_matrix("TM_full.txt",tm_full_mat);
+        'a', norm, MinClustSize, 1);
+    write_unsigned_char_matrix("TM_full.txt",tm_full_mat);
+
+    /* clean up */
+    cout<<"finished clustering of "<<pdb_entry_num<<" chains into "
+        <<TMclust.repr_list.size()<<" clusters."<<endl;
+    pdb_chain_list.clear();
+    TMclust.repr_list.clear();
+    TMclust.clust_list.clear();
     return 0;
 }
