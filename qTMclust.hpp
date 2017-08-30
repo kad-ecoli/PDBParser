@@ -251,12 +251,10 @@ int qTMclust(TMclustUnit &TMclust, const vector<string>&pdb_name_list,
 
     /* read first chain */
     cout<<"    assigning "<<pdb_name_list[0]<<" as first cluster"<<endl;
+    ModelUnit tmp_model=read_pdb_structure(pdb_file_list[0].c_str(),0,1);
     if (pdb_chain_list[0].second.residues.size()==0)
-    {
-        ModelUnit tmp_model=read_pdb_structure(pdb_file_list[0].c_str(),0,1);
         pdb_chain_list[0].second.residues=tmp_model.chains[0].residues;
-        tmp_model.chains.clear();
-    }
+    tmp_model.chains.clear();
 
     /**** perform superposition ****/
     while(TMclust.unclust_list.size())
