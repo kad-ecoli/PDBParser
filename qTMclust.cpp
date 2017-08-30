@@ -23,6 +23,10 @@ const char* docstring=""
 "    -TMstep=0.10    step size of TM-score cut-offs\n"
 "    -MinClustSize=2 minimum cluster size below which clustering will not\n"
 "                    be performed\n"
+"    -CacheCoor={-1,0,1} whether cache all PDB coordinate in memory\n"
+"        0 - (default) cache all coordinate if less than 10,000 chains\n"
+"        1 - always cache all coordinates\n"
+"       -1 - never cache all coordinates\n"
 ;
 
 #include <iostream>
@@ -42,7 +46,7 @@ int main(int argc, char **argv)
     double TMmin=0.5;  // minimum TM-score cutoff
     double TMmax=0.8;  // maximum TM-score cutoff
     double TMstep=0.1; // step size of TM-score cutoffs
-    int MaxMemChain=1000; // maximum number of chain cache in memory
+    int CacheCoor=0;   // decide whether cache all PDB based on pdb_entry_num
     vector<string> argv_list;
     for (int arg=1;arg<argc;arg++)
     {
@@ -56,6 +60,8 @@ int main(int argc, char **argv)
             TMstep=atof(string(argv[arg]).substr(8).c_str());
         else if (string(argv[arg]).substr(0,14)=="-MinClustSize=")
             MinClustSize=atof(string(argv[arg]).substr(14).c_str());
+        else if (string(argv[arg]).substr(0,6)=="-CacheCoor=")
+            CacheCoor=atoi(string(argv[arg]).substr(11).c_str());
         else
             argv_list.push_back(argv[arg]);
     }
@@ -70,6 +76,7 @@ int main(int argc, char **argv)
     vector<string> pdb_file_list;
     int pdb_entry_num=parse_pdb_list(argv_list[0],argv_list[1],
         pdb_name_list,pdb_file_list);
+    if (CacheCoor==0) CacheCoor=2*(pdb_entry_num<=10000)-1;
 
     /* parse pdb_file */
     cout<<"convert "<<pdb_entry_num<<" chains into SARST sequence"<<endl;
@@ -87,10 +94,10 @@ int main(int argc, char **argv)
         tmp_model=read_pdb_structure(pdb_file_list[i].c_str(),1,1);
         pdb2fasta(tmp_model.chains[0]);
         pdb2sarst(tmp_model.chains[0]);
-        tmp_model.chains[0].residues.clear(); // free memory for caching 
-                                              // coordinates. coordinates
-                                              // are re-parsed in qTMclust
-        //remove_sidechain(tmp_model.chains[0],0); // remove non-CA atoms
+        
+        //free memory for caching coordinates, which are re-parsed by qTMclust
+        if (CacheCoor==-1) tmp_model.chains[0].residues.clear();
+        else remove_sidechain(tmp_model.chains[0],0); // remove non-CA atoms
 
         L=tmp_model.chains[0].sarst.length();
         pdb_chain_list.push_back(make_pair(L,tmp_model.chains[0]));
@@ -150,8 +157,8 @@ int main(int argc, char **argv)
     /* output initial clusters */
     cout<<"write output for TM-score "<<TMmin<<endl;
     write_TMclust_result("cluster.txt",TMclust,pdb_name_list,TMmin);
-    write_unsigned_char_matrix("TM_fast.txt",tm_fast_mat);
-    write_unsigned_char_matrix("TM_full.txt",tm_full_mat);
+    write_matrix("TM_fast.txt",tm_fast_mat);
+    write_matrix("TM_full.txt",tm_full_mat);
     write_TMclust_ca_xyz("ca.xyz", TMclust.repr_list, 
         pdb_name_list, pdb_chain_list);
 
@@ -160,8 +167,8 @@ int main(int argc, char **argv)
     /* clustering within clusters */
     full_clustering(TMclust, pdb_name_list, pdb_file_list, pdb_chain_list, 
         tm_fast_mat, tm_full_mat, TMmin, TMmax, TMstep, "cluster.txt",
-        'a', norm, MinClustSize, 1);
-    write_unsigned_char_matrix("TM_full.txt",tm_full_mat);
+        'a', norm, MinClustSize, CacheCoor);
+    write_matrix("TM_full.txt",tm_full_mat);
 
     /* clean up */
     cout<<"finished clustering of "<<pdb_entry_num<<" chains into "

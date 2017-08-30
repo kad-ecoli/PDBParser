@@ -214,8 +214,9 @@ int qTMclust(TMclustUnit &TMclust, const vector<string>&pdb_name_list,
     const vector<string>&pdb_file_list,
     vector<vector<unsigned char> >&tm_fast_mat,
     vector<vector<unsigned char> >&tm_full_mat,
-    vector<pair<int,ChainUnit> >&pdb_chain_list, double tmscore_cutoff=0.5,
-    int f=8, int norm=0)
+    vector<pair<int,ChainUnit> >&pdb_chain_list,
+    const double tmscore_cutoff=0.5, const int f=8, const int norm=0,
+    const int CacheCoor=1)
 {
     int pdb_entry_num=pdb_chain_list.size();
 
@@ -250,9 +251,12 @@ int qTMclust(TMclustUnit &TMclust, const vector<string>&pdb_name_list,
 
     /* read first chain */
     cout<<"    assigning "<<pdb_name_list[0]<<" as first cluster"<<endl;
-    ModelUnit tmp_model=read_pdb_structure(pdb_file_list[0].c_str(),0,1);
-    pdb_chain_list[0].second.residues=tmp_model.chains[0].residues;
-    tmp_model.chains.clear();
+    if (pdb_chain_list[0].second.residues.size()==0)
+    {
+        ModelUnit tmp_model=read_pdb_structure(pdb_file_list[0].c_str(),0,1);
+        pdb_chain_list[0].second.residues=tmp_model.chains[0].residues;
+        tmp_model.chains.clear();
+    }
 
     /**** perform superposition ****/
     while(TMclust.unclust_list.size())
@@ -398,7 +402,7 @@ int qTMclust(TMclustUnit &TMclust, const vector<string>&pdb_name_list,
         {
             cout<<" to "<<pdb_name_list[j]<<"\t\t";
             add_chain_to_clust(TMclust,i,j);
-            pdb_chain_list[i].second.residues.clear();
+            if (CacheCoor==-1) pdb_chain_list[i].second.residues.clear();
         }
         else 
         {
@@ -506,7 +510,6 @@ int fast_clustering(TMclustUnit &TMclust,const vector<string>&pdb_name_list,
 
         if (add_to_clust>=0)
         {
-            //cout<<" to "<<pdb_name_list[j]<<endl;
             add_chain_to_clust(TMclust,i,j);
         }
         else
@@ -514,7 +517,6 @@ int fast_clustering(TMclustUnit &TMclust,const vector<string>&pdb_name_list,
             TMclust.repr_list.push_back(i);
             vector<int> tmp_array(1,i);
             TMclust.clust_list.push_back(tmp_array);
-            //cout<<" as new cluster"<<endl;
         }
     }
     for (i=0;i<TMclust.clust_list.size();i++) 
@@ -550,14 +552,14 @@ void write_TMclust_result(const string filename,
     fp.close();
 }
 
-void write_unsigned_char_matrix(const string filename, 
+void write_matrix(const string filename, 
     const vector<vector<unsigned char> >&tm_mat)
 {
     stringstream buf;
     int i,j;
     for (i=0;i<tm_mat.size();i++)
     {
-        buf<<setprecision(4)<<tm_mat[i][0];
+        buf<<setprecision(4)<<tm_mat[i][0]/255.;
         for (j=1;j<tm_mat[0].size();j++)
         {
             buf<<'\t'<<setprecision(4)<<tm_mat[i][j]/255.;
@@ -626,7 +628,7 @@ int full_clustering(TMclustUnit &TMclust,
     vector<vector<unsigned char> >&tm_full_mat,
     double TMmin=0.5, const double TMmax=0.8, const double TMstep=0.1,
     const string cluster_filename="cluster.txt", const char openmode='a',
-    const int norm=0, const int MinClustSize=2, const int clear_clust_mem=0)
+    const int norm=0, const int MinClustSize=2, const int CacheCoor=1)
 {
     TMmin+=TMstep;
     if (TMmin>TMmax) return 0;
@@ -674,7 +676,7 @@ int full_clustering(TMclustUnit &TMclust,
         /* clean up */
         TMsubclust.repr_list.clear();
         TMsubclust.clust_list.clear();
-        if (clear_clust_mem==1)
+        if (CacheCoor==-1)
         {
             for (l=0;l<TMclust.clust_list[i].size();l++)
             {
