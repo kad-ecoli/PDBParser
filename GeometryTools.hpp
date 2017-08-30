@@ -263,6 +263,8 @@ inline double Points2Angle(const vector<double> &c1, const vector<double> &c2, c
 //points c1-c2-c3-c4 should be in two different pane.
 //or there may be faults.
 //by Yang Cao
+//
+//Change by chengxin: if they are on the same plane, return 2*PI
 inline double Points2Dihedral(const vector<double> &c1, const vector<double> &c2, const vector<double> &c3, const vector<double> &c4)
 {
    vector<double> vector1(3,0), vector2(3,0), vector3(3,0);
@@ -275,8 +277,8 @@ inline double Points2Dihedral(const vector<double> &c1, const vector<double> &c2
    crossproduct(vector3, vector2, v2);
    
    vector<double> v3(3,0), v4(3,0);
-   if(!norm (v1, v3)) {cout<<"Error in Points2Dihedral 1\n"<<endl; exit(1);}
-   if(!norm (v2, v4)) {cout<<"Error in Points2Dihedral 2\n"<<endl; exit(1);}
+   if(!norm (v1, v3)) {cout<<"Error in Points2Dihedral 1\n"<<endl; return 2*PI;}//exit(1);}
+   if(!norm (v2, v4)) {cout<<"Error in Points2Dihedral 2\n"<<endl; return 2*PI;}//exit(1);}
    
    double dihedral = innerproduct(v3, v4);
    
