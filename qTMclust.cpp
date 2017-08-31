@@ -142,7 +142,8 @@ int main(int argc, char **argv)
     // use unsigned char instead of float or double save 4x ~ 8x space
     vector <unsigned char> tmp_array(pdb_entry_num,0);
     vector<vector<unsigned char> >tm_fast_mat(pdb_entry_num,tmp_array);
-    vector<vector<unsigned char> >tm_full_mat(pdb_entry_num,tmp_array);
+    map<int,map<int,unsigned char> >tm_full_mat; // sparse matrix
+    //vector<vector<unsigned char> >tm_full_mat(pdb_entry_num,tmp_array);
     tmp_array.clear();
     TMclustUnit TMclust;
     initialize_TMclust(TMclust,pdb_entry_num);
@@ -158,7 +159,7 @@ int main(int argc, char **argv)
     cout<<"write output for TM-score "<<TMmin<<endl;
     write_TMclust_result("cluster.txt",TMclust,pdb_name_list,TMmin);
     write_matrix("TM_fast.txt",tm_fast_mat);
-    write_matrix("TM_full.txt",tm_full_mat);
+    write_matrix("TM_full.txt",tm_full_mat,pdb_entry_num);
     write_TMclust_ca_xyz("ca.xyz", TMclust.repr_list, 
         pdb_name_list, pdb_chain_list);
 
@@ -168,7 +169,7 @@ int main(int argc, char **argv)
     full_clustering(TMclust, pdb_name_list, pdb_file_list, pdb_chain_list, 
         tm_fast_mat, tm_full_mat, TMmin, TMmax, TMstep, "cluster.txt",
         'a', norm, MinClustSize, CacheCoor);
-    write_matrix("TM_full.txt",tm_full_mat);
+    write_matrix("TM_full.txt",tm_full_mat,pdb_entry_num);
 
     /* clean up */
     cout<<"finished clustering of "<<pdb_entry_num<<" chains into "
