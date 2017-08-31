@@ -142,7 +142,7 @@ int main(int argc, char **argv)
     // use unsigned char instead of float or double save 4x ~ 8x space
     vector <unsigned char> tmp_array(pdb_entry_num,0);
     vector<vector<unsigned char> >tm_fast_mat(pdb_entry_num,tmp_array);
-    map<int,map<int,unsigned char> >tm_full_mat; // sparse matrix
+    map<long long,unsigned char> tm_full_mat; // sparse matrix
     //vector<vector<unsigned char> >tm_full_mat(pdb_entry_num,tmp_array);
     tmp_array.clear();
     TMclustUnit TMclust;
