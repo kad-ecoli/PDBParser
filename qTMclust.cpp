@@ -18,9 +18,9 @@ const char* docstring=""
 "    -norm={0,1} protein length with which TM-score is normalized\n"
 "        0 - (default) use the larger protein length for normalization\n"
 "        1 - use the smaller protein length for normalization\n"
-"    -TMmin=0.50     minimum TM-score to consider\n"
-"    -TMmax=0.80     maximum TM-score to consider\n"
-"    -TMstep=0.10    step size of TM-score cut-offs\n"
+"    -TMmin=0.50     (default: 0.50)  minimum TM-score to consider\n"
+"    -TMmax=0.50     (default: TMmin) maximum TM-score to consider\n"
+"    -TMstep=0.10    (default: 0.10)  step size of TM-score cut-offs\n"
 "    -MinClustSize=2 minimum cluster size below which clustering will not\n"
 "                    be performed\n"
 "    -CacheCoor={-1,0,1} whether cache all PDB coordinate in memory\n"
@@ -44,7 +44,7 @@ int main(int argc, char **argv)
     int norm=0; // use longer protein
     int MinClustSize=2; // minimum size of cluster
     double TMmin=0.5;  // minimum TM-score cutoff
-    double TMmax=0.8;  // maximum TM-score cutoff
+    double TMmax=0;    // maximum TM-score cutoff
     double TMstep=0.1; // step size of TM-score cutoffs
     int CacheCoor=0;   // decide whether cache all PDB based on pdb_entry_num
     vector<string> argv_list;
@@ -152,8 +152,6 @@ int main(int argc, char **argv)
     cout<<"heuristic clustering for TM-score "<<TMmin<<endl;
     qTMclust(TMclust, pdb_name_list, pdb_file_list, 
         tm_fast_mat, tm_full_mat, pdb_chain_list, TMmin, 8, norm);
-    //fast_clustering(TMclust, pdb_name_list, 
-        //tm_fast_mat, tm_full_mat, pdb_chain_list, TMmin, 8, norm);
 
     /* output initial clusters */
     cout<<"write output for TM-score "<<TMmin<<endl;
