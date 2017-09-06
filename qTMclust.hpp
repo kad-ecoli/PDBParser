@@ -367,22 +367,37 @@ int qTMclust(TMclustUnit &TMclust, const vector<string>&pdb_name_list,
             if (tm_fast_mat[i][j]>0 || (norm==0 && 
                (L_i<tmscore_cutoff*L_j || L_j<tmscore_cutoff*L_i))) continue;
             
-            rmsd=tmscore_i=tmscore_j=0;
-            TMalign(aln_i, aln_j,pdb_chain_list[i].second,
-                pdb_chain_list[j].second, rmsd, tmscore_i, tmscore_j, f);
-            tm_fast_mat[i][j]=(int)(255*tmscore_i+.5);
-            tm_fast_mat[j][i]=(int)(255*tmscore_j+.5);
+            if (tm_full_mat.count((long long)(i)*pdb_entry_num+j))
+            {
+                tmscore_i=tm_full_mat[(long long)(i)*pdb_entry_num+j]/255.;
+                tmscore_j=tm_full_mat[(long long)(j)*pdb_entry_num+i]/255.;
+            }
+            else if (tm_fast_mat[i][j]!=0)
+            {
+                tmscore_i=tm_fast_mat[i][j]/255.;
+                tmscore_j=tm_fast_mat[j][i]/255.;
+            }
+            else
+            {
+                rmsd=tmscore_i=tmscore_j=0;
+                TMalign(aln_i, aln_j,pdb_chain_list[i].second,
+                    pdb_chain_list[j].second, rmsd, tmscore_i, tmscore_j, f);
+                tm_fast_mat[i][j]=(int)(255*tmscore_i+.5);
+                tm_fast_mat[j][i]=(int)(255*tmscore_j+.5);
+            }
             tmscore=(norm==0?
                 MIN(tmscore_i,tmscore_j):MAX(tmscore_i,tmscore_j));
            
-            if (f>0 && tmscore>=tmscore_cutoff*.9)
+            if (f>0 && tmscore>=tmscore_cutoff*.9 && 
+                tm_full_mat.count((long long)(i)*pdb_entry_num+j)==0)
             {
                 TMalign(aln_i, aln_j,pdb_chain_list[i].second,
                     pdb_chain_list[j].second, rmsd, tmscore_i, tmscore_j, 0);
                 tm_full_mat[(long long)(i)*pdb_entry_num+j]=(int)(255*tmscore_i+.5);
                 tm_full_mat[(long long)(j)*pdb_entry_num+i]=(int)(255*tmscore_j+.5);
             }
-            else if (f==0)
+            else if (f==0 && 
+                tm_full_mat.count((long long)(i)*pdb_entry_num+j)==0)
             {
                 tm_full_mat[(long long)(i)*pdb_entry_num+j]=(int)(255*tmscore_i+.5);
                 tm_full_mat[(long long)(j)*pdb_entry_num+i]=(int)(255*tmscore_j+.5);
