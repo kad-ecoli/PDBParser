@@ -328,8 +328,10 @@ int qTMclust(TMclustUnit &TMclust, const vector<string>&pdb_name_list,
             {
                 TMalign(aln_i, aln_j,pdb_chain_list[i].second,
                     pdb_chain_list[j].second, rmsd,tmscore_i,tmscore_j,0);
-                tm_full_mat[i][j]=tm_fast_mat[i][j]=(int)(255*tmscore_i+.5);
-                tm_full_mat[j][i]=tm_fast_mat[j][i]=(int)(255*tmscore_j+.5);
+                tm_full_mat[(long long)(i)*pdb_entry_num+j]=
+                    =tm_fast_mat[i][j]=(int)(255*tmscore_i+.5);
+                tm_full_mat[(long long)(j)*pdb_entry_num+i]=
+                    =tm_fast_mat[j][i]=(int)(255*tmscore_j+.5);
                 tmscore=(norm==0?
                     MIN(tmscore_i,tmscore_j):MAX(tmscore_i,tmscore_j));
                 if (tmscore>=tmscore_cutoff)
@@ -424,7 +426,8 @@ int qTMclust(TMclustUnit &TMclust, const vector<string>&pdb_name_list,
             assign_chain_as_new_clust(TMclust,i);
         }
         cout<<setiosflags(ios::fixed)<<setprecision(2)
-            <<100.*(i+1)/pdb_entry_num<<'%'<<endl;
+            <<100.*(i+1)/pdb_entry_num<<"%\t"
+            <<l+(add_to_clust>=0)<<'/'<<aln_order_pair.size()<<endl;
         aln_order_pair.clear();
     }
 
