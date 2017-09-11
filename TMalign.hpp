@@ -279,8 +279,7 @@ void TMalign_I(const string & aln1, const string & aln2,
 }
 
 
-/* free alignment 
- * TODO: return alignment from invmap & invmap0 to aln1 & aln2 */
+/* free alignment */
 void TMalign(string & aln1, string & aln2,
     ChainUnit & chain1, const ChainUnit & chain2,
     double & rmsd0, double & tmscore1, double & tmscore2, int f=0)
@@ -519,6 +518,41 @@ void TMalign(string & aln1, string & aln2,
     d0B=d0;
     local_d0_search = d0_search;
     TM2 = TMscore8_search(xtm, ytm, n_ali8, t, u, simplify_step, score_sum_method, &rmsd, local_d0_search);
+
+    /* retrieve alignment */
+    int ali_len=xlen+ylen; //maximum length of alignment
+    char *seqxA, *seqyA;
+    seqxA=new char[ali_len];
+    seqyA=new char[ali_len];
+    int kk=0, i_old=0, j_old=0;
+    for(int k=0; k<n_ali8; k++)
+    {
+        for(int i=i_old; i<m1[k]; i++)
+        {
+            //align x to gap
+            seqxA[kk]=seqx[i];
+            seqyA[kk]='-';
+            kk++;
+        }
+
+        for(int j=j_old; j<m2[k]; j++)
+        {
+            //align y to gap
+            seqxA[kk]='-';
+            seqyA[kk]=seqy[j];
+            kk++;
+        }
+
+        seqxA[kk]=seqx[m1[k]];
+        seqyA[kk]=seqy[m2[k]];
+        kk++;  
+        i_old=m1[k]+1;
+        j_old=m2[k]+1;
+    }
+    aln1=(string)(seqxA);
+    aln2=(string)(seqyA);
+    delete [] seqxA;
+    delete [] seqyA;
 
     /* Done! Free memory */
     free_memory();
