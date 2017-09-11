@@ -251,7 +251,7 @@ int qTMclust(TMclustUnit &TMclust, const vector<string>&pdb_name_list,
     }
 
     /* read first chain */
-    cout<<"    assign "<<pdb_name_list[0]<<" as first cluster\t"
+    cout<<"    assigning "<<pdb_name_list[0]<<" as first cluster\t"
         <<setprecision(2)<<100./pdb_entry_num<<'%'<<endl;
     ModelUnit tmp_model=read_pdb_structure(pdb_file_list[0].c_str(),0,1);
     if (pdb_chain_list[0].second.residues.size()==0)
@@ -263,7 +263,7 @@ int qTMclust(TMclustUnit &TMclust, const vector<string>&pdb_name_list,
     {
         i=TMclust.unclust_list.back(); // try to add protein i to clust_list
         L_i=pdb_chain_list[i].first;
-        cout<<"    assign "<<pdb_name_list[i];
+        cout<<"    assigning "<<pdb_name_list[i];
         TMclust.unclust_list.pop_back();
         add_to_clust=-1; // cluster representative to whom cluster i belongs
     
