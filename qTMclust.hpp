@@ -429,8 +429,8 @@ int qTMclust(TMclustUnit &TMclust, const vector<string>&pdb_name_list,
         cout<<setiosflags(ios::fixed)<<setprecision(2)
             <<100.*(i+1)/pdb_entry_num<<"%\t"
             <<l+(add_to_clust>=0)<<'/'<<aln_order_pair.size()<<'\t'
-            <<aln_order_pair[l-(l==aln_order_pair.size())].first
-            <<'\t'<<L_i<<endl;
+            <<(aln_order_pair.size()?aln_order_pair[l-(l==
+               aln_order_pair.size())].first:0)<<'\t'<<L_i<<endl;
         aln_order_pair.clear();
     }
 
