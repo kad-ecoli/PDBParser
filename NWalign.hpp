@@ -526,7 +526,7 @@ void trace_back_sw(string seq1, string seq2,
 
 /* entry function for NWalign 
  * seq_type - 0: amino acid, 1: chi1 rotamer, 2: sarst code, 
- *            3: 3d-blast sequence */
+ *            3: 3d-blast sequence, 4 - ss */
 int NWalign(const string& seq1, const string& seq2, 
     const vector<int>& seq2int1, const vector<int>& seq2int2, // aa2int
     string & aln1,string & aln2,const int seq_type=0, const int glocal=0)
@@ -553,6 +553,10 @@ int NWalign(const string& seq1, const string& seq2,
             aln_score=calculate_score_gotoh(seq2int1,seq2int2,JumpH,JumpV,P,
                 BLOSUM62_3dblast,gapopen_3dblast,gapext_3dblast,glocal);
             break;
+        //case 4: // ss, for some reason, using BLOSUM62 gives better result
+            //aln_score=calculate_score_gotoh(seq2int1,seq2int2,JumpH,JumpV,P,
+                //BLOSUM62_ss,gapopen_ss,gapext_ss,glocal);
+            //break;
         default: // amino acid
             aln_score=calculate_score_gotoh(seq2int1,seq2int2,JumpH,JumpV,P,
                 BLOSUM62,gapopen_blosum62,gapext_blosum62,glocal);
