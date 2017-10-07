@@ -81,7 +81,7 @@ int main(int argc, char **argv)
             cout<<"Aligned length:"<<setw(5)<<aln_len<<endl;
             cout<<"Identical length:"<<setw(5)<<iden_len<<endl;
             cout<<"Sequence identity:"<<setiosflags(ios::fixed);
-            cout<<setprecision(3)<<setw(9)<<double(iden_len)/len2<<" (=";
+            cout<<setprecision(3)<<setw(9)<<float(iden_len)/len2<<" (=";
             cout<<setw(4)<<iden_len<<'/'<<setw(4)<<len2<<')'<<endl;
             cout<<endl;
 

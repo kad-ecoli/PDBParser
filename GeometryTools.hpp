@@ -14,13 +14,13 @@ Date:2008.7.11.
 #include <cstdlib> 
 using namespace std;
 
-const double PI=3.141592653589793;
-const double Extra=1.0e-4;
-const double UpMax=1.0e+10;
-typedef vector<vector<double> > matrix;
+const float PI=3.141592653589793;
+const float Extra=1.0e-4;
+const float UpMax=1.0e+10;
+typedef vector<vector<float> > matrix;
 
 
-void ShowMyvector(const vector<double> &cc)
+void ShowMyvector(const vector<float> &cc)
 {
    for(int i=0; i<cc.size(); ++i)
    {
@@ -30,55 +30,55 @@ void ShowMyvector(const vector<double> &cc)
 }
 
 //Functions using vectors
-inline void crossproduct(const vector<double> &c1, const vector<double> &c2, vector<double> &cc)
+inline void crossproduct(const vector<float> &c1, const vector<float> &c2, vector<float> &cc)
 {
    cc[0] = c1[1] * c2[2] - c1[2] * c2[1];
    cc[1] = c1[2] * c2[0] - c1[0] * c2[2];
    cc[2] = c1[0] * c2[1] - c2[0] * c1[1];
 }
 
-inline double innerproduct(const vector<double> &c1, const vector<double> &c2)
+inline float innerproduct(const vector<float> &c1, const vector<float> &c2)
 {
    return c1[0] * c2[0] + c1[1] * c2[1] + c1[2] * c2[2];
 }
 
-inline double innerproduct_univ(const vector<double> &c1, const vector<double> &c2)
+inline float innerproduct_univ(const vector<float> &c1, const vector<float> &c2)
 {
-	double sum=0;
+	float sum=0;
 	for(int i=0; i<c1.size(); i++)
 		sum += c1[i] * c2[i];
 	return sum;
 }
 
-inline void vectorsum(const vector<double> &c1, const vector<double> &c2, vector<double> &cc)
+inline void vectorsum(const vector<float> &c1, const vector<float> &c2, vector<float> &cc)
 {
    cc[0] = c1[0] + c2[0];
    cc[1] = c1[1] + c2[1];
    cc[2] = c1[2] + c2[2];
 }
 
-inline void vectorsum_univ(const vector<double> &c1, const vector<double> &c2, vector<double> &cc)
+inline void vectorsum_univ(const vector<float> &c1, const vector<float> &c2, vector<float> &cc)
 {
 	for(int i=0; i<cc.size(); i++)
 		cc[i] = c1[i] + c2[i];
 }
 
-inline void subtract(const vector<double> &c1, const vector<double> &c2, vector<double> &cc)
+inline void subtract(const vector<float> &c1, const vector<float> &c2, vector<float> &cc)
 {
    cc[0] = c1[0] - c2[0];
    cc[1] = c1[1] - c2[1];
    cc[2] = c1[2] - c2[2];
 }
 
-inline void subtract_univ(const vector<double> &c1, const vector<double> &c2, vector<double> &cc)
+inline void subtract_univ(const vector<float> &c1, const vector<float> &c2, vector<float> &cc)
 {
 	for(int i=0; i<cc.size(); i++)
 		cc[i] = c1[i] - c2[i];
 }
 
-inline bool norm(const vector<double> &c, vector<double> &cc)
+inline bool norm(const vector<float> &c, vector<float> &cc)
 {
-   double len = c[0]*c[0] + c[1]*c[1] +c[2]*c[2];
+   float len = c[0]*c[0] + c[1]*c[1] +c[2]*c[2];
    if(len<Extra) 
    {
       cout<<"Error in norm()! length~=0!\n";
@@ -93,9 +93,9 @@ inline bool norm(const vector<double> &c, vector<double> &cc)
    return true;
 }
 
-inline bool norm_univ(const vector<double> &c, vector<double> &cc)
+inline bool norm_univ(const vector<float> &c, vector<float> &cc)
 {
-	double len = 0;
+	float len = 0;
 	for(int i=0; i<c.size(); i++)
 		len+=c[i]*c[i];
 	if(len<Extra) 
@@ -109,9 +109,9 @@ inline bool norm_univ(const vector<double> &c, vector<double> &cc)
 	return true;
 }
 
-inline bool norm_warnless(vector<double> &c)
+inline bool norm_warnless(vector<float> &c)
 {
-   double len = c[0]*c[0] + c[1]*c[1] +c[2]*c[2];
+   float len = c[0]*c[0] + c[1]*c[1] +c[2]*c[2];
    if(len<Extra) 
    {
       return false;
@@ -123,9 +123,9 @@ inline bool norm_warnless(vector<double> &c)
    return true;
 }
 
-inline bool norm_univ_warnless(vector<double> &c)
+inline bool norm_univ_warnless(vector<float> &c)
 {
-	double len = 0;
+	float len = 0;
 	for(int i=0; i<c.size(); i++)
 		len+=c[i]*c[i];
 	if(len<Extra) 
@@ -138,90 +138,90 @@ inline bool norm_univ_warnless(vector<double> &c)
 	return true;
 }
 
-inline double vectorlength(const vector<double> &c)
+inline float vectorlength(const vector<float> &c)
 {
    return sqrt(c[0]*c[0]+ c[1]*c[1] + c[2]*c[2]);
 }
 
-inline double vectorlength_univ(const vector<double> &c)
+inline float vectorlength_univ(const vector<float> &c)
 {
-	double len = 0;
+	float len = 0;
 	for(int i=0; i<c.size(); i++)
 		len+=c[i]*c[i];
 	return sqrt(len);
 }
 
-inline double vectorlength2(const vector<double> &c)
+inline float vectorlength2(const vector<float> &c)
 {
    return (c[0]*c[0]+ c[1]*c[1] + c[2]*c[2]);
 }
 
-inline double vectorlength2_univ(const vector<double> &c)
+inline float vectorlength2_univ(const vector<float> &c)
 {
-	double len = 0;
+	float len = 0;
 	for(int i=0; i<c.size(); i++)
 		len+=c[i]*c[i];
 	return len;
 }
 
-inline void multi(double coefficient, vector<double> &c, vector<double> &cc)
+inline void multi(float coefficient, vector<float> &c, vector<float> &cc)
 {
    cc[0] = c[0]*coefficient;
    cc[1] = c[1]*coefficient;
    cc[2] = c[2]*coefficient;
 }
 
-inline void multi_univ(double coefficient, vector<double> &c, vector<double> &cc)
+inline void multi_univ(float coefficient, vector<float> &c, vector<float> &cc)
 {
 	for(int i=0; i<c.size(); i++)
 		cc[i] = c[i] * coefficient;
 }
 
-inline void multi(double coefficient, vector<double> &cc)
+inline void multi(float coefficient, vector<float> &cc)
 {
    cc[0] *= coefficient;
    cc[1] *= coefficient;
    cc[2] *= coefficient;
 }
 
-inline void multi_univ(double coefficient, vector<double> &cc)
+inline void multi_univ(float coefficient, vector<float> &cc)
 {
 	for(int i=0; i<cc.size(); i++)
 		cc[i]*=coefficient;
 }
 
-inline double deg2rad(double deg)
+inline float deg2rad(float deg)
 {
    return deg*PI/180;
 }
 
-inline double rad2deg(double rad)
+inline float rad2deg(float rad)
 {
    return rad*180/PI;
 }
 
 
-inline double Points2Distance2(const vector<double> &c1, const vector<double> &c2)
+inline float Points2Distance2(const vector<float> &c1, const vector<float> &c2)
 {
-   double a=(c1[0]-c2[0]);
-   double b=(c1[1]-c2[1]);
-   double c=(c1[2]-c2[2]);
+   float a=(c1[0]-c2[0]);
+   float b=(c1[1]-c2[1]);
+   float c=(c1[2]-c2[2]);
    return a*a+b*b+c*c;
 }
 
-inline double Points2Distance(const vector<double> &c1, const vector<double> &c2)
+inline float Points2Distance(const vector<float> &c1, const vector<float> &c2)
 {
-   double a=(c1[0]-c2[0]);
-   double b=(c1[1]-c2[1]);
-   double c=(c1[2]-c2[2]);
+   float a=(c1[0]-c2[0]);
+   float b=(c1[1]-c2[1]);
+   float c=(c1[2]-c2[2]);
    return sqrt(a*a+b*b+c*c);
 }
 
 //Return the angle of c1-c2-c3. Unit: radian
 //Angle <c1c2c3 
-inline double Points2Angle(const vector<double> &c1, const vector<double> &c2, const vector<double> &c3)
+inline float Points2Angle(const vector<float> &c1, const vector<float> &c2, const vector<float> &c3)
 {
-   double a, b, c, tmp1, tmp2, tmp3, alpha;
+   float a, b, c, tmp1, tmp2, tmp3, alpha;
    
    tmp1=c1[0]-c2[0];
    tmp2=c1[1]-c2[1];
@@ -250,7 +250,7 @@ inline double Points2Angle(const vector<double> &c1, const vector<double> &c2, c
    }
    else if(alpha>1+Extra || alpha<-1-Extra)
    {
-      cout<<"Error, double Points2Angle()\n";
+      cout<<"Error, float Points2Angle()\n";
       exit(0);
    }
    
@@ -265,22 +265,22 @@ inline double Points2Angle(const vector<double> &c1, const vector<double> &c2, c
 //by Yang Cao
 //
 //Change by chengxin: if they are on the same plane, return 2*PI
-inline double Points2Dihedral(const vector<double> &c1, const vector<double> &c2, const vector<double> &c3, const vector<double> &c4)
+inline float Points2Dihedral(const vector<float> &c1, const vector<float> &c2, const vector<float> &c3, const vector<float> &c4)
 {
-   vector<double> vector1(3,0), vector2(3,0), vector3(3,0);
+   vector<float> vector1(3,0), vector2(3,0), vector3(3,0);
    subtract(c1, c2, vector1);
    subtract(c2, c3, vector2);
    subtract(c3, c4, vector3);
    
-   vector<double> v1(3,0), v2(3,0);
+   vector<float> v1(3,0), v2(3,0);
    crossproduct(vector2, vector1, v1);
    crossproduct(vector3, vector2, v2);
    
-   vector<double> v3(3,0), v4(3,0);
+   vector<float> v3(3,0), v4(3,0);
    if(!norm (v1, v3)) {cout<<"Error in Points2Dihedral 1\n"<<endl; return 2*PI;}//exit(1);}
    if(!norm (v2, v4)) {cout<<"Error in Points2Dihedral 2\n"<<endl; return 2*PI;}//exit(1);}
    
-   double dihedral = innerproduct(v3, v4);
+   float dihedral = innerproduct(v3, v4);
    
    if (dihedral>1 && dihedral<1+Extra)
    {
@@ -293,13 +293,13 @@ inline double Points2Dihedral(const vector<double> &c1, const vector<double> &c2
    }
    else if(dihedral>1+Extra || dihedral<-1-Extra)
    {
-      cout<<"Error, double Points2Dihedral()\n";
+      cout<<"Error, float Points2Dihedral()\n";
       exit(0);
    }
    
-   vector<double> v5(3,0);
+   vector<float> v5(3,0);
    crossproduct(v4, v3, v5);
-   double direction = innerproduct(v5, vector2);
+   float direction = innerproduct(v5, vector2);
    
    if (direction>0)
     {
@@ -316,14 +316,14 @@ inline double Points2Dihedral(const vector<double> &c1, const vector<double> &c2
 //Method to initialize a matrix
 inline void SetMatrix(matrix &sm, int m, int n)
 {
-   vector<double> tmp(n, 0);
+   vector<float> tmp(n, 0);
    sm.assign(m, tmp);
 }
 
 inline void MatrixTimesMatrix(const matrix &a, const matrix &v, matrix &x, int m, int n, int l)
 {
    int i=0, j=0, k=0;
-   double sum=0;
+   float sum=0;
    for(i=0; i<m; ++i)
    {
       for(k=0; k<l; ++k)
@@ -338,7 +338,7 @@ inline void MatrixTimesMatrix(const matrix &a, const matrix &v, matrix &x, int m
    }
 }
 
-inline bool TransVectorTimesVector(const vector<double> &trans, const vector<double> &vctor, matrix &mtx)
+inline bool TransVectorTimesVector(const vector<float> &trans, const vector<float> &vctor, matrix &mtx)
 {
    if(trans.size()!=vctor.size())
    {
@@ -354,7 +354,7 @@ inline bool TransVectorTimesVector(const vector<double> &trans, const vector<dou
    return true;
 }
 
-inline bool MatrixTimesTransVector(const matrix &mtx, const vector<double> &tvt, vector<double> &vct)
+inline bool MatrixTimesTransVector(const matrix &mtx, const vector<float> &tvt, vector<float> &vct)
 {
    if(mtx[0].size()!=tvt.size())
    {
@@ -370,7 +370,7 @@ inline bool MatrixTimesTransVector(const matrix &mtx, const vector<double> &tvt,
    return true;
 }
 
-inline void RealTimesMatrix(double at, const matrix &mx, matrix &mc)
+inline void RealTimesMatrix(float at, const matrix &mx, matrix &mc)
 {
    int i=0, j=0;
    for(i=0; i<mx.size(); ++i)
@@ -394,7 +394,7 @@ inline bool MatrixAddMatrix(const matrix &ma, const matrix &mb, matrix &mc)
    return true;     
 }
 
-inline bool norm2(const vector<double> &c, vector<double> &cc)
+inline bool norm2(const vector<float> &c, vector<float> &cc)
 {
    if(c.size()!=cc.size())
    {
@@ -404,7 +404,7 @@ inline bool norm2(const vector<double> &c, vector<double> &cc)
       return false;
    }
    int i=0; 
-   double len=0;
+   float len=0;
    for(i=0; i<c.size(); ++i)
       len+=c[i]*c[i];
    len=sqrt(len);
@@ -417,10 +417,10 @@ inline bool norm2(const vector<double> &c, vector<double> &cc)
    
 }
 
-inline bool norm2_warnless(vector<double> &c)
+inline bool norm2_warnless(vector<float> &c)
 {
    int i=0; 
-   double len=0;
+   float len=0;
    for(i=0; i<c.size(); ++i)
       len+=c[i]*c[i];
    len=1/sqrt(len);
@@ -440,14 +440,14 @@ inline bool norm2_warnless(vector<double> &c)
 * Date 2006.11.30.
 * BUG: romtx[0][2]=0 should be romtx[3][2]=0
 *************************End***************************************/
-inline bool RotationMatrixA(const vector<double> &axis, double angle, matrix &romtx)
+inline bool RotationMatrixA(const vector<float> &axis, float angle, matrix &romtx)
 {
    if(axis.size()!=3) 
    {
       cout<<"Error 1 in RotationMatrixA()"<<endl;
       return false;
    }
-   vector<double> ouc(3, 0);
+   vector<float> ouc(3, 0);
    if(!norm(axis, ouc)) 
    {
       cout<<"Error 2 in RotationMatrixA()"<<endl;
@@ -498,22 +498,22 @@ inline bool RotationMatrixA(const vector<double> &axis, double angle, matrix &ro
 * Author: C.Y.
 * Date 2006.12.6.
 *************************End***************************************/
-inline bool RotationMatrixB(const vector<double> &axis, double angle, matrix &romtx)
+inline bool RotationMatrixB(const vector<float> &axis, float angle, matrix &romtx)
 {
    if(axis.size()!=3) 
    {
       cout<<"Error 1 in RotationMatrixB()"<<endl;
       return false;
    }
-   vector<double> ouc(3, 0);
+   vector<float> ouc(3, 0);
    if(!norm(axis, ouc)) 
    {
       cout<<"Error 2 in RotationMatrixB()"<<endl;
       return false;
    }
-   double c=cos(angle);
-   double s=sin(angle);
-   double t=1-c;
+   float c=cos(angle);
+   float s=sin(angle);
+   float t=1-c;
    SetMatrix(romtx, 4, 4);
    romtx[0][0]=t*ouc[0]*ouc[0]+c;romtx[0][1]=t*ouc[0]*ouc[1]+s*ouc[2];
    romtx[0][2]=t*ouc[0]*ouc[2]-s*ouc[1];romtx[0][3]=0;
@@ -535,7 +535,7 @@ inline bool RotationMatrixB(const vector<double> &axis, double angle, matrix &ro
 * Author: C.Y.
 * Date 2006.12.2.  
 *****************************END**********************************/
-bool CoordinateRotation(vector<double> &pointA, const vector<double> &axis, double angle, vector<double> &pointB)
+bool CoordinateRotation(vector<float> &pointA, const vector<float> &axis, float angle, vector<float> &pointB)
 {
    if(pointA.size()!=3)
    {
@@ -563,7 +563,7 @@ bool CoordinateRotation(vector<double> &pointA, const vector<double> &axis, doub
 * Date 2006.12.2.  
 *
 *****************************END**********************************/
-bool CoordinateRotation(const vector<double> &pointA, const vector<double> &axisA, const vector<double> &axisB, double angle, vector<double> &pointB)
+bool CoordinateRotation(const vector<float> &pointA, const vector<float> &axisA, const vector<float> &axisB, float angle, vector<float> &pointB)
 {
    if(pointA.size()!=3 || axisA.size()!=3 || axisB.size()!=3)
    {
@@ -571,7 +571,7 @@ bool CoordinateRotation(const vector<double> &pointA, const vector<double> &axis
       return false;
    }
    
-   vector<double> axis(3, 0);
+   vector<float> axis(3, 0);
    axis[0]=axisB[0]-axisA[0]; 
    axis[1]=axisB[1]-axisA[1];
    axis[2]=axisB[2]-axisA[2]; 
@@ -579,7 +579,7 @@ bool CoordinateRotation(const vector<double> &pointA, const vector<double> &axis
    matrix rotmtx;
    if(!RotationMatrixB(axis, deg2rad(angle), rotmtx)) return false;
    
-   vector<double> point_A(4, 1);
+   vector<float> point_A(4, 1);
    point_A[0]=pointA[0]-axisA[0];
    point_A[1]=pointA[1]-axisA[1];
    point_A[2]=pointA[2]-axisA[2];
@@ -603,7 +603,7 @@ Coordinate Rotation for a group of points
 CaoYang
 2008.6.14.
 ******************************************************************************/
-bool GroupRotation(const vector<double> &axisA, const vector<double> &axisB, double angle, vector<vector<double> > &pointB)
+bool GroupRotation(const vector<float> &axisA, const vector<float> &axisB, float angle, vector<vector<float> > &pointB)
 {
    if(axisA.size()!=3 || axisB.size()!=3)
    {
@@ -611,7 +611,7 @@ bool GroupRotation(const vector<double> &axisA, const vector<double> &axisB, dou
       return false;
    }
    
-   vector<double> axis(3, 0);
+   vector<float> axis(3, 0);
    axis[0]=axisB[0]-axisA[0]; 
    axis[1]=axisB[1]-axisA[1];
    axis[2]=axisB[2]-axisA[2]; 
@@ -619,8 +619,8 @@ bool GroupRotation(const vector<double> &axisA, const vector<double> &axisB, dou
    matrix rotmtx;
    if(!RotationMatrixB(axis, deg2rad(angle), rotmtx)) return false;
    
-   //vector<double> point_A(4, 0);
-   double point_A[3];
+   //vector<float> point_A(4, 0);
+   float point_A[3];
    for(int i=0; i<pointB.size(); ++i)
    {
       point_A[0]=pointB[i][0]-axisA[0];
@@ -635,7 +635,7 @@ bool GroupRotation(const vector<double> &axisA, const vector<double> &axisB, dou
    return true;
 }
 //CoordinateRotation for a given group of points
-bool GroupRotation(const vector<double> &axisA, const vector<double> &axisB, double angle, vector<vector<double> > &pointB, const vector<short>& index)
+bool GroupRotation(const vector<float> &axisA, const vector<float> &axisB, float angle, vector<vector<float> > &pointB, const vector<short>& index)
 {
    if(axisA.size()!=3 || axisB.size()!=3)
    {
@@ -643,7 +643,7 @@ bool GroupRotation(const vector<double> &axisA, const vector<double> &axisB, dou
       return false;
    }
    
-   vector<double> axis(3, 0);
+   vector<float> axis(3, 0);
    axis[0]=axisB[0]-axisA[0]; 
    axis[1]=axisB[1]-axisA[1];
    axis[2]=axisB[2]-axisA[2]; 
@@ -651,7 +651,7 @@ bool GroupRotation(const vector<double> &axisA, const vector<double> &axisB, dou
    matrix rotmtx;
    if(!RotationMatrixB(axis, deg2rad(angle), rotmtx)) return false;
    
-   double point_A[3];
+   float point_A[3];
    int i, j, m, n;
    for(j=0; j<index.size(); j++)
    {
@@ -674,7 +674,7 @@ bool GroupRotation(const vector<double> &axisA, const vector<double> &axisB, dou
 Coordinate Translation for a group of points
 2008.6.14.
 ******************************************************************************/
-bool GroupTranslation(const vector<double> &trans, vector<vector<double> > &pointB)
+bool GroupTranslation(const vector<float> &trans, vector<vector<float> > &pointB)
 {
    if(trans.size()!=3)
    {

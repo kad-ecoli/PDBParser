@@ -28,7 +28,7 @@ void print_vector(const vector<int>& vec,int max_num=20)
 }
 
 /* print the content of vector */
-void print_vector(const vector<double>& vec,int max_num=20)
+void print_vector(const vector<float>& vec,int max_num=20)
 {
     if (max_num % 2 !=0) max_num--; // must be even number
     int vec_len=vec.size();
@@ -59,7 +59,7 @@ void print_vector(const vector<string>& vec,int max_num=20)
 
 /* print the content of matrix 
  * max_num is the maximum number of row/columns to print */
-void print_matrix(const vector<vector<double> >& mat,int max_num=20)
+void print_matrix(const vector<vector<float> >& mat,int max_num=20)
 {
     if (max_num % 2 !=0) max_num--; // must be even number
     int m=mat.size();

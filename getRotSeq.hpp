@@ -4,7 +4,7 @@
 
 using namespace std;
 
-char getRotSeq(ResidueUnit& residue,double chi1_angle)
+char getRotSeq(ResidueUnit& residue,float chi1_angle)
 {
     if (chi1_angle<0) chi1_angle+=360;
     if (residue.resn=="ALA")                         return 'A';
@@ -89,7 +89,7 @@ string getRotSeq(ChainUnit& chain)
 {
     string RotSeq="";
     bool chi1_only=true;
-    vector<vector<double> >angle_mat=SidechainTorsion(chain,chi1_only);
+    vector<vector<float> >angle_mat=SidechainTorsion(chain,chi1_only);
     for (int r=0;r<chain.residues.size();r++)
         if (has_atom_name(chain.residues[r]))
             RotSeq+=getRotSeq(chain.residues[r],angle_mat[r][0]);

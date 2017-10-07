@@ -17,7 +17,7 @@ using namespace std;
  */
 void aln2coor(const string &aln1,const string &aln2,
     const ChainUnit &chain1, const ChainUnit &chain2,
-    vector<vector<double> > &xyz_list1,vector<vector<double> > &xyz_list2,
+    vector<vector<float> > &xyz_list1,vector<vector<float> > &xyz_list2,
     int atomic_detail=0)
 {
     int L=MIN(aln1.length(),aln2.length());
@@ -68,30 +68,30 @@ void aln2coor(const string &aln1,const string &aln2,
 }
 
 /* calculate RMSD of superposed structures */
-double calRMSD(const vector<vector<double> >& xyz_list1, 
-    const vector<vector<double> >& xyz_list2)
+float calRMSD(const vector<vector<float> >& xyz_list1, 
+    const vector<vector<float> >& xyz_list2)
 {
-    double dist2=0; // sum of square difference
+    float dist2=0; // sum of square difference
     int L=xyz_list1.size();
     for (int i=0;i<L;i++)
         dist2+=Points2Distance2(xyz_list1[i],xyz_list2[i]);
 
-    double rms=0;
+    float rms=0;
     if (L>0) rms=sqrt(dist2/L);
     return rms;
 }
 
 
 /* calculate TM-score of superposed structures, L is chain length */
-double calTMscore(const vector<vector<double> >& xyz_list1, 
-    const vector<vector<double> >& xyz_list2, int L)
+float calTMscore(const vector<vector<float> >& xyz_list1, 
+    const vector<vector<float> >& xyz_list2, int L)
 {
     if (L<1) return 0.;
 
-    double d0=(L>21)?(1.24*pow((L-15.),(1./3))-1.8):0.5;
+    float d0=(L>21)?(1.24*pow((L-15.),(1./3))-1.8):0.5;
 
-    double d02=d0*d0;
-    double TMscore=0; // sum of residue TMscore
+    float d02=d0*d0;
+    float TMscore=0; // sum of residue TMscore
     int Lali=xyz_list1.size();
     for (int i=0;i<Lali;i++)
         TMscore+=1./(1.+Points2Distance2(xyz_list1[i],xyz_list2[i])/d02);

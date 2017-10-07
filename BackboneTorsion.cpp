@@ -21,8 +21,8 @@ int main(int argc,char **argv)
     cout<<" AA c resi    omega     phi     psi   kappa   alpha"<<endl;
     for (c=0;c<pdb_entry.chains.size();c++)
     {
-        vector<vector<double> >OmgPhiPsi_mat=OmegaPhiPsi(pdb_entry.chains[c]);
-        vector<vector<double> >KappaAlpha_mat=KappaAlpha(pdb_entry.chains[c]);
+        vector<vector<float> >OmgPhiPsi_mat=OmegaPhiPsi(pdb_entry.chains[c]);
+        vector<vector<float> >KappaAlpha_mat=KappaAlpha(pdb_entry.chains[c]);
         for (r=0;r<pdb_entry.chains[c].residues.size();r++)
         {
             cout<<setw(3)<<pdb_entry.chains[c].residues[r].resn<<' '

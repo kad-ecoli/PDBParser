@@ -20,7 +20,7 @@ using namespace std;
 struct AtomUnit    // struct for each atom entry
 {
     string name;       // atom name
-    vector<double> xyz; // coordinate
+    vector<float> xyz; // coordinate
 };
 
 struct ResidueUnit // struct for each residue

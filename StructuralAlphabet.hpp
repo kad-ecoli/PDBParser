@@ -70,7 +70,7 @@ const char* ss_vec="XCHTE"; // undefined, coil, helix, strand, turn
 /* convert pdb chain to secondary structure */
 string pdb2ss(ChainUnit& chain)
 {
-    vector<vector<double> > dist_mat=KappaAlpha(chain,1);
+    vector<vector<float> > dist_mat=KappaAlpha(chain,1);
     string ss_seq="";
     int L=chain.residues.size();
     for (int r=0;r<L;r++)
@@ -98,7 +98,7 @@ string pdb2ss(ModelUnit& pep,const string PDBid="",const int ShowSeqLen=1)
  * by Ramachandran Sequential Transformation) code */
 string pdb2sarst(ChainUnit& chain)
 {
-    vector<vector<double> > angle_mat=OmegaPhiPsi(chain);
+    vector<vector<float> > angle_mat=OmegaPhiPsi(chain);
     chain.sarst="";
     int L=chain.residues.size();
     int dim=36; //int(sqrt(strlen(sarst_matrix)));
@@ -142,14 +142,14 @@ string pdb2sarst(ModelUnit& pep,const string PDBid="",const int ShowSeqLen=1)
 /* convert pdb chain to structural alphabet in 3D-blast */
 string pdb2ThreeDblast(ChainUnit& chain)
 {
-    vector<vector<double> > angle_mat=KappaAlpha(chain);
+    vector<vector<float> > angle_mat=KappaAlpha(chain);
     string ThreeDblast_seq="";
     int L=chain.residues.size();
     int dim=36; //int(sqrt(strlen(sarst_matrix)));
 
     int i,j; // coordinate in sarst_matrix
     char SA_code;
-    double kappa,alpha;
+    float kappa,alpha;
     for (int r=0;r<L;r++)
     {
         if (has_atom_name(chain.residues[r])==0) continue;

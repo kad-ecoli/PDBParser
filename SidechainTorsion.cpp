@@ -21,7 +21,7 @@ int main(int argc,char **argv)
     cout<<" AA c resi     chi1    chi2    chi3    chi4"<<endl;
     for (c=0;c<pdb_entry.chains.size();c++)
     {
-        vector<vector<double> >chi_mat=SidechainTorsion(pdb_entry.chains[c]);
+        vector<vector<float> >chi_mat=SidechainTorsion(pdb_entry.chains[c]);
         for (r=0;r<pdb_entry.chains[c].residues.size();r++)
         {
             cout<<setw(3)<<pdb_entry.chains[c].residues[r].resn<<' '

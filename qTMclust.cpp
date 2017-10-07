@@ -43,9 +43,9 @@ int main(int argc, char **argv)
     /* parse commad line argument */
     int norm=0; // use longer protein
     int MinClustSize=2; // minimum size of cluster
-    double TMmin=0.5;  // minimum TM-score cutoff
-    double TMmax=0;    // maximum TM-score cutoff
-    double TMstep=0.1; // step size of TM-score cutoffs
+    float TMmin=0.5;  // minimum TM-score cutoff
+    float TMmax=0;    // maximum TM-score cutoff
+    float TMstep=0.1; // step size of TM-score cutoffs
     int CacheCoor=0;   // decide whether cache all PDB based on pdb_entry_num
     vector<string> argv_list;
     for (int arg=1;arg<argc;arg++)
@@ -139,7 +139,7 @@ int main(int argc, char **argv)
     // (i,j) store TM-score between i and j, as normalized by i
     // tm_fast_mat is calculated by TMalign -f 8
     // tm_full_mat is calculated by standard TMalign
-    // use unsigned char instead of float or double save 4x ~ 8x space
+    // use unsigned char instead of float or float save 4x ~ 8x space
     vector <unsigned char> tmp_array(pdb_entry_num,0);
     vector<vector<unsigned char> >tm_fast_mat(pdb_entry_num,tmp_array);
     map<long long,unsigned char> tm_full_mat; // sparse matrix

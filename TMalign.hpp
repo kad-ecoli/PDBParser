@@ -94,9 +94,9 @@ void load_PDB_allocate_memory(const ChainUnit & chain1,
  * TM-score of Jianyi's TMalignc */
 void TMalign_I(const string & aln1, const string & aln2,
     ChainUnit & chain1, const ChainUnit & chain2,
-    double & rmsd0, double & tmscore1, double & tmscore2, int f=0)
+    float & tmscore1, float & tmscore2, int f=0)
 {
-    rmsd0=tmscore1=tmscore2=0;
+    tmscore1=tmscore2=0;
 
     fast_level = 0;
     f_opt = false;
@@ -231,7 +231,7 @@ void TMalign_I(const string & aln1, const string & aln2,
     }
     n_ali8=k;
 
-    //double rmsd0 = 0.0;
+    double rmsd0 = 0.0;
     Kabsch(r1, r2, n_ali8, 0, &rmsd0, t, u);//rmsd0 is used for final output, 
                                             //only recalculate rmsd0, not t & u
     rmsd0 = sqrt(rmsd0 / n_ali8);
@@ -282,9 +282,9 @@ void TMalign_I(const string & aln1, const string & aln2,
 /* free alignment */
 void TMalign(string & aln1, string & aln2,
     ChainUnit & chain1, const ChainUnit & chain2,
-    double & rmsd0, double & tmscore1, double & tmscore2, int f=0)
+    float & tmscore1, float & tmscore2, int f=0)
 {
-    rmsd0=tmscore1=tmscore2=0;
+    tmscore1=tmscore2=0;
     aln1.clear();
     aln2.clear();
 
@@ -488,7 +488,7 @@ void TMalign(string & aln1, string & aln2,
     }
     n_ali8=k;
 
-    //double rmsd0 = 0.0;
+    double rmsd0 = 0.0;
     Kabsch(r1, r2, n_ali8, 0, &rmsd0, t, u);//rmsd0 is used for final output, 
                                             //only recalculate rmsd0, not t & u
     rmsd0 = sqrt(rmsd0 / n_ali8);

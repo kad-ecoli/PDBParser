@@ -16,7 +16,6 @@ reindex_pdb        # renumber residue number of PDB file
 strip_sidechain    # remove side chain atoms
 pdb2fasta          # convert PDB file to fasta file
 split_chain        # split PDB by chain
-qTMclust 
 
 
 #### residue torsion angles ####

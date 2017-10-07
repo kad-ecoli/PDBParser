@@ -121,9 +121,9 @@ bool cf_int_str_pair_list(pair<int,string> chain1,pair<int,string> chain2)
 void rough_tmscore_by_kabsch(const string& seq1, const string& seq2, 
     const vector<int>& seq2int1, const vector<int>& seq2int2,
     string & aln1,string & aln2, ChainUnit& chain1, ChainUnit& chain2,
-    vector<vector<double> >&xyz_list1, vector<vector<double> >&xyz_list2, 
-    vector<vector<double> >&RotMatix, vector<double>&TranVect,
-    double& tmscore1, double& tmscore2, const int L1, const int L2,
+    vector<vector<float> >&xyz_list1, vector<vector<float> >&xyz_list2, 
+    vector<vector<float> >&RotMatix, vector<float>&TranVect,
+    float& tmscore1, float& tmscore2, const int L1, const int L2,
     const int seq_type=0, const int glocal=0)
 {
     NWalign(seq1, seq2, seq2int1, seq2int2, aln1, aln2, seq_type, glocal);
@@ -136,8 +136,8 @@ void rough_tmscore_by_kabsch(const string& seq1, const string& seq2,
         RotateCoor(xyz_list1,xyz_list2, RotMatix, TranVect);
 
         /* change coordinate */
-        vector<double> tmp_array(3,0);
-        vector<vector<double> > super_xyz_list1(aln_len,tmp_array);
+        vector<float> tmp_array(3,0);
+        vector<vector<float> > super_xyz_list1(aln_len,tmp_array);
         for (int r=0; r<aln_len; r++)
             ChangeCoor(xyz_list1[r], RotMatix, TranVect, super_xyz_list1[r]);
 
@@ -215,7 +215,7 @@ int qTMclust(TMclustUnit &TMclust, const vector<string>&pdb_name_list,
     vector<vector<unsigned char> >&tm_fast_mat,
     map<long long,unsigned char>&tm_full_mat,
     vector<pair<int,ChainUnit> >&pdb_chain_list,
-    const double tmscore_cutoff=0.5, const int f=8, const int norm=0,
+    const float tmscore_cutoff=0.5, const int f=8, const int norm=0,
     const int CacheCoor=1)
 {
     long long pdb_entry_num=pdb_chain_list.size();
@@ -226,21 +226,21 @@ int qTMclust(TMclustUnit &TMclust, const vector<string>&pdb_name_list,
     map<int,unsigned char> tmp_map;
 
     string aln_i,aln_j;
-    double rmsd,tmscore_i,tmscore_j;  // tmscore from sarst based superposition
-    double tmscore_aa_i,tmscore_aa_j; // tmscore from aa based superposition
-    double tmscore; // the tmscore to consider when clustering
+    float tmscore_i,tmscore_j;  // tmscore from sarst based superposition
+    float tmscore_aa_i,tmscore_aa_j; // tmscore from aa based superposition
+    float tmscore; // the tmscore to consider when clustering
     int L_i,L_j;
     int aln_len;
 
-    vector<vector<double> > xyz_list_i,xyz_list_j;
-    vector<vector<double> > RotMatix;  // U
-    vector<double> TranVect;  // t
-    vector<pair<double,int> >aln_order_pair;
+    vector<vector<float> > xyz_list_i,xyz_list_j;
+    vector<vector<float> > RotMatix;  // U
+    vector<float> TranVect;  // t
+    vector<pair<float,int> >aln_order_pair;
 
     /**** convert SARST to int ****/
     vector<vector<int> >sarst2int_list;
     vector<vector<int> >seq2int_list;
-    vector<double> X_sarst_ratio(pdb_entry_num,0.);
+    vector<float> X_sarst_ratio(pdb_entry_num,0.);
     for (i=0;i<pdb_entry_num;i++)
     {
         sarst2int_list.push_back(sarst2int(pdb_chain_list[i].second.sarst));
@@ -328,7 +328,7 @@ int qTMclust(TMclustUnit &TMclust, const vector<string>&pdb_name_list,
             if (tmscore>=tmscore_cutoff*.6)
             {
                 TMalign(aln_i, aln_j,pdb_chain_list[i].second,
-                    pdb_chain_list[j].second, rmsd,tmscore_i,tmscore_j,0);
+                    pdb_chain_list[j].second, tmscore_i,tmscore_j,0);
                 tm_full_mat[i*pdb_entry_num+j]=
                     =tm_fast_mat[i][j]=(int)(255*tmscore_i+.5);
                 tm_full_mat[j*pdb_entry_num+i]=
@@ -382,11 +382,11 @@ int qTMclust(TMclustUnit &TMclust, const vector<string>&pdb_name_list,
             }
             else
             {
-                rmsd=tmscore_i=tmscore_j=0;
+                tmscore_i=tmscore_j=0;
                 string aln_j; // for unknown reason, aln_j must be re-
                               // allocated 
                 TMalign(aln_i, aln_j,pdb_chain_list[i].second,
-                    pdb_chain_list[j].second, rmsd, tmscore_i, tmscore_j, f);
+                    pdb_chain_list[j].second, tmscore_i, tmscore_j, f);
                 aln_j.clear();
                 tm_fast_mat[i][j]=(int)(255*tmscore_i+.5);
                 tm_fast_mat[j][i]=(int)(255*tmscore_j+.5);
@@ -399,7 +399,7 @@ int qTMclust(TMclustUnit &TMclust, const vector<string>&pdb_name_list,
             {
                 string aln_j;
                 TMalign(aln_i, aln_j,pdb_chain_list[i].second,
-                    pdb_chain_list[j].second, rmsd, tmscore_i, tmscore_j, 0);
+                    pdb_chain_list[j].second, tmscore_i, tmscore_j, 0);
                 aln_j.clear();
                 tm_full_mat[i*pdb_entry_num+j]=(int)(255*tmscore_i+.5);
                 tm_full_mat[j*pdb_entry_num+i]=(int)(255*tmscore_j+.5);
@@ -454,7 +454,7 @@ int fast_clustering(TMclustUnit &TMclust,const vector<string>&pdb_name_list,
     vector<vector<unsigned char> >&tm_fast_mat,
     map<long long,unsigned char>&tm_full_mat,
     vector<pair<int,ChainUnit> >&pdb_chain_list,
-    const double tmscore_cutoff=0.5, const int norm=0)
+    const float tmscore_cutoff=0.5, const int norm=0)
 {
     long long pdb_entry_num=pdb_chain_list.size();
     int i,j,k,l;
@@ -462,10 +462,10 @@ int fast_clustering(TMclustUnit &TMclust,const vector<string>&pdb_name_list,
     int max_clust_size=0;
     map<int,unsigned char> tmp_map;
 
-    double rmsd,tmscore,tmscore_i,tmscore_j;
+    float tmscore,tmscore_i,tmscore_j;
     int L_i,L_j;
 
-    vector<pair<double,int> >aln_order_pair;
+    vector<pair<float,int> >aln_order_pair;
     while(TMclust.unclust_list.size())
     {
         i=TMclust.unclust_list.back(); // try to add protein i to clust_list
@@ -522,7 +522,7 @@ int fast_clustering(TMclustUnit &TMclust,const vector<string>&pdb_name_list,
                 }
                 string aln_i,aln_j;
                 TMalign(aln_i, aln_j,pdb_chain_list[i].second,
-                    pdb_chain_list[j].second, rmsd, tmscore_i,tmscore_j, 0);
+                    pdb_chain_list[j].second, tmscore_i,tmscore_j, 0);
                 aln_i.clear();
                 aln_j.clear();
                 tm_full_mat[i*pdb_entry_num+j]
@@ -557,7 +557,7 @@ int fast_clustering(TMclustUnit &TMclust,const vector<string>&pdb_name_list,
 
 void write_TMclust_result(const string filename,
     const TMclustUnit &TMclust, const vector<string> pdb_name_list,
-    double tmscore_cutoff=0.5,char openmode='w')
+    float tmscore_cutoff=0.5,char openmode='w')
 {
     stringstream buf;
     int i,j;
@@ -624,7 +624,7 @@ void write_matrix(const string filename,
     fp.close();
 }
 
-void write_matrix(const string filename, const vector<vector<double> >&tm_mat)
+void write_matrix(const string filename, const vector<vector<float> >&tm_mat)
 {
     stringstream buf;
     int i,j;
@@ -679,7 +679,7 @@ int full_clustering(TMclustUnit &TMclust,
     vector<pair<int,ChainUnit> >&pdb_chain_list,
     vector<vector<unsigned char> >&tm_fast_mat,
     map<long long,unsigned char>&tm_full_mat,
-    double TMmin=0.5, const double TMmax=0.8, const double TMstep=0.1,
+    float TMmin=0.5, const float TMmax=0.8, const float TMstep=0.1,
     const string cluster_filename="cluster.txt", const char openmode='a',
     const int norm=0, const int MinClustSize=2, const int CacheCoor=1)
 {
