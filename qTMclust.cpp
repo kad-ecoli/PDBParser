@@ -8,7 +8,6 @@ const char* docstring=""
 "\n"
 "output:\n"
 "    seq.fasta   - fasta format file for amino acid sequence\n"
-"    sarst.fasta - fasta format file for SARST code\n"
 "    cluster.txt - index file for clustering result\n"
 "    ca.xyz      - xyz format file for CA atoms of representative PDB files\n"
 "    TM_fast.txt - matrix of TM-score by fast TMalign\n"
@@ -23,9 +22,11 @@ const char* docstring=""
 "    -TMstep=0.10    (default: 0.10)  step size of TM-score cut-offs\n"
 "    -MinClustSize=2 minimum cluster size below which clustering will not\n"
 "                    be performed\n"
-"    -CacheCoor={-1,0,1} whether cache all PDB coordinate in memory\n"
-"        0 - (default) cache all coordinate if less than 10,000 chains\n"
-"        1 - always cache all coordinates\n"
+"    -heuristic=10000 only align the first heuristic/L representatives\n"
+"                     if set to 0, align to all possible representatives\n"
+"    -CacheCoor={1,0,-1} whether cache all PDB coordinate in memory\n"
+"        1 - (default) cache all coordinates\n"
+"        0 - cache all coordinate if less than 10,000 chains\n"
 "       -1 - never cache all coordinates\n"
 ;
 
@@ -46,7 +47,8 @@ int main(int argc, char **argv)
     float TMmin=0.5;  // minimum TM-score cutoff
     float TMmax=0;    // maximum TM-score cutoff
     float TMstep=0.1; // step size of TM-score cutoffs
-    int CacheCoor=0;   // decide whether cache all PDB based on pdb_entry_num
+    float heuristic=10000.; // heuristic parameter
+    int CacheCoor=1;   // cache all coordinates
     vector<string> argv_list;
     for (int arg=1;arg<argc;arg++)
     {
@@ -60,7 +62,9 @@ int main(int argc, char **argv)
             TMstep=atof(string(argv[arg]).substr(8).c_str());
         else if (string(argv[arg]).substr(0,14)=="-MinClustSize=")
             MinClustSize=atof(string(argv[arg]).substr(14).c_str());
-        else if (string(argv[arg]).substr(0,6)=="-CacheCoor=")
+        else if (string(argv[arg]).substr(0,11)=="-heuristic=")
+            heuristic=atof(string(argv[arg]).substr(11).c_str());
+        else if (string(argv[arg]).substr(0,11)=="-CacheCoor=")
             CacheCoor=atoi(string(argv[arg]).substr(11).c_str());
         else
             argv_list.push_back(argv[arg]);
@@ -94,6 +98,7 @@ int main(int argc, char **argv)
         tmp_model=read_pdb_structure(pdb_file_list[i].c_str(),1,1);
         pdb2fasta(tmp_model.chains[0]);
         pdb2sarst(tmp_model.chains[0]);
+        pdb2ss(tmp_model.chains[0]);
         
         //free memory for caching coordinates, which are re-parsed by qTMclust
         if (CacheCoor==-1) tmp_model.chains[0].residues.clear();
@@ -123,11 +128,6 @@ int main(int argc, char **argv)
 
 
     /* write fasta */
-    cout<<"write sarst.fasta"<<endl;
-    ofstream fp_sarst("sarst.fasta");
-    for (i=0;i<pdb_entry_num;i++) fp_sarst<<'>'<<pdb_name_list[i]<<'\t'<<
-        pdb_chain_list[i].first<<endl<<pdb_chain_list[i].second.sarst<<endl;
-    fp_sarst.close();
     cout<<"write seq.fasta"<<endl;
     ofstream fp_aa("seq.fasta");
     for (i=0;i<pdb_entry_num;i++) fp_aa<<'>'<<pdb_name_list[i]<<'\t'<<
@@ -151,7 +151,7 @@ int main(int argc, char **argv)
     /* perform initial clustering */
     cout<<"heuristic clustering for TM-score "<<TMmin<<endl;
     qTMclust(TMclust, pdb_name_list, pdb_file_list, 
-        tm_fast_mat, tm_full_mat, pdb_chain_list, TMmin, 8, norm);
+        tm_fast_mat, tm_full_mat, pdb_chain_list, TMmin, 8, norm, heuristic);
 
     /* output initial clusters */
     cout<<"write output for TM-score "<<TMmin<<endl;

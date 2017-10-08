@@ -216,7 +216,7 @@ int qTMclust(TMclustUnit &TMclust, const vector<string>&pdb_name_list,
     map<long long,unsigned char>&tm_full_mat,
     vector<pair<int,ChainUnit> >&pdb_chain_list,
     const float tmscore_cutoff=0.5, const int f=8, const int norm=0,
-    const int CacheCoor=1)
+    const int CacheCoor=1, const int heuristic=0)
 {
     long long pdb_entry_num=pdb_chain_list.size();
 
@@ -228,6 +228,7 @@ int qTMclust(TMclustUnit &TMclust, const vector<string>&pdb_name_list,
     string aln_i,aln_j;
     float tmscore_i,tmscore_j;  // tmscore from sarst based superposition
     float tmscore_aa_i,tmscore_aa_j; // tmscore from aa based superposition
+    float tmscore_ss_i,tmscore_ss_j; // tmscore from ss based superposition
     float tmscore; // the tmscore to consider when clustering
     int L_i,L_j;
     int aln_len;
@@ -240,14 +241,12 @@ int qTMclust(TMclustUnit &TMclust, const vector<string>&pdb_name_list,
     /**** convert SARST to int ****/
     vector<vector<int> >sarst2int_list;
     vector<vector<int> >seq2int_list;
-    vector<float> X_sarst_ratio(pdb_entry_num,0.);
+    vector<vector<int> >ss2int_list;
     for (i=0;i<pdb_entry_num;i++)
     {
         sarst2int_list.push_back(sarst2int(pdb_chain_list[i].second.sarst));
         seq2int_list.push_back(aa2int(pdb_chain_list[i].second.sequence));
-        for (j=0;j<pdb_chain_list[i].second.sarst.length();j++)
-            X_sarst_ratio[i]+=(pdb_chain_list[i].second.sarst[j]=='X');
-        X_sarst_ratio[i]/=pdb_chain_list[i].first;
+        ss2int_list.push_back(ss2int(pdb_chain_list[i].second.ss));
     }
 
     /* read first chain */
@@ -321,6 +320,26 @@ int qTMclust(TMclustUnit &TMclust, const vector<string>&pdb_name_list,
             xyz_list_i.clear();
             xyz_list_j.clear();
 
+            /*** superpose by secondary structure ***/
+            rough_tmscore_by_kabsch(pdb_chain_list[i].second.ss,
+                pdb_chain_list[j].second.ss,
+                ss2int_list[i], ss2int_list[j], aln_i, aln_j,
+                pdb_chain_list[i].second, pdb_chain_list[j].second,
+                xyz_list_i, xyz_list_j, RotMatix, TranVect,
+                tmscore_ss_i, tmscore_ss_j, L_i, L_j, 4,0); //4 -ss; 0 -global
+            tmscore_i=MAX(tmscore_i,tmscore_ss_i);
+            tmscore_j=MAX(tmscore_j,tmscore_ss_j);
+            tmscore=(norm==0?
+                MIN(tmscore_i,tmscore_j):MAX(tmscore_i,tmscore_j));
+
+            /* clean up */
+            RotMatix.clear();
+            TranVect.clear();
+            aln_i.clear();
+            aln_j.clear();
+            xyz_list_i.clear();
+            xyz_list_j.clear();
+
             /* the following lines pre-terminate sarst+rmsd alignment if the
              * first significant hit is found. this is not only unhelpful
              * for shortening computational time, but also resulting in
@@ -361,8 +380,11 @@ int qTMclust(TMclustUnit &TMclust, const vector<string>&pdb_name_list,
             reverse(aln_order_pair.begin(), aln_order_pair.end());
         }
 
+        int max_TMalign_num=MIN(aln_order_pair.size(), 1+int(heuristic/L_i));
         for (l=0;l<aln_order_pair.size();l++)
         {
+            if (heuristic>0 && l>max_TMalign_num && 
+                aln_order_pair[l].first<0.4*tmscore_cutoff) break;
             k=TMclust.clust_map[aln_order_pair[l].second]; // cluster index
             j=TMclust.repr_list[k]; // representative for cluster k
 
@@ -442,7 +464,7 @@ int qTMclust(TMclustUnit &TMclust, const vector<string>&pdb_name_list,
     /* clean-up */
     seq2int_list.clear();
     sarst2int_list.clear();
-    X_sarst_ratio.clear();
+    ss2int_list.clear();
 
     /* return max cluster size */
     for (i=0;i<TMclust.clust_list.size();i++) 
