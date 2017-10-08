@@ -40,6 +40,7 @@ struct ChainUnit  // struct for each chain
     string sarst;                 // SARST (Structural similarity search
                                   // Aided by Ramachandran Sequential 
                                   // Transformation) code
+    string ss;                    // secondary structure
     vector<ResidueUnit> residues; // list of residues
 };
 

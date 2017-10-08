@@ -145,6 +145,8 @@ int get_stdin_seq(const char *stdin_seq, vector<string>& name_list,
             seq2int.push_back(sarst2int(line[i]));
         else if (seq_type==3) // 3d-blast sequence
             seq2int.push_back(ThreeDblast2int(line[i]));
+        else if (seq_type==4) // secondary structure
+            seq2int.push_back(ss2int(line[i]));
         else // amino acid sequence
             seq2int.push_back(aa2int(line[i]));
     }
@@ -208,6 +210,8 @@ int read_fasta(const char *filename, vector<string>& name_list,
                     seq2int.push_back(sarst2int(line[i]));
                 else if (seq_type==3) // 3d-blast sequence
                     seq2int.push_back(ThreeDblast2int(line[i]));
+                else if (seq_type==4) // secondary structure
+                    seq2int.push_back(ss2int(line[i]));
                 else // amino acid sequence
                     seq2int.push_back(aa2int(line[i]));
             }
@@ -553,10 +557,10 @@ int NWalign(const string& seq1, const string& seq2,
             aln_score=calculate_score_gotoh(seq2int1,seq2int2,JumpH,JumpV,P,
                 BLOSUM62_3dblast,gapopen_3dblast,gapext_3dblast,glocal);
             break;
-        //case 4: // ss, for some reason, using BLOSUM62 gives better result
-            //aln_score=calculate_score_gotoh(seq2int1,seq2int2,JumpH,JumpV,P,
-                //BLOSUM62_ss,gapopen_ss,gapext_ss,glocal);
-            //break;
+        case 4: // ss, for some reason, using BLOSUM62 gives better result
+            aln_score=calculate_score_gotoh(seq2int1,seq2int2,JumpH,JumpV,P,
+                BLOSUM62_ss,gapopen_ss,gapext_ss,glocal);
+            break;
         default: // amino acid
             aln_score=calculate_score_gotoh(seq2int1,seq2int2,JumpH,JumpV,P,
                 BLOSUM62,gapopen_blosum62,gapext_blosum62,glocal);

@@ -71,11 +71,11 @@ const char* ss_vec="XCHTE"; // undefined, coil, helix, strand, turn
 string pdb2ss(ChainUnit& chain)
 {
     vector<vector<float> > dist_mat=KappaAlpha(chain,1);
-    string ss_seq="";
+    chain.ss="";
     int L=chain.residues.size();
     for (int r=0;r<L;r++)
-        ss_seq+=ss_vec[sec_str(dist_mat[r])];
-    return ss_seq;
+        chain.ss+=ss_vec[sec_str(dist_mat[r])];
+    return chain.ss;
 }
 
 /* convert pdb entry to secondary structure
