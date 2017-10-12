@@ -229,8 +229,8 @@ int calculate_score_gotoh(
     int aln_score=S[len1][len2];
 
     // re-fill first row/column of path matrix P for back-tracing
-    for (i=1;i<len1;i++) if (glocal<3 || P[i][0]>0) P[i][0]=2; // |
-    for (j=1;j<len2;j++) if (glocal<3 || P[0][j]>0) P[0][j]=4; // -
+    for (i=1;i<len1+1;i++) if (glocal<3 || P[i][0]>0) P[i][0]=2; // |
+    for (j=1;j<len2+1;j++) if (glocal<3 || P[0][j]>0) P[0][j]=4; // -
 
     // calculate alignment score and alignment path for swalign
     if (glocal>=3)
