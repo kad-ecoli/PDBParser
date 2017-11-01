@@ -151,7 +151,8 @@ int main(int argc, char **argv)
     /* perform initial clustering */
     cout<<"heuristic clustering for TM-score "<<TMmin<<endl;
     qTMclust(TMclust, pdb_name_list, pdb_file_list, 
-        tm_fast_mat, tm_full_mat, pdb_chain_list, TMmin, 8, norm, heuristic);
+        tm_fast_mat, tm_full_mat, pdb_chain_list, TMmin, 8, norm, 
+        CacheCoor, heuristic);
 
     /* output initial clusters */
     cout<<"write output for TM-score "<<TMmin<<endl;
