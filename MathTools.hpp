@@ -28,6 +28,22 @@ void print_vector(const vector<int>& vec,int max_num=20)
 }
 
 /* print the content of vector */
+void print_vector(const vector<double>& vec,int max_num=20)
+{
+    if (max_num % 2 !=0) max_num--; // must be even number
+    int vec_len=vec.size();
+    cout<<"[";
+    for(int i=0;i<vec_len;i++)
+    {
+        if (i==(vec_len-1)) cout<<setprecision(4)<<vec[i]<<"]"<<endl;
+        else if (i<max_num/2 || vec_len-i <=max_num/2) cout<<setprecision(4)<<vec[i]<<", ";
+        else if (i==max_num/2 && vec_len>max_num) cout<<" ... ";
+    }
+    if (vec_len==0) cout<<"]"<<endl;
+}
+
+
+/* print the content of vector */
 void print_vector(const vector<float>& vec,int max_num=20)
 {
     if (max_num % 2 !=0) max_num--; // must be even number
@@ -60,6 +76,20 @@ void print_vector(const vector<string>& vec,int max_num=20)
 /* print the content of matrix 
  * max_num is the maximum number of row/columns to print */
 void print_matrix(const vector<vector<float> >& mat,int max_num=20)
+{
+    if (max_num % 2 !=0) max_num--; // must be even number
+    int m=mat.size();
+    cout<<"["<<endl;
+    for(int i=0;i<m;i++)
+    {
+        if (i<max_num/2 || m-i <=max_num/2) print_vector(mat[i],max_num);
+        else if (i==max_num/2 && m>max_num) cout<<" ... "<<endl;
+    }
+    cout<<"]"<<endl;
+}
+
+/* print the content of matrix */
+void print_matrix(const vector<vector<double> >& mat,int max_num=20)
 {
     if (max_num % 2 !=0) max_num--; // must be even number
     int m=mat.size();
