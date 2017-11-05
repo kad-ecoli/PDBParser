@@ -380,7 +380,7 @@ int qTMclust(TMclustUnit &TMclust, const vector<string>&pdb_name_list,
             reverse(aln_order_pair.begin(), aln_order_pair.end());
         }
 
-        int max_TMalign_num=MIN(aln_order_pair.size(), 1+int(heuristic/L_i));
+        int max_TMalign_num=MIN(aln_order_pair.size(), int(heuristic/L_i));
         for (l=0;l<aln_order_pair.size();l++)
         {
             if (heuristic>0 && l>max_TMalign_num && 
