@@ -1,0 +1,3 @@
+[submodule "TMalign"]
+	path = TMalign
+	url = https://github.com/kad-ecoli/TMalign
