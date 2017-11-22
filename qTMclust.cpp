@@ -141,7 +141,7 @@ int main(int argc, char **argv)
     // tm_full_mat is calculated by standard TMalign
     // use unsigned char instead of float or float save 4x ~ 8x space
     vector <unsigned char> tmp_array(pdb_entry_num,0);
-    vector<vector<unsigned char> >tm_fast_mat(pdb_entry_num,tmp_array);
+    map<long long,unsigned char> tm_fast_mat;
     map<long long,unsigned char> tm_full_mat; // sparse matrix
     //vector<vector<unsigned char> >tm_full_mat(pdb_entry_num,tmp_array);
     tmp_array.clear();
@@ -157,8 +157,8 @@ int main(int argc, char **argv)
     /* output initial clusters */
     cout<<"write output for TM-score "<<TMmin<<endl;
     write_TMclust_result("cluster.txt",TMclust,pdb_name_list,TMmin);
-    write_matrix("TM_fast.txt",tm_fast_mat);
-    write_matrix("TM_full.txt",tm_full_mat,(long long)(pdb_entry_num));
+    write_matrix("TM_fast.txt",tm_fast_mat,pdb_name_list);
+    write_matrix("TM_full.txt",tm_full_mat,pdb_name_list);
     write_TMclust_ca_xyz("ca.xyz", TMclust.repr_list, 
         pdb_name_list, pdb_chain_list);
 
