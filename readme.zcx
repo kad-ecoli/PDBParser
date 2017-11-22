@@ -4,6 +4,13 @@ licensed under LGPL v2+.
 All programs can be directly called by command line.
 When launched without argument, a short documentation will be displayed.
 
+Download:
+git clone --recurse-submodules https://github.com/kad-ecoli/PDBParser
+cd PDBParser
+git pull
+git submodule init
+git submodule update
+
 Compiling by Makefile:
 make         # compile programs
 make all     # compile all programs, including "old" programs
