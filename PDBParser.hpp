@@ -180,7 +180,8 @@ ModelUnit read_pdb_structure(const char *filename,
             while(fp_gz2.good())
             {
                 getline(fp_gz2,line);
-                if (line.length()<53||line.substr(0,3)=="END") continue;
+                if (line.substr(0,3)=="END") break;
+                if (line.length()<53) continue;
                 parse_pdb_line(line,pep,chain,residue,atom,PDBmap[PDBfile],
                     atomic_detail,allowX);
             }
@@ -221,8 +222,8 @@ ModelUnit read_pdb_structure(const char *filename,
         else
             getline(fp,line);
 
-        if (line.length()<53) continue;
         if (line.substr(0,3)=="END") break;
+        if (line.length()<53) continue;
         
         parse_pdb_line(line,pep,chain,residue,atom,chainIDmap,
             atomic_detail,allowX);
