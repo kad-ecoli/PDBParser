@@ -1,3 +1,6 @@
 [submodule "TMalign"]
 	path = TMalign
 	url = https://github.com/kad-ecoli/TMalign
+[submodule "ssm"]
+	path = ssm
+	url = https://github.com/kad-ecoli/ssm
