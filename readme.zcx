@@ -38,3 +38,4 @@ NWalign            # global/glocal/local sequence alignment
 pdb2rmsd           # superpose two structures using Kabsch algorithm guided
                    # by sequence alignment given by NWalign
 qTMclust           # cluster PDB by TM-score
+ccealign           # reimplementation of CE for structure alignment
