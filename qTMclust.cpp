@@ -78,17 +78,17 @@ int main(int argc, char **argv)
     /* parse filename */
     vector<string> pdb_name_list;
     vector<string> pdb_file_list;
-    int pdb_entry_num=parse_pdb_list(argv_list[0],argv_list[1],
+    size_t pdb_entry_num=parse_pdb_list(argv_list[0],argv_list[1],
         pdb_name_list,pdb_file_list);
     if (CacheCoor==0) CacheCoor=2*(pdb_entry_num<=10000)-1;
 
     /* parse pdb_file */
     cout<<"convert "<<pdb_entry_num<<" chains into SARST sequence"<<endl;
-    vector<pair<int,ChainUnit> > pdb_chain_list;
-    vector<pair<int,string> > pdb_name_pair_list;
-    vector<pair<int,string> > pdb_file_pair_list;
+    vector<pair<size_t,ChainUnit> > pdb_chain_list;
+    vector<pair<size_t,string> > pdb_name_pair_list;
+    vector<pair<size_t,string> > pdb_file_pair_list;
     ModelUnit tmp_model;
-    int i,j;
+    size_t i,j;
     int L;
     for (i=0;i<pdb_entry_num;i++)
     {
