@@ -15,34 +15,48 @@ using namespace std;
 class Geo
 {
     public:
+    /* one letter amino acid code */
+    char  aa;
+
+    /* residue non-specific angles and bonds */
     float CA_N_length ;
     float CA_C_length ;
-    float N_CA_C_angle;
     float C_O_length  ;
-    float CA_C_O_angle;
     float phi         ;
     float psi_im1     ;
     float omega       ;
     float peptide_bond;
     float CA_C_N_angle;
     float C_N_CA_angle;
-    char  aa; // one letter amino acid code
+
+    float CA_CB_length;
+    float C_CA_CB_angle;
+
+    /* residue specific angles */
     float N_CA_C_O_diangle;
+    float CA_C_O_angle;
+    float N_CA_C_angle;
+    float N_C_CA_CB_diangle;
 
     /* initializer */
     Geo(const char aa)
     {
-        CA_N_length  = 1.46;
-        CA_C_length  = 1.52;
-        N_CA_C_angle = 111.;
-        C_O_length   = 1.23;
-        CA_C_O_angle =120.5;
-        phi          =-120.;
-        psi_im1      = 140.;
-        omega        =180.0;
-        peptide_bond = 1.33;
-        CA_C_N_angle =116.642992978143;
-        C_N_CA_angle =121.382215820277;
+        CA_N_length      = 1.46;
+        CA_C_length      = 1.52;
+        C_O_length       = 1.23;
+        phi              =-120.;
+        psi_im1          = 140.;
+        omega            =180.0;
+        peptide_bond     = 1.33;
+        CA_C_N_angle     =116.642992978143;
+        C_N_CA_angle     =121.382215820277;
+        CA_CB_length     = 1.52;
+        C_CA_CB_angle    =109.5;
+
+        N_CA_C_O_diangle =120.0; // LTRKDEQMHFYW
+        CA_C_O_angle     =120.5;
+        N_CA_C_angle     = 111.;
+        N_C_CA_CB_diangle=122.6;
         assign(aa);
     }
 
@@ -50,12 +64,124 @@ class Geo
     void assign(const char aa)
     {
         this->aa     =aa;
-        N_CA_C_O_diangle =120.0; // LTRKDEQMHFYW
-        if      (aa=='G') N_CA_C_O_diangle=180.0;
-        else if (aa=='A') N_CA_C_O_diangle=-60.5;
-        else if (aa=='P') N_CA_C_O_diangle=-45.0;
+        if      (aa=='G')
+        {
+            N_CA_C_O_diangle=180.0;
+            CA_C_O_angle=120.5117;
+            N_CA_C_angle=110.8914;
+        }
+        else if (aa=='A')
+        {
+            N_CA_C_O_diangle=-60.5;
+            N_CA_C_angle=111.068;
+            N_C_CA_CB_diangle=122.6860;
+        }
+        else if (aa=='P')
+        {
+            N_CA_C_O_diangle=-45.0;
+            CA_C_O_angle=120.2945;
+            N_CA_C_angle=112.7499;
+            N_C_CA_CB_diangle=115.2975;
+        }
         else if (string("SCUVIN").find(aa)!=string::npos)
+        {
             N_CA_C_O_diangle= -60.0;
+            if (aa=='S')
+            {
+                N_CA_C_angle=111.2812;
+                N_C_CA_CB_diangle=122.6618;
+            }
+            else if (aa=='C' || aa=='U')
+            {
+                N_CA_C_angle= 110.8856;
+                N_C_CA_CB_diangle=122.5037;
+            }
+            else if (aa=='V')
+            {
+                CA_C_O_angle=120.5686;
+                N_CA_C_angle=109.7698;
+                N_C_CA_CB_diangle=123.2347;
+            }
+            else if (aa=='I')
+            {
+                CA_C_O_angle=120.5403;
+                N_CA_C_angle=109.7202;
+                N_C_CA_CB_diangle=123.2347;
+            }
+            else if (aa=='N') 
+            {
+                CA_C_O_angle=120.4826;
+                N_CA_C_angle=111.5;
+                N_C_CA_CB_diangle=123.2254;
+            }
+        }
+        else if (aa=='L')
+        {
+            CA_C_O_angle=120.4647;
+            N_CA_C_angle=110.8652;
+            N_C_CA_CB_diangle=122.4948;
+        }
+        else if (aa=='T')
+        {
+            CA_C_O_angle=120.5359;
+            N_CA_C_angle=110.7014;
+            N_C_CA_CB_diangle=123.0953;
+        }
+        else if (aa=='R'||aa=='K'||aa=='O')
+        {
+            CA_C_O_angle=120.54;
+            N_CA_C_angle=111.08;
+            N_C_CA_CB_diangle=122.76;
+            if (aa=='R') N_CA_C_angle=110.98;
+        }
+        else if (aa=='D')
+        {
+            CA_C_O_angle=120.51;
+            N_CA_C_angle=111.03;
+            N_C_CA_CB_diangle=122.82;
+        }
+        else if (aa=='Q')
+        {
+            CA_C_O_angle=120.5029;
+            N_CA_C_angle=111.0849;
+            N_C_CA_CB_diangle=122.8134;
+        }
+        else if (aa=='E')
+        {
+            CA_C_O_angle=120.511;
+            N_CA_C_angle=111.1703;
+            N_C_CA_CB_diangle=122.8702;
+        }
+        else if (aa=='M')
+        {
+            CA_C_O_angle=120.4816;
+            N_CA_C_angle=110.9416;
+            N_C_CA_CB_diangle=122.6733;
+        }
+        else if (aa=='H')
+        {
+            CA_C_O_angle=120.4732;
+            N_CA_C_angle=111.0859;
+            N_C_CA_CB_diangle=122.6711;
+        }
+        else if (aa=='F')
+        {
+            CA_C_O_angle=120.5316;
+            N_CA_C_angle=110.7528;
+            N_C_CA_CB_diangle=122.6054;
+        }
+        else if (aa=='Y')
+        {
+            CA_C_O_angle=120.5434;
+            N_CA_C_angle=110.9288;
+            N_C_CA_CB_diangle=122.6023;
+        }
+        else if (aa=='W')
+        {
+            CA_C_O_angle=120.5117;
+            N_CA_C_angle=110.8914;
+            N_C_CA_CB_diangle=122.6112;
+        }
     }
 };
 
@@ -183,10 +309,9 @@ void initialize_res(ResidueUnit &residue, const Geo &geo)
     O_coord.clear();
 }
 
-/* Adds a residue to chain A model 0 of the given structure, and
- * returns the new structure. The residue to be added is determined by
- * the geometry object given as second argument.
- */
+/* Adds a residue to given chain. "residue" is the last added
+ * residue. "geo" must be pre-assigned according to the residue
+ * to be added. */
 void add_residue_from_geo(ChainUnit &chain, ResidueUnit &residue,
     const Geo &geo)
 {
@@ -201,7 +326,7 @@ void add_residue_from_geo(ChainUnit &chain, ResidueUnit &residue,
             prevN_coord=residue.atoms[a].xyz;
         else if (residue.atoms[a].name==" CA ")
             prevCA_coord=residue.atoms[a].xyz;
-        if (residue.atoms[a].name==" C  ")
+        else if (residue.atoms[a].name==" C  ")
             prevC_coord=residue.atoms[a].xyz;
     }
 
@@ -247,10 +372,13 @@ void add_residue_from_geo(ChainUnit &chain, ResidueUnit &residue,
     prevC_coord.clear();
 }
 
-/* add OXT to last residue */
+/* add OXT to last residue. "residue" must be the last residue.
+ * "geo" is reassigned according to "residue" */
 void add_terminal_oxygen(ChainUnit &chain, ResidueUnit &residue, 
-    const Geo &geo, const float psi)
+    Geo &geo, const float psi)
 {
+    geo.assign(aa3to1(residue.resn));
+
     /* last residue */
     vector <float> N_coord;
     vector <float> CA_coord;
@@ -262,7 +390,7 @@ void add_terminal_oxygen(ChainUnit &chain, ResidueUnit &residue,
             N_coord=residue.atoms[a].xyz;
         else if (residue.atoms[a].name==" CA ")
             CA_coord=residue.atoms[a].xyz;
-        if (residue.atoms[a].name==" C  ")
+        else if (residue.atoms[a].name==" C  ")
             C_coord=residue.atoms[a].xyz;
     }
 
@@ -283,8 +411,65 @@ void add_terminal_oxygen(ChainUnit &chain, ResidueUnit &residue,
     atom.xyz.clear();
 }
 
+/* add C beta given backbone N C CA */
+void add_Cbeta(ResidueUnit &residue, Geo &geo)
+{
+    geo.assign(aa3to1(residue.resn));
+    AtomUnit atom;
+    atom.name=" CB ";
+    atom.xyz.assign(3,0);
+
+    vector<float> N_coord;
+    vector<float> C_coord;
+    vector<float> CA_coord;
+    int a;
+    for (a=0;a<residue.atoms.size();a++)
+    {
+        if (residue.atoms[a].name==" N  ") 
+            N_coord=residue.atoms[a].xyz;
+        else if (residue.atoms[a].name==" CA ")
+            CA_coord=residue.atoms[a].xyz;
+        else if (residue.atoms[a].name==" C  ")
+            C_coord=residue.atoms[a].xyz;
+    }
+
+    calculateCoordinates(atom.xyz, N_coord, C_coord, CA_coord, 
+        geo.CA_CB_length, geo.C_CA_CB_angle, geo.N_C_CA_CB_diangle);
+    
+    /* add CB to residue */
+    for (a=0;a<residue.atoms.size();a++)
+    {
+        if (residue.atoms[a].name==" CB ") // update existing CB
+        {
+            for (int i=0;i<3;i++) residue.atoms[a].xyz[i]=atom.xyz[i];
+            break;
+        }
+    }
+    if (a>=residue.atoms.size()) // no pre-existing CB
+        residue.atoms.push_back(atom);
+
+    /* clean up */
+    atom.xyz.clear();
+    atom.name.clear();
+    N_coord.clear();
+    C_coord.clear();
+    CA_coord.clear();
+}
+
+void add_Cbeta(ChainUnit &chain, Geo &geo, const bool gly_beta=false)
+{
+    for (int r=0;r<chain.residues.size();r++)
+        add_Cbeta(chain.residues[r], geo);
+}
+
+/* add_cb - whether to add CB atoms. 
+ *          0: backbone only
+ *          1: backbone + CB for non gly residue
+ *          2: backbone + CB for all residue, including gly
+ */
 void make_chain(ChainUnit &chain, const string sequence, 
-    const vector<vector<float> >&rama_table)
+    const vector<vector<float> >&rama_table, const bool add_oxt=true,
+    const int add_cb=1)
 {
     if (sequence.size()==0) return;
 
@@ -308,7 +493,10 @@ void make_chain(ChainUnit &chain, const string sequence,
         add_residue_from_geo(chain, residue, geo);
     }
 
-    add_terminal_oxygen(chain, residue, geo, rama_table[r-1][2]);
+    if (add_cb) add_Cbeta(chain, geo, (add_cb==2));
+
+    if (add_oxt)
+        add_terminal_oxygen(chain, residue, geo, rama_table[r-1][2]);
 
     /* clean up */
     residue.resn.clear();
