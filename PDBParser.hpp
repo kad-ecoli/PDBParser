@@ -427,6 +427,35 @@ string pdb2fasta(ChainUnit& chain)
     return chain.sequence;
 }
 
+inline string aa1to3(const char aa)
+{
+    if (aa=='A') return "ALA";
+    if (aa=='B') return "ASX";
+    if (aa=='C') return "CYS";
+    if (aa=='D') return "ASP";
+    if (aa=='E') return "GLU";
+    if (aa=='F') return "PHE";
+    if (aa=='G') return "GLY";
+    if (aa=='H') return "HIS";
+    if (aa=='I') return "ILE";
+    if (aa=='K') return "LYS";
+    if (aa=='L') return "LEU";
+    if (aa=='M') return "MET";
+    if (aa=='N') return "ASN";
+    if (aa=='O') return "PYL";
+    if (aa=='P') return "PRO";
+    if (aa=='Q') return "GLN";
+    if (aa=='R') return "ARG";
+    if (aa=='S') return "SER";
+    if (aa=='T') return "THR";
+    if (aa=='U') return "SEC"; 
+    if (aa=='V') return "VAL"; 
+    if (aa=='W') return "TRP";
+    if (aa=='Y') return "TYR";
+    if (aa=='Z') return "GLX";
+    return "UNK";
+}
+
 /* ShowSeqLen - whether to show residue number for each chain */
 string pdb2fasta(ModelUnit& pep,const string PDBid="",const int ShowSeqLen=0)
 {
