@@ -187,7 +187,8 @@ void initialize_res(ResidueUnit &residue, const Geo &geo)
  * returns the new structure. The residue to be added is determined by
  * the geometry object given as second argument.
  */
-void add_residue_from_geo(ChainUnit &chain, ResidueUnit &residue, const Geo &geo)
+void add_residue_from_geo(ChainUnit &chain, ResidueUnit &residue,
+    const Geo &geo)
 {
     /* getReferenceResidue */
     vector <float> prevN_coord;
@@ -220,24 +221,22 @@ void add_residue_from_geo(ChainUnit &chain, ResidueUnit &residue, const Geo &geo
     vector<float> O_coord(3,0);
     calculateCoordinates(O_coord, N_coord, CA_coord, C_coord, 
         geo.C_O_length, geo.CA_C_O_angle, geo.N_CA_C_O_diangle);
-    //calculateCoordinates(O_coord, N_coord, CA_coord, C_coord,
-        //geo.C_O_length, geo.CA_C_O_angle, 180.0);
 
     /* correct old Carbonyl oxygen atom */
     vector <float> prevO_coord(3,0);
-    calculateCoordinates(prevO_coord, N_coord, prevCA_coord, prevC_coord,
-        geo.C_O_length, geo.CA_C_O_angle, 180.0);
+    calculateCoordinates(prevO_coord, N_coord, prevCA_coord, 
+        prevC_coord, geo.C_O_length, geo.CA_C_O_angle, 180.0);
     for (a=0;a<residue.atoms.size();a++)
     {
         if (residue.atoms[a].name==" O  ")
         {
             for (int i=0;i<3;i++)
-            {
                 chain.residues.back().atoms[a].xyz[i]=prevO_coord[i];
-            }
         }
     }
+    prevO_coord.clear();
 
+    /* add new residue to chain */
     residue.resi++;
     makeRes(residue, N_coord, CA_coord, C_coord, O_coord, geo);
     chain.residues.push_back(residue);
@@ -246,6 +245,42 @@ void add_residue_from_geo(ChainUnit &chain, ResidueUnit &residue, const Geo &geo
     prevN_coord.clear();
     prevCA_coord.clear();
     prevC_coord.clear();
+}
+
+/* add OXT to last residue */
+void add_terminal_oxygen(ChainUnit &chain, ResidueUnit &residue, 
+    const Geo &geo, const float psi)
+{
+    /* last residue */
+    vector <float> N_coord;
+    vector <float> CA_coord;
+    vector <float> C_coord;
+    int a;
+    for (a=0;a<residue.atoms.size();a++)
+    {
+        if (residue.atoms[a].name==" N  ") 
+            N_coord=residue.atoms[a].xyz;
+        else if (residue.atoms[a].name==" CA ")
+            CA_coord=residue.atoms[a].xyz;
+        if (residue.atoms[a].name==" C  ")
+            C_coord=residue.atoms[a].xyz;
+    }
+
+    /* OXT coordinates */
+    AtomUnit atom;
+    atom.name=" OXT";
+    atom.xyz.assign(3,0);
+    calculateCoordinates(atom.xyz, N_coord, CA_coord, C_coord,
+        geo.C_O_length, geo.CA_C_N_angle, psi);
+
+    chain.residues.back().atoms.push_back(atom);
+
+    /* clean up */
+    N_coord.clear();
+    CA_coord.clear();
+    C_coord.clear();
+    atom.name.clear();
+    atom.xyz.clear();
 }
 
 void make_chain(ChainUnit &chain, const string sequence, 
@@ -261,8 +296,8 @@ void make_chain(ChainUnit &chain, const string sequence,
     initialize_res(residue, geo);
     chain.residues.push_back(residue);
 
-    cout<<geo.aa<<endl;
-    for (int r=1;r<sequence.size();r++)
+    int r;
+    for (r=1;r<sequence.size();r++)
     {
         geo.assign(sequence[r]);
 
@@ -272,6 +307,8 @@ void make_chain(ChainUnit &chain, const string sequence,
 
         add_residue_from_geo(chain, residue, geo);
     }
+
+    add_terminal_oxygen(chain, residue, geo, rama_table[r-1][2]);
 
     /* clean up */
     residue.resn.clear();
