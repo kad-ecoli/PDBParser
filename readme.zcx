@@ -23,7 +23,7 @@ reindex_pdb        # renumber residue number of PDB file
 strip_sidechain    # remove side chain atoms
 pdb2fasta          # convert PDB file to fasta file
 split_chain        # split PDB by chain
-
+PeptideBuilder     # construct protein structure from phi, psi, omega
 
 #### residue torsion angles ####
 BackboneTorsion    # calculate backbone torsion angles (omega, phi, psi)
