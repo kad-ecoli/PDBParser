@@ -39,7 +39,7 @@ class Geo
     float N_C_CA_CB_diangle;
 
     /* initializer */
-    Geo(const char aa)
+    Geo(const char aa='G')
     {
         CA_N_length      = 1.46;
         CA_C_length      = 1.52;
@@ -412,17 +412,23 @@ void add_terminal_oxygen(ChainUnit &chain, ResidueUnit &residue,
 }
 
 /* add C beta given backbone N C CA */
-void add_Cbeta(ResidueUnit &residue, Geo &geo)
+void addCbeta(ResidueUnit &residue, Geo &geo)
 {
     geo.assign(aa3to1(residue.resn));
-    AtomUnit atom;
-    atom.name=" CB ";
-    atom.xyz.assign(3,0);
 
+    /* check if C beta already exist*/
+    int a;
+    for (a=0;a<residue.atoms.size();a++)
+    {
+        if (residue.atoms[a].name==" CB ")
+            break; // do not add CB if there is already one
+    }
+    if (a<residue.atoms.size()) return; // there is already a C beta
+
+    /* get backbone coordinates */
     vector<float> N_coord;
     vector<float> C_coord;
     vector<float> CA_coord;
-    int a;
     for (a=0;a<residue.atoms.size();a++)
     {
         if (residue.atoms[a].name==" N  ") 
@@ -433,20 +439,13 @@ void add_Cbeta(ResidueUnit &residue, Geo &geo)
             C_coord=residue.atoms[a].xyz;
     }
 
+    /* get CB coordinates */
+    AtomUnit atom;
+    atom.name=" CB ";
+    atom.xyz.assign(3,0);
     calculateCoordinates(atom.xyz, N_coord, C_coord, CA_coord, 
         geo.CA_CB_length, geo.C_CA_CB_angle, geo.N_C_CA_CB_diangle);
-    
-    /* add CB to residue */
-    for (a=0;a<residue.atoms.size();a++)
-    {
-        if (residue.atoms[a].name==" CB ") // update existing CB
-        {
-            for (int i=0;i<3;i++) residue.atoms[a].xyz[i]=atom.xyz[i];
-            break;
-        }
-    }
-    if (a>=residue.atoms.size()) // no pre-existing CB
-        residue.atoms.push_back(atom);
+    residue.atoms.push_back(atom);
 
     /* clean up */
     atom.xyz.clear();
@@ -456,10 +455,19 @@ void add_Cbeta(ResidueUnit &residue, Geo &geo)
     CA_coord.clear();
 }
 
-void add_Cbeta(ChainUnit &chain, Geo &geo, const bool gly_beta=false)
+void addCbeta(ChainUnit &chain, Geo &geo, const bool gly_beta=false)
 {
     for (int r=0;r<chain.residues.size();r++)
-        add_Cbeta(chain.residues[r], geo);
+    {
+        if (gly_beta || chain.residues[r].resn!="GLY")
+            addCbeta(chain.residues[r], geo);
+    }
+}
+
+void addCbeta(ModelUnit &model, Geo &geo, const bool gly_beta=false)
+{
+    for (int c=0;c<model.chains.size();c++)
+        addCbeta(model.chains[c], geo, gly_beta);
 }
 
 /* add_cb - whether to add CB atoms. 
@@ -493,7 +501,7 @@ void make_chain(ChainUnit &chain, const string sequence,
         add_residue_from_geo(chain, residue, geo);
     }
 
-    if (add_cb) add_Cbeta(chain, geo, (add_cb==2));
+    if (add_cb) addCbeta(chain, geo, (add_cb==2));
 
     if (add_oxt)
         add_terminal_oxygen(chain, residue, geo, rama_table[r-1][2]);

@@ -2,7 +2,7 @@ CC=g++
 CFLAGS=-O3
 LDFLAGS=-static
 
-PROG=qTMclust pdb2fasta reindex_pdb strip_sidechain split_chain BackboneTorsion SidechainTorsion NWalign pdb2rmsd pdb2ss pdb2sarst PeptideBuilder
+PROG=qTMclust pdb2fasta reindex_pdb strip_sidechain split_chain BackboneTorsion SidechainTorsion NWalign pdb2rmsd pdb2ss pdb2sarst PeptideBuilder addCbeta
 OLD_PROG=pdb2ThreeDblast SarstAlign ThreeDblastAlign ccealign getRotSeq
 HEADER=PDBParser.hpp pstream.h
 NW_HEADER=NWalign.hpp FilePathParser.hpp ROTSUMalign.hpp getRotSeq.hpp SidechainTorsion.hpp GeometryTools.hpp MathTools.hpp SarstAlign.hpp StructuralAlphabet.hpp BackboneTorsion.hpp ThreeDblastAlign.hpp SSalign.hpp 
@@ -60,6 +60,9 @@ ccealign: ccealign.cpp ccealign.hpp ce2tm.hpp ${NW_HEADER} ${HEADER}
 	${CC} ${CFLAGS} $@.cpp -o $@ ${LDFLAGS} -Itnt
 
 PeptideBuilder: PeptideBuilder.cpp PeptideBuilder.hpp FilePathParser.hpp ${HEADER}
+	${CC} ${CFLAGS} $@.cpp -o $@ ${LDFLAGS}
+
+addCbeta: addCbeta.cpp PeptideBuilder.hpp FilePathParser.hpp ${HEADER}
 	${CC} ${CFLAGS} $@.cpp -o $@ ${LDFLAGS}
 
 clean:
