@@ -409,7 +409,7 @@ int qTMclust(TMclustUnit &TMclust, const vector<string>&pdb_name_list,
                 string aln_j; // for unknown reason, aln_j must be re-
                               // allocated 
                 TMalign(aln_i, aln_j,pdb_chain_list[i].second,
-                    pdb_chain_list[j].second, tmscore_i, tmscore_j, f);
+                    pdb_chain_list[j].second, tmscore_i, tmscore_j, f, false);
                 aln_j.clear();
                 tm_fast_mat[i*pdb_entry_num+j]=(int)(255*tmscore_i+.5);
                 tm_fast_mat[j*pdb_entry_num+i]=(int)(255*tmscore_j+.5);
@@ -422,7 +422,7 @@ int qTMclust(TMclustUnit &TMclust, const vector<string>&pdb_name_list,
             {
                 string aln_j;
                 TMalign(aln_i, aln_j,pdb_chain_list[i].second,
-                    pdb_chain_list[j].second, tmscore_i, tmscore_j, 0);
+                    pdb_chain_list[j].second, tmscore_i, tmscore_j, 0, false);
                 aln_j.clear();
                 tm_full_mat[i*pdb_entry_num+j]=(int)(255*tmscore_i+.5);
                 tm_full_mat[j*pdb_entry_num+i]=(int)(255*tmscore_j+.5);
@@ -554,7 +554,7 @@ int fast_clustering(TMclustUnit &TMclust,const vector<string>&pdb_name_list,
                 }
                 string aln_i,aln_j;
                 TMalign(aln_i, aln_j,pdb_chain_list[i].second,
-                    pdb_chain_list[j].second, tmscore_i,tmscore_j, 0);
+                    pdb_chain_list[j].second, tmscore_i,tmscore_j, 0, false);
                 aln_i.clear();
                 aln_j.clear();
                 tm_full_mat[i*pdb_entry_num+j]

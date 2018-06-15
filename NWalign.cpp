@@ -24,8 +24,8 @@ const char* docstring=""
 "    NWalign input1 input2 option+4000 (using secondary structure by TMalign)\n"
 "\n"
 "    NWalign input1 input2 option+10000 (RMSD superposition)\n"
-//"    NWalign input1 input2 option+20000 (TM-score superposition)\n"
-//"    NWalign input1 input2 option+30000 (fast TM-score superposition)\n"
+"    NWalign input1 input2 option+20000 (TM-score superposition)\n"
+"    NWalign input1 input2 option+30000 (fast TM-score superposition)\n"
 ;
 
 #include <iostream>
@@ -263,13 +263,13 @@ int main(int argc, char **argv)
             else if (aln_len!=0 && super_type>=2) // TM-score
             {
                 if (input_mode>=6)
-                    TMalign_I(aln1,aln2,pdb_entry1.chains[q],
+                    TMalign(aln1,aln2,pdb_entry1.chains[q],
                         pdb_entry1.chains[s],tmscore1,tmscore2,
-                        (super_type==3)*8);
+                        (super_type==3),true);
                 else
-                    TMalign_I(aln1,aln2,pdb_entry1.chains[q],
+                    TMalign(aln1,aln2,pdb_entry1.chains[q],
                         pdb_entry2.chains[s],tmscore1,tmscore2,
-                        (super_type==3)*8);
+                        (super_type==3),true);
             }
 
             if (seqID_only==3) // max seqID only
