@@ -1,6 +1,10 @@
 const char* docstring=
 "RMSD superposition of two proteins aligned by sequence\n"
 "    pdb2rmsd F1.pdb F2.pdb\n"
+"\n"
+"Output the RMSD superposition of the first protein aligned to second\n"
+"protein by sequence\n"
+"    pdb2rmsd F1.pdb F2.pdb\n"
 ;
 
 #include <iostream>
@@ -29,8 +33,33 @@ int main(int argc, char **argv)
     /* parse input */
     string PDBid1=filename_no_ext(argv[1]);
     string PDBid2=filename_no_ext(argv[2]);
-    ModelUnit pdb_entry1=read_pdb_structure(argv[1],atomic_detail,allowX);
+    string outfile=(argc>3)?argv[3]:"";
+    ModelUnit pdb_entry1=read_pdb_structure(argv[1],2*(argc>3)   ,allowX);
     ModelUnit pdb_entry2=read_pdb_structure(argv[2],atomic_detail,allowX);
+
+    /* convert full structure to CA only structure */
+    int r; // resi
+    int a; // atom
+    int c1,c2; // index of chain
+    ModelUnit pdb_entry_full=pdb_entry1;
+    if (outfile.size())
+    {
+        for (c1=0;c1<pdb_entry_full.chains.size();c1++)
+        {
+            for (r=0;r<pdb_entry_full.chains[c1].residues.size();r++)
+            {
+                pdb_entry1.chains[c1].residues[r].atoms.clear();
+                for (a=0;a<pdb_entry_full.chains[c1].residues[r].atoms.size();a++)
+                {
+                    if (pdb_entry_full.chains[c1].residues[r].atoms[a].name==" CA ")
+                        break;
+                }
+                if (a==pdb_entry_full.chains[c1].residues[r].atoms.size()) a=0;
+                pdb_entry1.chains[c1].residues[r].atoms.push_back(
+                    pdb_entry_full.chains[c1].residues[r].atoms[a]);
+            }
+        }
+    }
 
     /* pdb2fasta */
     int seq_num1=pdb_entry1.chains.size();
@@ -49,7 +78,6 @@ int main(int argc, char **argv)
     }
 
     /* NWalign + RMSD*/
-    int c1,c2; // index of chain
     string aln1,aln2; // alignment
     int L1,L2; // sequence length
     int aln_len; // aligned position number
@@ -57,7 +85,7 @@ int main(int argc, char **argv)
     vector<vector<float> > xyz_list1,xyz_list2; // coordinate of aligned residue
     vector<vector<float> > RotMatix;  // U
     vector<float> TranVect;  // t
-    int r; // resi
+    int dim; // dimension
     string aln_str; // string to indicate match/mistmatch
     string pos_str; // string to indicate position
     int iden_len; // number of identical position
@@ -114,6 +142,22 @@ int main(int argc, char **argv)
                     <<"\tTM-score2="<<calTMscore(super_xyz_list1,xyz_list2,L2)
                     <<endl;
                 
+                /* superposed structure */
+                if (outfile.size())
+                {
+                    for (r=0;r<pdb_entry_full.chains[c1].residues.size();r++)
+                    {
+                        for (a=0;a<pdb_entry_full.chains[c1].residues[r].atoms.size();a++)
+                        {
+                            for (dim=0;dim<3;dim++) super_xyz_list1[0][dim]=
+                                pdb_entry_full.chains[c1].residues[r].atoms[a].xyz[dim];
+	                        ChangeCoor(super_xyz_list1[0], RotMatix, TranVect, 
+                                pdb_entry_full.chains[c1].residues[r].atoms[a].xyz);
+                        }
+                    }
+                    write_pdb_structure(outfile.c_str(),pdb_entry_full);
+                }
+                
                 /* clean up */
                 RotMatix.clear();
                 TranVect.clear();
@@ -133,6 +177,7 @@ int main(int argc, char **argv)
     /* clean up*/
     seq2int1_list.clear();
     seq2int2_list.clear();
+    pdb_entry_full.chains.clear();
     pdb_entry1.chains.clear();
     pdb_entry2.chains.clear();
     PDBid1.clear();
