@@ -75,9 +75,9 @@ int parse_pdb_line(const string line,ModelUnit &pep, ChainUnit &chain,
     // ignore alternatively locating residues
     if (altLoc!=' ' && altLoc!='A') return 0;
 
-    if ((atomic_detail==0 && atom.name!=" CA ")||
-        (atomic_detail==1 && atom.name!=" CA " && atom.name!=" N  " && 
-         atom.name!=" C  " && atom.name!=" O  ")) return 0;
+    if ((atomic_detail==0 && atom.name!=" CA " && atom.name!=" C3'")||
+        (atomic_detail==1 && atom.name!=" CA " && atom.name!=" C3'" &&
+         atom.name!=" N  "&& atom.name!=" C  " && atom.name!=" O  ")) return 0;
     
     if (residue.resn=="MSE" && allowX<3)
     {
@@ -323,6 +323,7 @@ void reindex_pdb(const int startindex,ModelUnit& pep)
 inline char aa3to1(const string resn,const int convertX=2)
 {
     // 20 standard amino acid + MSE
+    if (resn[0]==' ' && (resn[1]=='D'||resn[1]==' ')) return tolower(resn[2]);
     if (resn=="ALA") return 'A';
     if (resn=="CYS") return 'C';
     if (resn=="ASP") return 'D';
@@ -406,7 +407,7 @@ inline char aa3to1(const string resn,const int convertX=2)
     return 'X';
 }
 
-/* only residues in 'ATOM' record with CA atoms are converted */
+/* only residues in 'ATOM' record with CA or C3' atoms are converted */
 string pdb2fasta(ChainUnit& chain)
 {
     chain.sequence="";
@@ -417,10 +418,9 @@ string pdb2fasta(ChainUnit& chain)
         {
             for (a=0;a<chain.residues[r].atoms.size();a++)
             {
-                if (chain.residues[r].atoms[a].name==" CA ")
-                {
+                if (chain.residues[r].atoms[a].name==" CA "||
+                    chain.residues[r].atoms[a].name==" C3'")
                     chain.sequence+=aa3to1(chain.residues[r].resn);
-                }
             }
         }
     }

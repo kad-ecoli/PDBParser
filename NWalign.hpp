@@ -52,7 +52,21 @@ const int BLOSUM62[24][24]={
 {-4,-4,-4,-4,-4,-4,-4,-4,-4,-4,-4,-4,-4,-4,-4,-4,-4,-4,-4,-4,-4,-4,-4, 1},//*
 };
 
+
+const int gapopen_blastn=-5;
+const int gapext_blastn=-2;
+
+const int blastn_matrix[24][24]={
+//A  T  C  G  U
+{ 2,-3,-3,-3,-3},//A
+{-3, 2,-3,-3, 2},//T
+{-3,-3, 2,-3,-3},//C
+{-3,-3,-3, 2,-3},//G
+{-3, 2,-3,-3, 2},//U
+};
+
 const string aa_list="ARNDCQEGHILKMFPSTWYVBZX*";
+const string na_list="atcgu";
 
 /* convert amino acid to int */
 inline int aa2int(char aa)
@@ -62,11 +76,26 @@ inline int aa2int(char aa)
     return aa_list.length();
 }
 
+inline int rna2int(char aa)
+{
+    for (int i=0;i<na_list.length();i++) if (na_list[i]==aa) return i;
+    if (aa!=tolower(aa)) return aa2int(tolower(aa));
+    return na_list.length();
+}
+
 vector<int> aa2int(const string sequence)
 {
     vector<int> seq2int;
     for (int r=0;r<sequence.length();r++)
         seq2int.push_back(aa2int(sequence[r]));
+    return seq2int;
+}
+
+vector<int> rna2int(const string sequence)
+{
+    vector<int> seq2int;
+    for (int r=0;r<sequence.length();r++)
+        seq2int.push_back(rna2int(sequence[r]));
     return seq2int;
 }
 
@@ -113,6 +142,7 @@ int read_pdb_as_fasta(const char *filename,vector<string>& name_list,
             case 2:seq2int_list.push_back(sarst2int(sequence));break;
             case 3:seq2int_list.push_back(ThreeDblast2int(sequence));break;
             case 4:seq2int_list.push_back(ss2int(sequence));break;
+            case 5:seq2int_list.push_back(rna2int(sequence));break;
             default:seq2int_list.push_back(aa2int(sequence));break;
         }
         sequence.clear();
@@ -212,6 +242,8 @@ int read_fasta(const char *filename, vector<string>& name_list,
                     seq2int.push_back(ThreeDblast2int(line[i]));
                 else if (seq_type==4) // secondary structure
                     seq2int.push_back(ss2int(line[i]));
+                else if (seq_type==5) // RNA
+                    seq2int.push_back(rna2int(line[i]));
                 else // amino acid sequence
                     seq2int.push_back(aa2int(line[i]));
             }
@@ -560,6 +592,10 @@ int NWalign(const string& seq1, const string& seq2,
         case 4: // ss, for some reason, using BLOSUM62 gives better result
             aln_score=calculate_score_gotoh(seq2int1,seq2int2,JumpH,JumpV,P,
                 BLOSUM62_ss,gapopen_ss,gapext_ss,glocal);
+            break;
+        case 5: // rna
+            aln_score=calculate_score_gotoh(seq2int1,seq2int2,JumpH,JumpV,P,
+                blastn_matrix,gapopen_blastn,gapext_blastn,glocal);
             break;
         default: // amino acid
             aln_score=calculate_score_gotoh(seq2int1,seq2int2,JumpH,JumpV,P,

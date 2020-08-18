@@ -22,10 +22,11 @@ const char* docstring=""
 "    NWalign input1 input2 option+2000 (using SARST sequence)\n"
 "    NWalign input1 input2 option+3000 (using 3d-blast sequence)\n"
 "    NWalign input1 input2 option+4000 (using secondary structure by TMalign)\n"
+"    NWalign input1 input2 option+5000 (using RNA sequence)\n"
 "\n"
 "    NWalign input1 input2 option+10000 (RMSD superposition)\n"
-"    NWalign input1 input2 option+20000 (TM-score superposition)\n"
-"    NWalign input1 input2 option+30000 (fast TM-score superposition)\n"
+//"    NWalign input1 input2 option+20000 (TM-score superposition)\n"
+//"    NWalign input1 input2 option+30000 (fast TM-score superposition)\n"
 ;
 
 #include <iostream>
@@ -36,7 +37,7 @@ const char* docstring=""
 #include "ROTSUMalign.hpp"
 #include "pdb2rmsd.hpp"
 #include "Superpose.hpp"
-#include "TMalign.hpp"
+//#include "TMalign.hpp"
 
 using namespace std;
 
@@ -260,17 +261,17 @@ int main(int argc, char **argv)
                 xyz_list1.clear();
                 xyz_list2.clear();
             }
-            else if (aln_len!=0 && super_type>=2) // TM-score
-            {
-                if (input_mode>=6)
-                    TMalign(aln1,aln2,pdb_entry1.chains[q],
-                        pdb_entry1.chains[s],tmscore1,tmscore2,
-                        (super_type==3),true);
-                else
-                    TMalign(aln1,aln2,pdb_entry1.chains[q],
-                        pdb_entry2.chains[s],tmscore1,tmscore2,
-                        (super_type==3),true);
-            }
+            //else if (aln_len!=0 && super_type>=2) // TM-score
+            //{
+                //if (input_mode>=6)
+                    //TMalign(aln1,aln2,pdb_entry1.chains[q],
+                        //pdb_entry1.chains[s],tmscore1,tmscore2,
+                        //(super_type==3),true);
+                //else
+                    //TMalign(aln1,aln2,pdb_entry1.chains[q],
+                        //pdb_entry2.chains[s],tmscore1,tmscore2,
+                        //(super_type==3),true);
+            //}
 
             if (seqID_only==3) // max seqID only
             {

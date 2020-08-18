@@ -24,9 +24,9 @@ void ShowMyvector(const vector<float> &cc)
 {
    for(int i=0; i<cc.size(); ++i)
    {
-      cout<<cc[i]<<'\t';
+      cerr<<cc[i]<<'\t';
    }
-   cout<<endl;
+   cerr<<endl;
 }
 
 //Functions using vectors
@@ -81,7 +81,7 @@ inline bool norm(const vector<float> &c, vector<float> &cc)
    float len = c[0]*c[0] + c[1]*c[1] +c[2]*c[2];
    if(len<Extra) 
    {
-      cout<<"Error in norm()! length~=0!\n";
+      cerr<<"Error in norm()! length~=0!\n";
       ShowMyvector(c);
       ShowMyvector(cc);
       return false;
@@ -100,7 +100,7 @@ inline bool norm_univ(const vector<float> &c, vector<float> &cc)
 		len+=c[i]*c[i];
 	if(len<Extra) 
 	{
-		cout<<"Error in norm()! length~=0!\n";
+		cerr<<"Error in norm()! length~=0!\n";
 		return false;
 	}
 	len = 1/sqrt(len);
@@ -250,7 +250,7 @@ inline float Points2Angle(const vector<float> &c1, const vector<float> &c2, cons
    }
    else if(alpha>1+Extra || alpha<-1-Extra)
    {
-      cout<<"Error, float Points2Angle()\n";
+      cerr<<"Error, float Points2Angle()\n";
       exit(0);
    }
    
@@ -264,7 +264,7 @@ inline float Points2Angle(const vector<float> &c1, const vector<float> &c2, cons
 //or there may be faults.
 //by Yang Cao
 //
-//Change by chengxin: if they are on the same plane, return 2*PI
+//Change by chengxin: if they are on the same plane, return -2*PI
 inline float Points2Dihedral(const vector<float> &c1, const vector<float> &c2, const vector<float> &c3, const vector<float> &c4)
 {
    vector<float> vector1(3,0), vector2(3,0), vector3(3,0);
@@ -277,14 +277,14 @@ inline float Points2Dihedral(const vector<float> &c1, const vector<float> &c2, c
    crossproduct(vector3, vector2, v2);
    
    vector<float> v3(3,0), v4(3,0);
-   if(!norm (v1, v3)) {cout<<"Error in Points2Dihedral 1\n"<<endl; return 2*PI;}//exit(1);}
-   if(!norm (v2, v4)) {cout<<"Error in Points2Dihedral 2\n"<<endl; return 2*PI;}//exit(1);}
+   if(!norm (v1, v3)) {cerr<<"Error in Points2Dihedral 1\n"<<endl; return -2*PI;}//exit(1);}
+   if(!norm (v2, v4)) {cerr<<"Error in Points2Dihedral 2\n"<<endl; return -2*PI;}//exit(1);}
    
    float dihedral = innerproduct(v3, v4);
    
    if (dihedral>1 && dihedral<1+Extra)
    {
-      //cout<<"dihedral "<<dihedral<<" "<<acos(dihedral)<<"\n";
+      //cerr<<"dihedral "<<dihedral<<" "<<acos(dihedral)<<"\n";
       dihedral=1;
    }
    else if(dihedral<-1 && dihedral>-1-Extra)
@@ -293,7 +293,7 @@ inline float Points2Dihedral(const vector<float> &c1, const vector<float> &c2, c
    }
    else if(dihedral>1+Extra || dihedral<-1-Extra)
    {
-      cout<<"Error, float Points2Dihedral()\n";
+      cerr<<"Error, float Points2Dihedral()\n";
       exit(0);
    }
    
@@ -330,7 +330,6 @@ inline void MatrixTimesMatrix(const matrix &a, const matrix &v, matrix &x, int m
       {
          for(j=0, sum=0; j<n; ++j)
          {
-            //cout<<a[i][j]<<" * "<<v[j][k]<<" + ";
             sum+=a[i][j]*v[j][k];
          }
          x[i][k]=sum;
@@ -342,7 +341,7 @@ inline bool TransVectorTimesVector(const vector<float> &trans, const vector<floa
 {
    if(trans.size()!=vctor.size())
    {
-      cout<<"Error in TransVectorTimesVector()"<<endl;
+      cerr<<"Error in TransVectorTimesVector()"<<endl;
       return false;
    }
    int i=0, j=0;
@@ -358,7 +357,7 @@ inline bool MatrixTimesTransVector(const matrix &mtx, const vector<float> &tvt, 
 {
    if(mtx[0].size()!=tvt.size())
    {
-      cout<<"Error in MatrixTimesTransVector()"<<endl;
+      cerr<<"Error in MatrixTimesTransVector()"<<endl;
       return false;
    }
    int i=0, j=0;
@@ -383,7 +382,7 @@ inline bool MatrixAddMatrix(const matrix &ma, const matrix &mb, matrix &mc)
    if(ma.size()!=mb.size() || ma[0].size()!=mb[0].size()
    ||ma.size()!=mc.size() || ma[0].size()!=mc[0].size())
    {
-      cout<<"Error size! MatrixAddMatrix()"<<endl;
+      cerr<<"Error size! MatrixAddMatrix()"<<endl;
       return false;
    }
    int i=0, j=0;
@@ -398,7 +397,7 @@ inline bool norm2(const vector<float> &c, vector<float> &cc)
 {
    if(c.size()!=cc.size())
    {
-      cout<<"Error in norm() "<<endl;
+      cerr<<"Error in norm() "<<endl;
       ShowMyvector(c);
       ShowMyvector(cc);
       return false;
@@ -444,13 +443,13 @@ inline bool RotationMatrixA(const vector<float> &axis, float angle, matrix &romt
 {
    if(axis.size()!=3) 
    {
-      cout<<"Error 1 in RotationMatrixA()"<<endl;
+      cerr<<"Error 1 in RotationMatrixA()"<<endl;
       return false;
    }
    vector<float> ouc(3, 0);
    if(!norm(axis, ouc)) 
    {
-      cout<<"Error 2 in RotationMatrixA()"<<endl;
+      cerr<<"Error 2 in RotationMatrixA()"<<endl;
       return false;
    }
    int i=0, j=0;
@@ -502,13 +501,13 @@ inline bool RotationMatrixB(const vector<float> &axis, float angle, matrix &romt
 {
    if(axis.size()!=3) 
    {
-      cout<<"Error 1 in RotationMatrixB()"<<endl;
+      cerr<<"Error 1 in RotationMatrixB()"<<endl;
       return false;
    }
    vector<float> ouc(3, 0);
    if(!norm(axis, ouc)) 
    {
-      cout<<"Error 2 in RotationMatrixB()"<<endl;
+      cerr<<"Error 2 in RotationMatrixB()"<<endl;
       return false;
    }
    float c=cos(angle);
@@ -539,7 +538,7 @@ bool CoordinateRotation(vector<float> &pointA, const vector<float> &axis, float 
 {
    if(pointA.size()!=3)
    {
-      cout<<"Error in CoordinateRotation()"<<endl;
+      cerr<<"Error in CoordinateRotation()"<<endl;
       return false;
    }
    matrix rotmtx;
@@ -567,7 +566,7 @@ bool CoordinateRotation(const vector<float> &pointA, const vector<float> &axisA,
 {
    if(pointA.size()!=3 || axisA.size()!=3 || axisB.size()!=3)
    {
-      cout<<"Error in CoordinateRotation()"<<endl;
+      cerr<<"Error in CoordinateRotation()"<<endl;
       return false;
    }
    
@@ -607,7 +606,7 @@ bool GroupRotation(const vector<float> &axisA, const vector<float> &axisB, float
 {
    if(axisA.size()!=3 || axisB.size()!=3)
    {
-      cout<<"Error in GroupRotation()"<<endl;
+      cerr<<"Error in GroupRotation()"<<endl;
       return false;
    }
    
@@ -639,7 +638,7 @@ bool GroupRotation(const vector<float> &axisA, const vector<float> &axisB, float
 {
    if(axisA.size()!=3 || axisB.size()!=3)
    {
-      cout<<"Error in GroupRotation()"<<endl;
+      cerr<<"Error in GroupRotation()"<<endl;
       return false;
    }
    
@@ -678,7 +677,7 @@ bool GroupTranslation(const vector<float> &trans, vector<vector<float> > &pointB
 {
    if(trans.size()!=3)
    {
-      cout<<"Error in GroupTranslation\n";
+      cerr<<"Error in GroupTranslation\n";
       return false;
    }
    for(int i=0; i<pointB.size(); ++i)
