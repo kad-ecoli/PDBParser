@@ -53,8 +53,8 @@ const int BLOSUM62[24][24]={
 };
 
 
-const int gapopen_blastn=-5;
-const int gapext_blastn=-2;
+const int gapopen_blastn=-15;
+const int gapext_blastn=-4;
 
 const int blastn_matrix[24][24]={
 //A  T  C  G  U
