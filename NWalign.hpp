@@ -594,8 +594,8 @@ int NWalign(const string& seq1, const string& seq2,
                 BLOSUM62_ss,gapopen_ss,gapext_ss,glocal);
             break;
         case 5: // rna
-            aln_score=calculate_score_gotoh(seq2int1,seq2int2,JumpH,JumpV,P,
-                blastn_matrix,gapopen_blastn,gapext_blastn,glocal);
+            aln_score=calculate_score_gotoh(seq2int1,seq2int2,JumpH,JumpV,P,blastn_matrix,
+                (glocal==3)?-5:gapopen_blastn, (glocal==3)?-2:gapext_blastn, glocal);
             break;
         default: // amino acid
             aln_score=calculate_score_gotoh(seq2int1,seq2int2,JumpH,JumpV,P,
