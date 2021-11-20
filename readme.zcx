@@ -20,6 +20,7 @@ make NWalign # compile "NWalign" only
 
 #### structure parsing ####
 reindex_pdb        # renumber residue number of PDB file
+centerModel        # translate structure to the origin
 strip_sidechain    # remove side chain atoms
 pdb2fasta          # convert PDB file to fasta file
 split_chain        # split PDB by chain
