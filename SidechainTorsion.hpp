@@ -196,7 +196,7 @@ vector<vector<float> >SidechainTorsion(ChainUnit& chain,bool chi1_only=false)
             else if (has_CG1 && has_CD1) 
                 angle_mat[r][1]=rad2deg(Points2Dihedral(CA,CB,CG1,CD1));
             else if (has_CG && has_CD1)
-                angle_mat[r][1]=rad2deg(Points2Dihedral(CA,CB,CG1,CD));
+                angle_mat[r][1]=rad2deg(Points2Dihedral(CA,CB,CG,CD1));
             continue;
         }
         else
