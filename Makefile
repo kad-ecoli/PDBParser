@@ -2,7 +2,7 @@ CC=g++
 CFLAGS=-O3
 LDFLAGS=-static
 
-PROG=qTMclust pdb2fasta reindex_pdb strip_sidechain split_chain BackboneTorsion SidechainTorsion NWalign pdb2rmsd pdb2ss pdb2sarst PeptideBuilder addCbeta
+PROG=qTMclust pdb2fasta reindex_pdb strip_sidechain split_chain BackboneTorsion SidechainTorsion NWalign pdb2rmsd pdb2ss pdb2sarst PeptideBuilder addCbeta centerModel
 OLD_PROG=pdb2ThreeDblast SarstAlign ThreeDblastAlign ccealign getRotSeq
 HEADER=PDBParser.hpp pstream.h
 NW_HEADER=NWalign.hpp FilePathParser.hpp ROTSUMalign.hpp getRotSeq.hpp SidechainTorsion.hpp GeometryTools.hpp MathTools.hpp SarstAlign.hpp StructuralAlphabet.hpp BackboneTorsion.hpp ThreeDblastAlign.hpp SSalign.hpp 
@@ -18,6 +18,9 @@ split_chain: split_chain.cpp FilePathParser.hpp ${HEADER}
 	${CC} ${CFLAGS} $@.cpp -o $@ ${LDFLAGS}
 
 reindex_pdb: reindex_pdb.cpp ${HEADER}
+	${CC} ${CFLAGS} $@.cpp -o $@ ${LDFLAGS}
+
+centerModel: centerModel.cpp ${HEADER}
 	${CC} ${CFLAGS} $@.cpp -o $@ ${LDFLAGS}
 
 strip_sidechain: strip_sidechain.cpp ${HEADER}
