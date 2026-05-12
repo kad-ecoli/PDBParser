@@ -45,6 +45,7 @@ int main(int argc, char **argv)
     int L;
 
     /* add C beta */
+    stringstream buf;
     for (int c=0;c<pdb_entry.chains.size();c++)
     {
         L=pdb_entry.chains[c].residues.size();
@@ -162,14 +163,8 @@ int main(int argc, char **argv)
 
             pdb_entry.chains[c].residues[r].atoms.push_back(atom);
         }
-    }
-
-    /* make structure */
-    write_pdb_structure((argvs.size()>1?argvs[1].c_str():"-"),pdb_entry);
-
-    if (argvs.size()>2)
-    {
-        stringstream buf;
+        //vector<bool> tmp_vec(L,0);
+        //vector<vector<bool> > ct_mat(L,tmp_vec);
         for (int r1=0;r1<L;r1++)
         {
             for (int r2=r1+6;r2<L;r2++)
@@ -178,13 +173,25 @@ int main(int argc, char **argv)
                     pdb_entry.chains[0].residues[r1].atoms.back().xyz,
                     pdb_entry.chains[0].residues[r2].atoms.back().xyz)>8)
                     continue;
+                //ct_mat[r1][r2]=ct_mat[r2][r1]=1;
+                //if (abs(r2-r1)<6) continue;
                 buf<<r1+1<<' '<<r2+1<<" 0 8 1"<<endl;
             }
         }
+        //vector<bool>().swap(tmp_vec);
+        //vector<vector<bool> > ().swap(ct_mat);
+    }
+
+    /* make structure */
+    write_pdb_structure((argvs.size()>1?argvs[1].c_str():"-"),pdb_entry);
+
+    if (argvs.size()>2)
+    {
         ofstream fp(argvs[2]);
         fp<<buf.str();
         fp.close();
     }
+    buf.str(string());
 
     /* clean up */
     pdb_entry.chains.clear();
